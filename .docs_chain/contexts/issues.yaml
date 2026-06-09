@@ -25,6 +25,6 @@ edges:
 transforms:
   md-to-db:           { exec: "constitution/scripts/workable-items/bin/workable-items", args: ["sync", "md-to-db"] }
   db-to-md:           { exec: "constitution/scripts/workable-items/bin/workable-items", args: ["sync", "db-to-md"] }
-  gen-issues-summary: { exec: "scripts/generate_issues_summary.sh" }
+  gen-issues-summary: { exec: "scripts/generate_issues_summary.sh", args: ["--stdout"] }
   md-to-html:         { builtin: pandoc-html }
   html-to-pdf:        { builtin: weasyprint-pdf }

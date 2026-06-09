@@ -1,0 +1,2411 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Issues</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Issues</h1>
+</header>
+<h1 id="helixcode-open-issues-tracker">HelixCode — Open Issues
+Tracker</h1>
+<blockquote>
+<p>Per Constitution §11.4.15 (Item-status tracking) + §11.4.16
+(Item-type tracking) + §11.4.19 (Fixed-document column-alignment) +
+CONST-057 (Type-aware closure vocabulary) + CONST-058 (Reopened-source
+attribution).</p>
+<p><strong>Authoritative resumption ledger</strong>:
+<code>docs/CONTINUATION.md</code> (CONST-044). This file complements it
+with item-level granularity for currently-open work.</p>
+<p><strong>Status vocabulary</strong> (closed set): <code>Queued</code>
+| <code>In progress</code> | <code>Ready for testing</code> |
+<code>In testing</code> | <code>Reopened</code> |
+<code>Fixed/Implemented/Completed (→ Fixed.md)</code></p>
+<p><strong>Type vocabulary</strong> (closed set): <code>Bug</code> |
+<code>Feature</code> | <code>Task</code></p>
+</blockquote>
+<hr />
+<h2 id="prefix-convention">Prefix convention</h2>
+<p>Round 189 (2026-05-19) introduced per-project / per-submodule ID
+prefixes replacing the legacy <code>ISSUE-NNN</code> flat namespace. New
+items MUST use the prefix matching their scope; cross-cutting items
+affecting two or more submodules (or any meta-repo concern) live under
+<code>HXC</code>. Numeric portion is per-prefix (each prefix starts at
+<code>001</code>). Legacy <code>ISSUE-NNN</code> IDs renamed
+forward-only per CONST-043; historical close-out narratives in
+<code>docs/CONTINUATION.md</code> preserve original IDs verbatim, and
+<code>docs/Fixed.md</code> annotates each closure with
+<code>(ex-ISSUE-NNN)</code> for git-history traceability.</p>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 30%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr>
+<th>Prefix</th>
+<th>Scope</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HXC</td>
+<td>HelixCode root project (project-wide, multi-submodule, governance,
+infrastructure)</td>
+<td>this repo</td>
+</tr>
+<tr>
+<td>HXA</td>
+<td>HelixAgent submodule</td>
+<td><code>submodules/helix_agent</code> (when present) /
+<code>helix_agent/</code> tree</td>
+</tr>
+<tr>
+<td>HXM</td>
+<td>HelixMemory submodule</td>
+<td><code>submodules/helix_memory</code></td>
+</tr>
+<tr>
+<td>HXL</td>
+<td>HelixLLM submodule</td>
+<td><code>submodules/helix_llm</code></td>
+</tr>
+<tr>
+<td>HXQ</td>
+<td>HelixQA submodule</td>
+<td><code>submodules/helix_qa</code> (<code>helix_qa/</code>)</td>
+</tr>
+<tr>
+<td>HXS</td>
+<td>HelixSpecifier submodule</td>
+<td><code>submodules/helix_specifier</code></td>
+</tr>
+<tr>
+<td>HXO</td>
+<td>HelixOrchestrator (= LLMOrchestrator) submodule</td>
+<td><code>submodules/llm_orchestrator</code></td>
+</tr>
+<tr>
+<td>HXV</td>
+<td>HelixVerifier (= LLMsVerifier) submodule</td>
+<td><code>submodules/llms_verifier</code></td>
+</tr>
+<tr>
+<td>HXD</td>
+<td>HelixDocProcessor (= DocProcessor) submodule</td>
+<td><code>submodules/doc_processor</code></td>
+</tr>
+<tr>
+<td>HXI</td>
+<td>HelixI18n (when added)</td>
+<td>tba</td>
+</tr>
+<tr>
+<td>PLN</td>
+<td>Planning submodule (vasic-digital)</td>
+<td><code>submodules/planning</code></td>
+</tr>
+<tr>
+<td>VEN</td>
+<td>VisionEngine submodule (HelixDevelopment)</td>
+<td><code>submodules/vision_engine</code></td>
+</tr>
+<tr>
+<td>SLF</td>
+<td>SelfImprove submodule (vasic-digital)</td>
+<td><code>submodules/self_improve</code></td>
+</tr>
+<tr>
+<td>STO</td>
+<td>Storage submodule (vasic-digital)</td>
+<td><code>submodules/storage</code></td>
+</tr>
+<tr>
+<td>OPS</td>
+<td>LLMOps submodule (vasic-digital)</td>
+<td><code>submodules/llm_ops</code></td>
+</tr>
+<tr>
+<td>VDB</td>
+<td>VectorDB submodule (vasic-digital)</td>
+<td><code>submodules/vector_db</code></td>
+</tr>
+<tr>
+<td>OBS</td>
+<td>Observability submodule (vasic-digital)</td>
+<td><code>submodules/observability</code></td>
+</tr>
+<tr>
+<td>MCP</td>
+<td>MCP_Module submodule (vasic-digital)</td>
+<td><code>submodules/mcp_module</code></td>
+</tr>
+<tr>
+<td>MSG</td>
+<td>Messaging submodule (vasic-digital)</td>
+<td><code>submodules/messaging</code></td>
+</tr>
+<tr>
+<td>MDW</td>
+<td>Middleware submodule (vasic-digital)</td>
+<td><code>submodules/middleware</code></td>
+</tr>
+<tr>
+<td>PLG</td>
+<td>Plugins submodule (vasic-digital)</td>
+<td><code>submodules/plugins</code></td>
+</tr>
+<tr>
+<td>STR</td>
+<td>Streaming submodule (vasic-digital)</td>
+<td><code>submodules/streaming</code></td>
+</tr>
+<tr>
+<td>WAT</td>
+<td>Watcher submodule (vasic-digital)</td>
+<td><code>submodules/watcher</code></td>
+</tr>
+<tr>
+<td>CNV</td>
+<td>conversation submodule (vasic-digital)</td>
+<td><code>submodules/conversation</code></td>
+</tr>
+<tr>
+<td>AUT</td>
+<td>Auth submodule (vasic-digital)</td>
+<td><code>submodules/auth</code></td>
+</tr>
+<tr>
+<td>LZY</td>
+<td>Lazy submodule (vasic-digital)</td>
+<td><code>submodules/lazy</code></td>
+</tr>
+<tr>
+<td>ATP</td>
+<td>AutoTemp submodule (vasic-digital)</td>
+<td><code>submodules/auto_temp</code></td>
+</tr>
+<tr>
+<td>PLI</td>
+<td>PliniusCommon submodule (vasic-digital)</td>
+<td><code>submodules/plinius_common</code></td>
+</tr>
+<tr>
+<td>CHL</td>
+<td>challenges submodule (vasic-digital)</td>
+<td><code>challenges/</code></td>
+</tr>
+<tr>
+<td>CNT</td>
+<td>containers submodule</td>
+<td><code>containers/</code></td>
+</tr>
+<tr>
+<td>SEC</td>
+<td>security submodule</td>
+<td><code>security/</code></td>
+</tr>
+<tr>
+<td>PAN</td>
+<td>panoptic submodule</td>
+<td><code>panoptic/</code></td>
+</tr>
+</tbody>
+</table>
+<p>For submodules not listed above, default to the first 3 letters of
+the submodule name, uppercase (e.g. <code>Watcher</code> →
+<code>WAT</code>). Document the new prefix in this table on first
+use.</p>
+<h3 id="legacy-new-mapping-round-189">Legacy → new mapping (round
+189)</h3>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 24%" />
+<col style="width: 51%" />
+</colgroup>
+<thead>
+<tr>
+<th>Old ID</th>
+<th>New ID</th>
+<th>Scope rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ISSUE-001</td>
+<td>VEN-001</td>
+<td>VisionEngine <code>helix-gitlab</code> URL</td>
+</tr>
+<tr>
+<td>ISSUE-002</td>
+<td>VEN-002</td>
+<td>VisionEngine <code>vasic-digital-github</code> fork divergent</td>
+</tr>
+<tr>
+<td>ISSUE-003</td>
+<td>HXL-001</td>
+<td>HelixLLM <code>analysis_test.go</code> hardcoded path</td>
+</tr>
+<tr>
+<td>ISSUE-004</td>
+<td>HXL-002</td>
+<td>HelixLLM TOON <code>WriteTOON</code> 500</td>
+</tr>
+<tr>
+<td>ISSUE-005</td>
+<td>HXC-001</td>
+<td>CONST-052 rename programme (project-wide)</td>
+</tr>
+<tr>
+<td>ISSUE-006</td>
+<td>HXC-002</td>
+<td>Round-74 residual LOGIC FAILs (multi-submodule cross-cutting)</td>
+</tr>
+<tr>
+<td>ISSUE-007</td>
+<td>HXC-003</td>
+<td>CONST-046 migration backlog (project-wide)</td>
+</tr>
+<tr>
+<td>ISSUE-008</td>
+<td>HXQ-001</td>
+<td>helix_qa <code>TestPerformance</code> flake</td>
+</tr>
+<tr>
+<td>ISSUE-009</td>
+<td>HXA-001</td>
+<td>helix_agent handler tests (4)</td>
+</tr>
+<tr>
+<td>ISSUE-010</td>
+<td>HXA-002</td>
+<td>helix_agent debate API drift</td>
+</tr>
+<tr>
+<td>ISSUE-011</td>
+<td>HXA-003</td>
+<td>venice CONST-037 (in helix_agent)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2
+id="ven-001-ex-issue-001-visionengine-helix-gitlab-remote-repo-missing-404-closed-fixed.md">VEN-001
+(ex-ISSUE-001) — VisionEngine <code>helix-gitlab</code> remote repo
+missing (404) — CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Discovered:</strong> 2026-05-19
+(round 98 — Planning + VisionEngine i18n migration)
+<strong>Discovered-By:</strong> AI subagent during 4-remote push attempt
+<strong>Closed-By:</strong> Round 188 (subagent repo-inventory sweep)
+<strong>Root cause:</strong> The <code>helix-gitlab</code> remote URL in
+<code>submodules/vision_engine/.git/config</code> pointed at
+<code>git@gitlab.com:HelixDevelopment/visionengine.git</code> — a
+non-existent group path. The actual GitLab group is
+<code>helixdevelopment1</code> (path) / <code>HelixDevelopment</code>
+(display name). The repository
+<code>helixdevelopment1/VisionEngine</code> (id 80411994) already
+existed since 2026-03-19. NOT a missing-repo issue — a
+URL-misconfiguration issue. <strong>Fix:</strong>
+<code>git remote set-url helix-gitlab git@gitlab.com:helixdevelopment1/VisionEngine.git</code>
+in the VisionEngine submodule, then
+<code>git push helix-gitlab master</code> (FF-safe: local was 46 commits
+ahead, remote 0 ahead). Push landed at SHA <code>2d0c35b</code>
+(verified via <code>git ls-remote helix-gitlab master</code>). The
+Upstreams recipe <code>push-helix-gitlab.sh</code> references the remote
+by name (not URL), so it continues to work unchanged.
+<strong>Evidence:</strong> -
+<code>glab api projects/helixdevelopment1%2Fvisionengine</code> → id
+80411994 OK - <code>git ls-remote helix-gitlab HEAD</code> →
+<code>2d0c35bebb199a9a199fbf899eaeb292e38eaf17</code> (matches local
+HEAD) - Original broken URL still 404s when probed directly (proves URL
+was the issue, not perms)</p>
+<hr />
+<h2
+id="hxl-001-ex-issue-003-helixllm-internalagentstoolsanalysis_test.go-hardcoded-absolute-path">HXL-001
+(ex-ISSUE-003) — HelixLLM
+<code>internal/agents/tools/analysis_test.go</code> hardcoded absolute
+path</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Discovered:</strong> 2026-05-19 (round 95 — HelixLLM
+migration; surfaced as pre-existing failure)
+<strong>Discovered-By:</strong> AI subagent during HelixLLM standalone
+test run <strong>Closed-By:</strong> Round 105 (commit
+<code>a5e56d4</code> in HelixLLM; meta pointer <code>fedd152</code>)
+<strong>Attribution correction:</strong> Originally documented as
+helix_agent; actual location is HelixLLM submodule
+(<code>submodules/helix_llm/internal/agents/tools/</code>). Commit SHAs
+<code>0a84310</code> resolved there. <strong>Resolution:</strong>
+Replaced hardcoded path with <code>t.TempDir()</code> + 2 synthesised
+fixture files. Bonus: same bug-pattern discovered in
+<code>git_test.go</code> (constant <code>helixLLMRoot</code> + 7 tests)
+— refactored <code>gitSandbox()</code> signature. 6 tests now PASS on
+any host. Mutation verified.</p>
+<hr />
+<h2
+id="hxl-002-ex-issue-004-helixllm-internalgatewaymiddleware-toon-writetoon-returns-500">HXL-002
+(ex-ISSUE-004) — HelixLLM <code>internal/gateway/middleware</code> TOON
+<code>WriteTOON</code> returns 500</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Discovered:</strong> 2026-05-19 (round 95)
+<strong>Discovered-By:</strong> AI subagent <strong>Closed-By:</strong>
+Round 105 (commit <code>a5e56d4</code>) <strong>Attribution
+correction:</strong> Originally documented as helix_agent; actual
+location is HelixLLM submodule. Commit <code>6f11c56</code> resolved
+there. <strong>Resolution:</strong> Root cause was vasic-digital/TOON’s
+round-27 anti-bluff change (Marshal returns
+<code>ErrTOONEncodingNotImplemented</code> unconditionally) combined
+with <code>WriteTOON</code> treating ANY Marshal error as 500. Fix: fall
+back to <code>json.Marshal</code> while preserving
+<code>application/toon</code> Content-Type (matches ContentNegotiation
+middleware). 500 still returned for genuinely unmarshallable values
+(channels). 19 middleware tests now PASS. Mutation verified.</p>
+<hr />
+<h2
+id="hxc-001-ex-issue-005-const-052-rename-programme-meta-repo-directories-still-pascalcase-closed-fixed.md">HXC-001
+(ex-ISSUE-005) — CONST-052 rename programme: meta-repo directories still
+PascalCase — CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record.
+<strong>Type:</strong> Task <strong>Closure (2026-05-28):</strong> all
+owned-org submodule LEAF dirs renamed to lowercase snake_case (Phases
+1–4: 1-A..1-D Upstreams; 2-A..2-D / 3 / 4 leaf dirs) + all 57
+<code>Upstreams/</code>→<code>upstreams/</code> dirs. Phase 5
+(org-grouping dirs <code>dependencies/vasic-digital/</code> +
+<code>dependencies/HelixDevelopment/</code>) resolved as a NO-OP per
+operator decision 2026-05-28 (AskUserQuestion): kept as GitHub-org
+namespace carve-outs. Section retained as a migration tombstone per
+§11.4.19; round-343 detail below preserved for history.
+<strong>Discovered:</strong> 2026-05-15 (CONST-052 cascade landed)
+<strong>Discovered-By:</strong> Constitution <strong>Evidence:</strong>
+Meta-repo top-level dirs already snake_case (round-88 sweep). Remaining
+non-compliance is two layers deeper:
+<code>dependencies/HelixDevelopment/*</code> +
+<code>dependencies/vasic-digital/*</code> owned-org submodule dirs
+(PascalCase), and 59 <code>Upstreams/</code> dirs inside submodule
+trees. <strong>Resolution path:</strong> Phased migration per CONST-052
+§11.4.29. Round 113 produced the phased plan (<code>f666410</code>,
+<code>docs/superpowers/specs/2026-05-19-const052-rename-programme-plan.md</code>).
+Round 343 executed the safe (zero-submodule-go.mod-entanglement)
+batches.</p>
+<p><strong>Round-343 12 chosen snake_case names (operator “agent
+defaults”):</strong> D-1 sequential phases; D-2
+<code>helix_development</code> (parent dir, deferred — touches every
+consumer go.mod); D-3 <code>vasic-digital</code> kept (GitHub-org
+handle, proper-noun carve-out); D-4 n/a (<code>helix_code</code> already
+snake_case); D-5 <code>LLMsVerifier/Assets</code>+<code>Website</code>
+deferred (deployment-wire audit); D-6 <code>mcp_module</code>; D-7
+<code>i_llm</code>; D-8 <code>toon</code>; D-9 <code>rag</code>; D-10
+cluster-C <code>upstreams</code> strict; D-11 yes co-authored; D-12 one
+approval per batch.</p>
+<p><strong>Round-343 per-batch status:</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Batch</th>
+<th>Renamed</th>
+<th>Status</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>HelixDevelopment/Models</code> → <code>models</code></td>
+<td>LANDED <code>a1ea3c8</code></td>
+<td>submodule resolves; <code>go build ./internal/... ./cmd/...</code>
+exit 0</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>HelixDevelopment/DebateOrchestrator</code> →
+<code>debate_orchestrator</code></td>
+<td>LANDED <code>416fe8e</code></td>
+<td><code>go list -m digital.vasic.debate</code> → new path; build exit
+0</td>
+</tr>
+<tr>
+<td>3</td>
+<td>11 <code>vasic-digital/*</code> zero-go.mod-consumer leaves
+(<code>auto_temp</code>, <code>claritas</code>,
+<code>doc_processor</code>, <code>gandalf_solutions</code>,
+<code>hyper_tune</code>, <code>i_llm</code>, <code>leak_hub</code>,
+<code>ouroborous</code>, <code>plinius_common</code>,
+<code>veritas</code>, <code>vision_engine</code>)</td>
+<td>LANDED <code>e813b5c</code></td>
+<td>11 submodule statuses resolve; build exit 0</td>
+</tr>
+<tr>
+<td>Deferred</td>
+<td>~37 owned-org leaves consumed by
+<code>helix_agent</code>/<code>helix_qa</code>/<code>HelixLLM</code>
+go.mod</td>
+<td>DEFERRED</td>
+<td>renaming requires submodule-internal go.mod commits entangled with
+pre-existing uncommitted work — needs dedicated per-submodule
+rounds</td>
+</tr>
+<tr>
+<td>Deferred</td>
+<td>parent dirs
+<code>HelixDevelopment/</code>→<code>helix_development/</code> (D-2),
+<code>vasic-digital/</code> kept (D-3)</td>
+<td>DEFERRED</td>
+<td>parent rename touches every consumer go.mod atomically</td>
+</tr>
+<tr>
+<td>Deferred</td>
+<td>59 <code>Upstreams/</code>→<code>upstreams/</code> (cluster C,
+D-10)</td>
+<td>DEFERRED</td>
+<td>live inside submodule trees — separate-repo commits</td>
+</tr>
+</tbody>
+</table>
+<p>13 of ~58 owned-org leaf renames done this round (zero build
+breakage). HXC-001 stays In progress pending the deferred
+submodule-entangled and parent-dir batches.</p>
+<hr />
+<h2
+id="hxc-002-ex-issue-006-round-74-residual-logic-class-fails-closed">HXC-002
+(ex-ISSUE-006) — Round-74 residual LOGIC-class FAILs (CLOSED)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Discovered:</strong> 2026-05-19 (round 74 —
+release-gate-test.sh creation; classified by round 89)
+<strong>Discovered-By:</strong> AI release-gate sweep <strong>Closure
+progress:</strong> - ✓ HelixMemory: closed round 106 (commit
+<code>69016df</code> — single-line <code>go.mod</code> fix; 6 FAIL → 0
+FAIL) - ✓ vasic-digital/Planning: round 107 NO-OP — 275 PASS / 0 FAIL /
+20 SKIP-OK; likely incidentally fixed by round 98 i18n migration - ✓
+helix_agent inner: closed round 109 (commit <code>0f492e98</code> — 5
+test-side bluff fixes, zero production changes)
+<strong>Evidence:</strong> Round 74 surfaced 26 FAILs across submodules;
+rounds 82-87 closed 19; this Issue tracked the residual 7 across 3
+submodules. All 3 components closed by rounds 106 + 107 + 109.
+<strong>Follow-ups surfaced (NEW issues filed)</strong>: 4 helix_agent
+handler tests previously masked by mid-run panic (now visible) + 3
+build-failed packages depending on sibling submodule API drift
+(<code>digital.vasic.debate</code>) + 2 LOGIC FAILs reclassified as
+cross-cutting work (venice CONST-037 model-wiring + compliance CONST-051
+architectural reconciliation). See HXA-001 through HXA-003 (filed
+below).</p>
+<hr />
+<h2
+id="hxa-001-ex-issue-009-helix_agent-handler-tests-surfaced-after-round-109-fix">HXA-001
+(ex-ISSUE-009) — helix_agent handler tests surfaced after round-109
+fix</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Discovered:</strong> 2026-05-19 (round 109)
+<strong>Discovered-By:</strong> AI subagent (helix_agent LOGIC audit)
+<strong>Evidence:</strong> Mid-run panic in
+<code>TestIsProviderAvailable_NotAvailable</code> aborted test binary;
+round 109’s fix unblocked execution, surfacing 4 pre-existing FAILs:
+<code>TestFormattersHandler_FormatCode_UnsupportedLanguage</code>,
+<code>TestEmbeddingHandler_WithRealManager</code>,
+<code>TestGetTaskResources</code>, <code>TestGetTaskLogs</code>. Out of
+round-109’s 5-fix cap. <strong>Resolution path:</strong> Per-handler
+investigation, similar to round 109’s test-side bluff pattern.
+<strong>Closure:</strong> Fixed round 116 (commit <code>da782d4</code>)
+— all 4 handler tests fixed; closure recorded in
+<code>docs/Fixed.md</code>. This <code>**Status:**</code> line was stale
+(<code>Queued</code>) and is corrected here to match
+<code>Fixed.md</code> + <code>Issues_Summary.md</code> (§11.4.12
+sync).</p>
+<hr />
+<h2
+id="hxa-002-ex-issue-010-helix_agent-debatellmprovider-sibling-submodule-api-drift">HXA-002
+(ex-ISSUE-010) — helix_agent debate/llmprovider sibling-submodule API
+drift</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Discovered:</strong> 2026-05-19 (round 109)
+<strong>Discovered-By:</strong> AI subagent
+<strong>Investigated:</strong> 2026-05-20 (round 324) — split into a
+mechanical part and a design-decision part. <strong>Closed:</strong>
+2026-05-20 (round 342) <strong>Closure-Ref:</strong> helix_agent commit
+(round-342 HXA-002 debate API drift) + meta-repo
+<code>.gitmodules</code> pointer-bump <strong>Investigation finding
+(operator’s explicit ask — moved vs deleted):</strong> The
+learning/knowledge/recommendations capability tier was <strong>genuinely
+DELETED, not moved</strong>. <code>git log</code> on the
+<code>digital.vasic.debate</code> submodule
+(<code>submodules/debate_orchestrator</code>, renamed from
+<code>DebateOrchestrator</code> per CONST-052) shows the orchestrator
+was rebuilt from scratch — commit <code>196d0ea</code> “feat: initial
+DebateOrchestrator reconstruction (Phase 1)”.
+<code>orchestrator/api.go</code> has carried only the slim
+<code>CreateDebate</code>/<code>GetStatistics</code> surface since that
+very first commit (<code>git log --follow orchestrator/api.go</code> =
+single entry). A tree-wide <code>grep</code> of
+<code>dependencies/</code> for <code>KnowledgeRepository</code>,
+<code>GetRecommendations</code>, <code>ConvertAPIRequest</code>,
+<code>GetDebateStatus</code>, <code>DefaultMinConsensus</code>,
+<code>MaxAgentsPerDebate</code>, <code>EnableAgentDiversity</code> found
+<strong>zero</strong> surviving copies in any
+<code>digital.vasic.*</code> package or in HelixSpecifier/HelixMemory.
+The slim API is the first and only version — the richer tier was a
+pre-reconstruction artifact that no longer exists anywhere. Per the
+operator’s chosen direction for the deleted case, the helix_agent tests
+were rewritten down to the slim API. <strong>Resolution:</strong> See
+<code>docs/Fixed.md</code> row for the full closure narrative (Part-1
+import swap + Part-2 slim-API rewrite + score-scale + go.mod
+rename-drift fix + captured evidence).</p>
+<hr />
+<h2
+id="hxa-003-ex-issue-011-venice-testgetcapabilities-model-list-drift-const-037">HXA-003
+(ex-ISSUE-011) — venice <code>TestGetCapabilities</code> model-list
+drift (CONST-037)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Discovered:</strong> 2026-05-19 (round 109)
+<strong>Discovered-By:</strong> AI subagent <strong>Closed:</strong>
+2026-05-19 (round 190) <strong>Closure-Ref:</strong> helix_agent commit
+(round-190 venice CONST-037 model-list drift) + meta-repo pointer-bump
+<strong>Evidence:</strong> Test hardcoded
+<code>venice-uncensored</code>; Venice API returned 75 models with the
+family rotated to <code>venice-uncensored-1-2</code> /
+<code>venice-uncensored-role-play</code>. Per CONST-037 (LLMsVerifier is
+the single source of truth for model metadata) the assertion violated
+the no-hardcoded-list rule. <strong>Resolution:</strong>
+<code>helix_agent/internal/llm/providers/venice/venice_test.go::TestGetCapabilities</code>
+— replaced <code>assert.Contains(..., "venice-uncensored")</code> and
+<code>assert.Contains(..., "llama-3.3-70b")</code> with structural
+assertion: <code>NotEmpty(SupportedModels)</code> plus a substring scan
+for the <code>venice-uncensored*</code> family. SKIP-OK marker per
+CONST-035 fires if the entire family disappears (avoids false-positive
+PASS). Mutation-verified (revert → FAIL with the original drift, restore
+→ PASS).</p>
+<hr />
+<h2
+id="hxc-004-recovery-batch-under-verification-40-fail-rate-per-round-193-audit">HXC-004
+— Recovery-batch under-verification (40% FAIL rate per round-193
+audit)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Discovered:</strong> 2026-05-19 (round 193 — recovery-batch
+verification audit) <strong>Discovered-By:</strong> AI subagent
+<strong>Fixed:</strong> 2026-05-19 (round 200 — per-package
+test-assertion repair) <strong>Evidence:</strong> Round-193 audit of 10
+recovery-batch-landed packages (recovery commits <code>b7f8672</code> +
+<code>5c94696</code>) found 6 PASS / <strong>4 FAIL</strong>: -
+<code>internal/llm</code> (round 161): test-assertion drift — tests
+still expected pre-i18n English literal “api_key”, production emits
+message-ID <code>internal_llm_wizard_anthropic_apikey_required</code> -
+<code>internal/logo</code> (round 163): same drift — tests expected
+“failed to open” / “failed to decode”, production emits
+<code>internal_logo_open_source_failed</code> /
+<code>internal_logo_decode_source_failed</code> -
+<code>internal/notification</code> (round 167): same drift — tests
+expected Title literals “Task Completed”, “Task Failed”, “Workflow
+Completed”, “Workflow Failed”, “Worker Disconnected”, “System Error”,
+“System Started”; production emits
+<code>internal_notification_title_*</code> IDs -
+<code>internal/performance</code> (round 168): build break —
+<code>translator.go</code> <code>stdctx.Context</code> vs plain
+<code>context</code> — fixed inline by parent agent <strong>Root
+cause:</strong> Recovery-batch commits captured stalled-agent file
+content but did NOT re-run consuming-test updates + did NOT verify
+build/test green per-package. <strong>Resolution:</strong> Round-200
+subagent updated test assertions in all 3 drifted packages to expect
+message-ID echoes (<code>internal_&lt;pkg&gt;_*</code> prefix).
+Per-package PASS confirmed (llm: 51.8s, logo: 0.07s, notification:
+0.89s, performance: 8.4s). Per CONST-035 mutation-verified one assertion
+per package: revert to literal → FAIL (production emits the ID), restore
+→ PASS. <strong>Audit reference:</strong>
+<code>docs/audits/2026-05-19-recovery-batch-verification.md</code>
+(commit <code>1badef1</code>).</p>
+<hr />
+<h2
+id="hxc-003-ex-issue-007-const-046-i18n-migration-backlog-closed-migrated-to-docsfixed.md">HXC-003
+(ex-ISSUE-007) — CONST-046 i18n migration backlog — CLOSED (migrated to
+docs/Fixed.md)</h2>
+<p><strong>Status:</strong> Implemented (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record.
+<strong>Type:</strong> Feature The genuine user-facing (C)
+string-literal surface is exhausted across all 7 CONST-046 scope areas —
+helix_code <code>internal/</code> + <code>cmd/</code> +
+<code>applications/</code> (exhausted rounds 461/462),
+<code>LLMsVerifier</code> (round 452), <code>helix_qa</code>, and every
+owned <code>vasic-digital/*</code> + <code>HelixDevelopment/*</code>
+submodule (rounds 413/441). Hundreds of rounds (~91-462) migrated tens
+of thousands of literals through i18n seams with paired-mutation
+anti-bluff tests. The remaining ~55k audit-baseline hits are all OUT of
+CONST-046 scope (LLM prompt templates, wrapped-error tech strings,
+identifier tokens, struct-tag keys, format-spec tokens, test fixtures) —
+documented in
+<code>docs/audits/2026-05-20-internal-const046-classification.md</code>.
+Closed by round 463. Section retained as a migration tombstone per
+§11.4.19 — the authoritative closure narrative is in
+<code>docs/Fixed.md</code>.</p>
+<hr />
+<h2
+id="hxq-001-ex-issue-008-helix_qa-intermittent-testperformance-flake-host-load-sensitive">HXQ-001
+(ex-ISSUE-008) — helix_qa intermittent TestPerformance flake
+(host-load-sensitive)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Discovered:</strong> 2026-05-19 (round 82)
+<strong>Discovered-By:</strong> AI subagent <strong>Fixed:</strong>
+2026-05-20 (round 325) <strong>Evidence:</strong> helix_qa
+<code>TestPerformance</code> (three perf tests in
+<code>pkg/vision/</code> —
+<code>TestPerformance_DHash64_Under5msPer1080pFrame</code>,
+<code>TestPerformance_PHash_Under25msPer1080pFrame</code>,
+<code>TestPerformance_SSIM_Under5msPer480pFrame</code>) fails
+intermittently under high host load (concurrent containers + builds).
+Not a code bug per se; a sensitivity issue — the hard per-frame timing
+ceilings (5 ms / 25 ms / 5 ms) are only meaningful on a quiescent host.
+<strong>Resolution:</strong> Decision — <strong>path (b)</strong>
+(env-var gating) chosen over path (a) (loosen tolerance). Rationale:
+loosening the timing tolerance would weaken the test’s anti-bluff value
+— a genuine perf regression could then pass. Path (b) preserves the
+strict assertions while making the flake deterministic: the three tests
+now check <code>os.Getenv("HOST_LOAD_DEDICATED")</code> and
+<code>t.Skip("SKIP-OK: #HXQ-001 …")</code> honestly when unset, running
+strict only on a quiescent dedicated host
+(<code>HOST_LOAD_DEDICATED=1</code>). This is the CONST-035-compliant
+choice. Landed in helix_qa submodule commit <code>649e2dd</code> + meta
+<code>.gitmodules</code> pointer bump.
+<code>docs/test-coverage.md</code> §6.1 documents the env var. Post-fix
+evidence: <code>go build ./pkg/vision/...</code> exit 0,
+<code>go vet</code> clean;
+<code>go test -count=1 -run TestPerformance ./pkg/vision/...</code>
+(unset) → all 3 <code>--- SKIP</code> with
+<code>SKIP-OK: #HXQ-001</code> marker;
+<code>HOST_LOAD_DEDICATED=1 go test -count=1 -run TestPerformance ./pkg/vision/...</code>
+→ all 3 <code>--- PASS</code> strict (DHash64 average 741ns, PHash
+average 88.969µs — well under the 5 ms / 25 ms ceilings).</p>
+<hr />
+<h2
+id="hxc-005-cmdperformance_optimization_standalonemain.go-is-a-const-035-simulation-bluff">HXC-005
+— <code>cmd/performance_optimization_standalone/main.go</code> is a
+CONST-035 simulation bluff</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Discovered:</strong> 2026-05-20 (round 317 — cmd i18n
+migration subagent) <strong>Discovered-By:</strong> AI subagent —
+refused to localize the file because doing so would polish a bluff
+<strong>Fixed:</strong> 2026-05-20 (round 318)
+<strong>Evidence:</strong>
+<code>helix_code/cmd/performance_optimization_standalone/main.go</code>
+was a <code>package main</code> that printed “🚀 Starting HelixCode
+Production Performance Optimization” then <em>simulated</em> every
+optimization phase:
+<code>// Simulate production optimization phases</code>,
+<code>time.Sleep(500 * time.Millisecond)</code> per phase, and
+<code>improvement := 5.0 + rand.Float64()*20.0</code> — fabricated
+improvement percentages from a random number generator. No real
+profiling, no real optimization, no real measurement. The canonical
+BLUFF-001-class anti-pattern (CLAUDE.md §3.3 / §6 ANTI-PATTERN 1) — a
+binary that reports success for work it never performed. Violated
+CONST-035 / Article XI §11.9. <strong>Resolution:</strong> Decision —
+<strong>DELETE</strong> (resolution path b). The standalone tool was
+genuinely obsolete: fully superseded by
+<code>cmd/performance_optimization/</code> (snake_case post-CONST-052),
+which calls the REAL
+<code>dev.helix.code/internal/performance.PerformanceOptimizer</code> —
+real <code>runtime.ReadMemStats</code>, real <code>GOMAXPROCS</code>
+tuning, real before/after measurement — and carries CONST-046 i18n + a
+unit-test file.
+<code>git rm -r cmd/performance_optimization_standalone/</code> removed
+the dead bluff; stale references purged from
+<code>docs/COMPREHENSIVE_AUDIT_REPORT.md</code>. Reproduce-before-fix
+Challenge added at
+<code>cmd/performance_optimization/bluff_regression_test.go</code>:
+<code>TestHXC005_BluffStandaloneDirectoryDeleted</code> asserts the
+obsolete path is gone + the real command survives;
+<code>TestHXC005_RealOptimizerMeasuresActualMemory</code> allocates a
+retained 32 MiB buffer and asserts the optimizer’s baseline
+<code>MemoryUsage</code> tracks a genuine <code>runtime.HeapAlloc</code>
+reading (not an RNG single-digit). Post-fix evidence:
+<code>go build ./cmd/...</code> exit 0;
+<code>go test -count=1 -run TestHXC005 ./cmd/performance_optimization/</code>
+→ both PASS (literal log:
+<code>optimizer baseline MemoryUsage=33812624 bytes, runtime.HeapAlloc=33802008 bytes — both real measurements, same order of magnitude. No RNG-fabricated improvement percentages.</code>);
+anti-bluff smoke on the deleted path returns N/A (directory gone).</p>
+<hr />
+<h2
+id="pan-001-panoptic-appendjsonstring-truncates-multi-byte-utf-8-runes-to-bytes-testresult.marshaljson-corrupts-non-ascii">PAN-001
+— panoptic <code>appendJSONString</code> truncates multi-byte UTF-8
+runes to bytes (<code>TestResult.MarshalJSON</code> corrupts
+non-ASCII)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Discovered:</strong> 2026-05-19 (round 298 — panoptic
+enrichment subagent) <strong>Discovered-By:</strong> AI subagent
+runner-detector against real
+<code>executor.TestResult.MarshalJSON</code> <strong>Fixed:</strong>
+2026-05-19 (round 302 — panoptic submodule commit <code>24aa627</code> +
+meta pointer bump) <strong>Evidence:</strong>
+<code>panoptic/internal/executor/executor.go:120</code> —
+<code>buf = append(buf, byte(r))</code> in the <code>else</code> branch
+of <code>appendJSONString</code> casts a <code>rune</code> to a single
+byte. Multi-byte UTF-8 codepoints (German umlauts, Spanish accents,
+Japanese CJK, Serbian Cyrillic, Chinese Han) get truncated to one byte
+each, producing corrupted JSON output. Honestly tracked via the
+round-298 Challenge runner’s
+<code>executor-marshal:utf8-detector:regression-present</code> PASS line
++ KNOWN-ISSUE entry in <code>panoptic/docs/test-coverage.md</code> §7.
+Affects every consumer that JSON-marshals a <code>TestResult</code>
+containing non-ASCII text. <strong>Resolution:</strong> Replaced
+<code>buf = append(buf, byte(r))</code> with
+<code>buf = utf8.AppendRune(buf, r)</code> (Go 1.21+) + added
+<code>unicode/utf8</code> import. Single-line functional fix. Post-fix
+evidence: <code>go test -race -count=1 ./internal/executor/...</code> →
+ok 4.470s; <code>bash challenges/panoptic_describe_challenge.sh</code> →
+39/39 PASS, 0 FAIL; runner UTF-8 detector flipped from
+<code>regression-present</code> → <code>fixed</code> (literal log:
+<code>PASS [executor-marshal:utf8-detector:fixed]</code> +
+<code>KNOWN-ISSUE-RESOLVED: executor.appendJSONString now UTF-8 clean</code>).
+Closed in this round.</p>
+<hr />
+<h2
+id="hxv-002-llmsverifier-verification-package-10-pre-existing-test-failures">HXV-002
+— LLMsVerifier <code>verification/</code> package 10 pre-existing test
+failures</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Discovered:</strong> 2026-05-20 (round 345 — LLMsVerifier
+i18n round-12 subagent) <strong>Discovered-By:</strong> AI subagent —
+<code>git stash</code> test confirmed the 10 failures reproduce at
+submodule HEAD <code>582ae9c7</code> (round-336) <em>without</em> the
+round-345 i18n change, proving pre-existing and unrelated
+<strong>Resolved:</strong> 2026-05-20 (round 348)
+<strong>Evidence:</strong> <code>go test ./verification/...</code> in
+<code>submodules/llms_verifier/llm-verifier/</code> reported 10
+failures; after round-348 fix
+<code>ok digital.vasic.llmsverifier/verification (1.635s)</code>, 0
+failures, <code>go build ./...</code> clean.
+<strong>Resolution:</strong> All 10 failures classified <strong>(A)
+test-assertion drift</strong> — every failing test asserted pre-honesty
+fabricated behaviour that round-17 commit <code>a6328629</code>
+correctly removed. <strong>No production code changed.</strong>
+Per-failure classification table:</p>
+<table>
+<colgroup>
+<col style="width: 4%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 30%" />
+<col style="width: 46%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Test</th>
+<th>File</th>
+<th>Drifted assertion</th>
+<th>Re-keyed to honest contract</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>TestVerifier_Verify_Success</code></td>
+<td>verification_test.go</td>
+<td><code>NoError</code> + all-capabilities-true + scores&gt;0</td>
+<td><code>ErrVerificationNotWired</code> sentinel; renamed
+<code>TestVerifier_Verify_NotWiredContract</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>TestVerifier_Verify_ResultScores</code></td>
+<td>verification_test.go</td>
+<td><code>NoError</code> + fabricated 0-10 scores</td>
+<td><code>ErrVerificationNotWired</code>; no score fabrication</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>TestVerifier_Verify_LatencyMetrics</code></td>
+<td>verification_test.go</td>
+<td><code>NoError</code> + fabricated latency metrics</td>
+<td><code>ErrVerificationNotWired</code>; latency from real call
+only</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>TestVerifier_Verify_CodeLanguageSupport</code></td>
+<td>verification_test.go</td>
+<td><code>NoError</code> + fabricated python/go/js support</td>
+<td><code>ErrVerificationNotWired</code>; support must be measured</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>TestVerifier_Verify_CodeCapabilities</code></td>
+<td>verification_test.go</td>
+<td><code>NoError</code> + all code-capability flags true</td>
+<td><code>ErrVerificationNotWired</code>; flags must be tested</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>TestVerifier_Verify_ModelStatusFlags</code></td>
+<td>verification_test.go</td>
+<td><code>NoError</code> + fabricated ModelExists/Responsive</td>
+<td><code>ErrVerificationNotWired</code>; status from real probe</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>TestVerifier_Verify_ContextCancellation</code></td>
+<td>verification_test.go</td>
+<td><code>NoError</code> + fabricated completed result</td>
+<td><code>ErrVerificationNotWired</code> regardless of ctx state</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>TestVerifier_Verify_MultipleRequests</code></td>
+<td>verification_test.go</td>
+<td><code>NoError</code> + <code>Status=="completed"</code> per
+request</td>
+<td><code>ErrVerificationNotWired</code> for every request in batch</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>TestCodeVerificationService_TestCodeVisibility_Error</code></td>
+<td>code_verification_test.go</td>
+<td><code>NoError</code> (API 503 swallowed)</td>
+<td><code>require.Error</code> + <code>503</code>; response still
+carries <code>Verified=false</code>+<code>Error</code></td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>TestCodeVerificationService_VerifyModelCodeVisibility_ServerError</code></td>
+<td>code_verification_test.go</td>
+<td><code>Status=="verified"</code> + score≥0.7 on HTTP 500</td>
+<td><code>Status=="failed"</code> + non-empty <code>ErrorMessage</code>;
+a 500 server never yields a passing verification</td>
+</tr>
+</tbody>
+</table>
+<p>Mirrors HXV-001 round-323’s classification approach. The production
+code (<code>verification.go</code> round-17
+<code>ErrVerificationNotWired</code>, <code>code_verification.go</code>
+error propagation + zero-response→<code>failed</code>) was already
+honest; only the stale test assertions needed re-keying to certify
+it.</p>
+<hr />
+<h2
+id="hxc-006-helixcode-speed-programme-closed-migrated-to-docsfixed.md">HXC-006
+— HelixCode Speed Programme — CLOSED (migrated to docs/Fixed.md)</h2>
+<p><strong>Status:</strong> Implemented (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record.
+<strong>Type:</strong> Feature All 6 phases / 31 tasks landed; CONST-048
+coverage ledger at
+<code>docs/research/speed/05-coverage-ledger.md</code> (29 PASS + 2
+PARTIAL + 0 DEFERRED). Closed by P5-T04 round 400. Section retained as a
+migration tombstone per §11.4.19 — the authoritative closure narrative
+is in <code>docs/Fixed.md</code>.</p>
+<hr />
+<h2
+id="hxc-007-constitution-11.4.6870-74-cascade-meta-pointer-bump-closed-migrated-to-docsfixed.md">HXC-007
+— Constitution §11.4.68/70-74 cascade + meta-pointer bump — CLOSED
+(migrated to docs/Fixed.md)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record.
+<strong>Type:</strong> Task Cascade verified complete (round 403):
+constitution <code>584b3ee</code>→<code>34a82b3</code>, all 6 rules
+cascaded to the meta-repo + 67 owned submodules, meta pointer confirmed
+at <code>34a82b3</code>. Section retained as a migration tombstone per
+§11.4.19.</p>
+<hr />
+<h2
+id="hxc-008-const-055-g1-governance-gaps-surfaced-by-post-constitution-pull-validation-sweep-closed-migrated-to-docsfixed.md">HXC-008
+— CONST-055 G1 governance gaps surfaced by post-constitution-pull
+validation sweep — CLOSED (migrated to docs/Fixed.md)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record.
+<strong>Type:</strong> Bug Both gaps fixed (round 403): (a)
+<code>submodule_owned.txt</code> corrected
+<code>HelixDevelopment/Models</code>→<code>models</code>; (b)
+CONST-047..057 cascaded into <code>helix_qa/CONSTITUTION.md</code>,
+§11.4.69 cascaded into <code>VisionEngine/CONSTITUTION.md</code>.
+<code>verify-governance-cascade.sh</code> → 0 failures;
+<code>verify-all-constitution-rules.sh</code> → 6 gates / 0 failures.
+Section retained as a migration tombstone per §11.4.19.</p>
+<hr />
+<h2
+id="hxc-009-owned-submodule-github-gitlab-mirror-divergence-reconciliation-closed-migrated-to-docsfixed.md">HXC-009
+— Owned-submodule GitHub ↔︎ GitLab mirror-divergence reconciliation —
+CLOSED (migrated to docs/Fixed.md)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record.
+<strong>Type:</strong> Task Reconciliation verified complete (round
+403): helix_qa, VisionEngine, LLMProvider, challenges, containers,
+DocProcessor all reconciled via merge-first (CONST-061 / §11.4.71), all
+owned submodules converged + pushed to all upstreams. Section retained
+as a migration tombstone per §11.4.19.</p>
+<hr />
+<h2
+id="hxc-010-end-to-end-kimi-cli-qwen-code-codegraph-verification-closed-migrated-to-docsfixed.md">HXC-010
+— End-to-end Kimi CLI + Qwen Code CodeGraph verification — CLOSED
+(migrated to docs/Fixed.md)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record.
+<strong>Type:</strong> Task Operator supplied OpenAI-compatible router
+credentials (2026-05-21). Both <code>cg-challenge-05-kimi.sh</code> and
+<code>cg-challenge-07-qwen.sh</code> re-run produce <strong>true tier-1
+PASS</strong> — each agent genuinely invoked
+<code>codegraph_search</code> and received real graph data from the
+scanned HelixCode code-graph. Kimi driven via an
+<code>openai_legacy</code> provider, Qwen via
+<code>--auth-type openai</code>, both against SiliconFlow; API keys
+injected via environment variables only, never written to any tracked
+file (CONST-042). Section retained as a migration tombstone per
+§11.4.19.</p>
+<hr />
+<h2
+id="hxc-013-adopt-sqlite-backed-single-source-of-truth-for-workable-items-11.4.9395">HXC-013
+— Adopt SQLite-backed single-source-of-truth for workable items
+(§11.4.93/95)</h2>
+<p><strong>Status:</strong> Implemented (→ Fixed.md)
+<strong>Type:</strong> Feature <strong>Closure (2026-05-29,
+subagent-driven §11.4.70 + conductor integration):</strong> the
+constitution submodule’s non-functional <code>workable-items</code>
+scaffold is now a FUNCTIONAL Go binary (built UPSTREAM per §11.4.74 in
+<code>constitution/scripts/workable-items/</code>, pushed to its origin
+at e460a5d): <code>sync md-to-db</code> parses Issues.md+Fixed.md
+(<code>## &lt;atm-id&gt; — &lt;title&gt;</code> blocks →
+<code>items</code> rows: atm_id/type/status/severity/title/description +
+the full raw markdown block in <code>body_md</code>),
+<code>sync db-to-md</code> regenerates both docs
+<strong>byte-identically modulo trailing whitespace</strong> (verified:
+0 diff lines on the real 137-item tracker), <code>validate</code>
+enforces closed-set status/type + §11.4.91 description floor +
+no-dup-atm_id, <code>diff</code> reports md↔︎db drift. go build + go test
+(round-trip + validate paired-mutation) pass. Per §11.4.95 the tracked
+DB lives at <code>docs/workable_items.db</code> (137 items: 31 Issues +
+106 Fixed), WAL-checkpointed before commit, with <code>.gitignore</code>
+gaining <code>!docs/workable_items.db</code> (negating the blanket
+<code>*.db</code> while keeping the transient
+<code>*.db-wal</code>/<code>*.db-shm</code> sidecars ignored).
+HelixCode’s constitution pin bumped 6017af9→e460a5d.
+<strong>Operator-decisions resolved with the scope’s
+stated-recommendation safe-defaults (§11.4.101):</strong> id-strategy =
+keep ATM/HXC-NNN free-text atm_id; round-trip-tolerance =
+byte-identical-via-body_md-blob; upstream-first = built+pushed upstream
+per §11.4.74. <strong>Follow-up (not yet wired):</strong> auto-invoking
+<code>sync md-to-db</code> from a commit hook /
+<code>commit_all.sh</code> + a pre-build
+<code>CM-WORKABLE-ITEMS-MD-DB-IN-SYNC</code> gate (the binary + tracked
+DB foundation is in place; the auto-sync wiring is the remaining
+incremental step). <strong>Discovered:</strong> 2026-05-28 (constitution
+pull 7f738df→15cd4bc) <strong>Discovered-By:</strong> AI (post-pull
+awareness review) <strong>Scope:</strong> §11.4.93 + §11.4.95 require a
+tracked <code>docs/workable_items.db</code> as authoritative, with a Go
+binary doing bidirectional md↔︎db sync. Critical findings: the
+constitution’s <code>constitution/scripts/workable-items/</code> binary
+is a NON-FUNCTIONAL Phase-2 scaffold (every subcommand prints “not yet
+implemented”) — adoption requires building the parser/renderer UPSTREAM
+per §11.4.74 (triggers §11.4.26); <code>.gitignore:162</code> blanket
+<code>*.db</code> must gain <code>!docs/workable_items.db</code>;
+HelixCode lacks
+<code>generate_issues_summary.sh</code>/<code>sync_issues_docs.sh</code>.
+Effort ~5-9 subagent-days. <strong>Operator decisions:</strong> id
+strategy (recommend keep HXC-NNN in free-text atm_id col); .gitignore
+negation; upstream-first vs wait; round-trip tolerance.</p>
+<hr />
+<h2 id="hxc-014-stress-chaos-test-coverage-11.4.85">HXC-014 — Stress +
+chaos test coverage (§11.4.85)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Closure (2026-05-29):</strong> the
+retroactive §11.4.85 sweep is complete across every package with a real
+resilience surface — 31 in-process packages (batches 1-11) + 5
+real-infra packages (redis/database/server/verifier against real podman
+PG+Redis+server, ollama against real local Ollama). <strong>35 packages
+covered; 34 real production bugs surfaced + fixed</strong> (systemic
+classes: panic-in-goroutine-no-recover process crashes,
+non-reentrant-RWMutex deadlocks, unguarded/declared-unused-mutex data
+races, plus an auth forged-token DoS and the Ollama CONST-035
+empty-generation bluff). The harness (<code>tests/stresschaos/</code>),
+<code>make stress-chaos</code> (29 in-process targets),
+<code>make stress-chaos-meta</code> (§1.1 harness self-tests), and
+<code>make stress-chaos-infra</code> (integration-tagged real-infra) are
+all in place — §11.4.85 is now a per-change discipline going forward
+(every new fix ships its stress+chaos suite). <strong>Honest
+out-of-scope remainder (NOT bluffed as covered):</strong> (a) cloud LLM
+provider endpoints (OpenAI/Anthropic/Gemini/…) need real API keys +
+incur real cost → operator/external-gated, not stress-loopable safely;
+(b) low-concurrency stateless utility packages
+(version/logo/hardware-probe/adapters/fix) have NO meaningful resilience
+surface — a “stress test” of a pure function is a benchmark, not a
+§11.4.85 resilience test, so forcing tests there would itself be a
+bluff. The systemic translator i18n hardening is tracked + closed as
+HXC-014b; the pre-existing llm integration-build breakage surfaced
+during the infra batch is tracked + closed as HXC-024.
+<strong>Discovered:</strong> 2026-05-28 (constitution pull)
+<strong>Discovered-By:</strong> AI <strong>Scope:</strong> §11.4.85
+requires every fix/improvement to ship stress (sustained-load N≥100/≥30s
+p50/p95/p99 + concurrency N≥10 + boundary) + chaos
+(process-death/network-fault/input-corruption/resource-exhaustion/state-corruption)
+suites with captured evidence. <strong>Batch 1 DONE (2026-05-28, commits
+76586014 + a9f883c6):</strong> Go-native helper
+<code>helix_code/tests/stresschaos/</code> (RunSustainedLoad
+p50/p95/p99→latency.json; RunConcurrent ≥10 goroutines + deadlock/leak
+guards; ChaosKill/CorruptInput/ResourcePressure injectors ≤128MB
+§12.6-safe; evidence→qa-results/ gitignored CONST-053) + 7 paired §1.1
+meta-tests proving the harness can’t bluff
+(deadlock/leak/error-rate/below-floor/panic all DETECTED). First 2
+targets done: internal/worker + internal/llm/load_balancer under -race.
+<strong>The chaos tests SURFACED + FIXED 2 REAL production
+bugs:</strong> (1) WorkerPool.AssignTask RWMutex-reentrancy deadlock
+(double-RLock), (2) GetPoolStats data race on PoolWorker.Status.
+<code>make stress-chaos</code> + <code>make stress-chaos-meta</code>
+added. Conductor independently re-ran meta-tests → PASS. <strong>Batch 2
+DONE (2026-05-28, commit 0505c337):</strong> internal/task
+(TaskManager/TaskQueue — sustained p50=0.21ms, concurrent 16×120
+gDelta=0, state-corruption + input-corruption chaos) + internal/session
+(TranscriptStore/ResumeFinder, real disk I/O — sustained, concurrent
+12×60 no-loss, input-corruption + process-death-mid-append
+crash-consistent recovery). 8 tests PASS under -race, captured evidence.
+No new bugs (components robust). All 4 in-process targets
+(worker/load_balancer/task/session) now covered. <strong>Batch 3 DONE
+(2026-05-28, subagent-driven §11.4.70):</strong> internal/event +
+internal/memory + internal/context (3 parallel disjoint-scope
+subagents). <strong>2 MORE REAL production bugs SURFACED +
+FIXED:</strong> (1) <code>internal/event/bus.go</code> — a panicking
+event handler crashed the whole process (in async dispatch the handler
+runs in its own goroutine; an unrecovered panic took down every
+goroutine). Fix: <code>EventBus.invokeHandler</code> recover-wrapper
+routed through all 3 dispatch sites (Publish async/sync +
+PublishAndWait) → graceful degradation. (2)
+<code>internal/memory/manager.go</code> —
+<code>GetConversation</code>/<code>GetActive</code>/<code>GetAll</code>/<code>GetBySession</code>/<code>GetRecent</code>/<code>Search</code>
+returned the LIVE stored <code>*Conversation</code> pointer out from
+under the RLock; callers read
+<code>conv.Messages</code>/<code>MessageCount</code> concurrently with
+<code>AddMessage</code>/<code>Clear</code> writers → genuine
+<code>DATA RACE</code> the map-only RWMutex didn’t cover. Fix: return
+<code>conv.Clone()</code> snapshots + repaired
+<code>Conversation.Clone()</code> which silently dropped
+CharacterID/UserID/CharMessages/Version/Status. internal/context: no bug
+(RWMutex discipline held), full coverage added. All consumers of the
+memory read methods confirmed read-only (context builder / persistence
+snapshot / listing) → no regression. Each fix proven anti-bluff by
+reverting → test FAILs → restore → PASS. <code>make stress-chaos</code>
+target extended to include task/session/event/memory/context; full
+target PASSES under -race. 7 in-process targets now covered.
+<strong>Batch 4 DONE (2026-05-28, subagent-driven §11.4.70):</strong>
+internal/rules + internal/repomap + internal/discovery (3 parallel
+disjoint-scope subagents). No new production bugs — all three components
+already correctly RWMutex-guarded and survived concurrent churn +
+Clear/cancel races + malformed/corrupt input + bounded memory pressure
+with no panic/race/deadlock/leak. Each suite proven genuinely
+fail-capable (anti-bluff): rules → strip AddProjectRule lock → DATA RACE
+FAIL; repomap → write results[0] in parseFilesParallel → DATA RACE FAIL;
+discovery → strip port-range check → boundary FAIL; all restored
+byte-identical. discovery deliberately targets in-process
+registry/config/JSON-decode paths (not flaky UDP-multicast/net.Listen).
+10 in-process targets now covered; <code>make stress-chaos</code>
+extended to all 10, full target PASSES under -race. <strong>Batch 5 DONE
+(2026-05-28, subagent-driven §11.4.70):</strong> internal/tools +
+internal/workflow + internal/hooks (3 parallel disjoint-scope
+subagents). <strong>3 MORE REAL production bugs SURFACED + FIXED, all in
+internal/hooks:</strong> (1) <code>executor.go</code>
+executeSync/executeAsync called hook.Execute with no recover() — a
+panicking async hook handler crashes the whole process (same bug class
+as the event-bus fix); fixed via <code>Executor.runHandler</code>
+recover-wrapper → graceful degradation. (2) <code>manager.go</code>
+TriggerEvent/TriggerEventAndWait/TriggerEventSync held
+<code>m.mu.RLock()</code> then called <code>GetByType()</code> which
+re-locks the non-reentrant RWMutex — a writer (Register/Unregister)
+queuing between the two RLock acquisitions deadlocks both (same bug
+class as the worker batch-1 deadlock); fixed by dropping the redundant
+outer RLock (GetByType already returns a defensive copy under its own
+lock — verified). (3) <code>Register(nil)</code> nil-pointer panic
+(Validate dereferences nil receiver); fixed with a nil guard +
+CONST-046-compliant i18n key <code>internal_hooks_nil</code>.
+internal/tools (ToolRegistry + real fs/shell tools — command-injection +
+CONST-033 power-mgmt commands confirmed REFUSED by the security gate
+before os/exec) and internal/workflow (state-machine + executor +
+BackgroundManager) had no bugs, full coverage added. Each fix
+anti-bluff-proven: revert → FAIL (panic / 30s deadlock timeout / FATAL)
+→ restore → PASS. 13 in-process targets now covered;
+<code>make stress-chaos</code> extended to all 13, full target PASSES
+under -race. <strong>Batch 6 DONE (2026-05-28, subagent-driven
+§11.4.70):</strong> internal/agent + internal/monitoring +
+internal/commands (3 parallel disjoint-scope subagents). <strong>3 MORE
+REAL production bugs SURFACED + FIXED:</strong> (1)
+<code>internal/agent/agent.go</code> — <code>AgentRegistry.agents</code>
+map had NO mutex; Register/Unregister write it while
+Get/List/Count/GetByType/GetByCapability read it, and the Coordinator
+delegates without holding c.mu → unsynchronised concurrent map access =
+guaranteed <code>fatal error: concurrent map read and map write</code>
+under load. Fix: added <code>sync.RWMutex</code> (writers Lock, readers
+RLock, never reentrant). (2)
+<code>internal/monitoring/monitor.go:48</code> —
+<code>CollectMetrics</code> called <code>collector.Collect()</code>
+under the write lock with no recover(); a panicking collector (HTTP
+scrape / /proc read fault) crashes the process. Fix:
+<code>safeCollect</code> recover-wrapper + i18n key
+<code>internal_monitoring_collector_panic</code>. (3)
+<code>internal/commands/executor.go</code> —
+<code>Executor.Execute</code> called <code>cmd.Execute()</code> with no
+recover(); a panicking slash/markdown/third-party command crashes the
+host CLI/server. Fix: <code>executeRecovered</code> wrapper + i18n key
+<code>internal_commands_command_panicked</code>. All CONST-046-compliant
+(no hardcoded English). Each fix anti-bluff-proven: revert → DATA RACE /
+concurrent-map-crash / panic → restore → PASS. <strong>16 in-process
+targets now covered; 8 real production bugs fixed this session</strong>
+(worker/load_balancer batch 1; event/memory batch 3; hooks×3 batch 5;
+agent/monitoring/commands batch 6); <code>make stress-chaos</code>
+extended to all 16, full target PASSES under -race. <strong>Batch 7 DONE
+(2026-05-28, subagent-driven §11.4.70):</strong> internal/mcp +
+internal/notification + internal/performance (3 parallel disjoint-scope
+subagents). <strong>4 MORE REAL production bugs SURFACED +
+FIXED:</strong> (1+2) <code>internal/mcp/server.go</code> handleCallTool
+invoked tool.Handler with no recover() (handleSession dispatches each
+message via <code>go handleMessage</code>, so a panicking tool handler
+crashes the process) + <code>internal/mcp/lifecycle.go</code>
+Client.setState called the caller-supplied onEvent callback inline with
+no recover (panic crashes the Connect/Close/recvLoop goroutine); fixed
+via invokeToolHandler recover-wrapper + i18n key
+<code>internal_mcp_server_tool_handler_panicked</code> + callback
+recover. (3) <code>internal/notification/engine.go</code> sendToChannels
+called channel.Send with no recover — a panicking channel crashes the
+process when dispatched from a NotificationQueue worker goroutine; fixed
+via sendOne recover-wrapper. (4)
+<code>internal/performance/optimizer.go</code> declared
+<code>po.mutex</code> but NEVER used it — StartProductionOptimization
+wrote po.optimizations while getOptimizationsByType iterated it
+unsynchronised →
+<code>fatal error: concurrent map iteration and map write</code>; fixed
+with Lock on write + RLock on read. Each anti-bluff-proven: revert →
+panic/FATAL/DATA RACE → restore → PASS. <strong>19 in-process targets
+now covered; 12 real production bugs fixed this session</strong>
+(+mcp×2, notification, performance in batch 7);
+<code>make stress-chaos</code> extended to all 19, full target PASSES
+under -race. <strong>Batch 8 DONE (2026-05-28, subagent-driven
+§11.4.70):</strong> internal/security + internal/providers +
+internal/llm-manager (3 parallel disjoint-scope subagents). <strong>6
+MORE REAL production bugs SURFACED + FIXED:</strong> (1+2)
+<code>internal/security/translator.go</code> — package-level
+<code>translator</code> var read by tr() + written by SetTranslator()
+with NO mutex (data race; scans run in background goroutines) + tr()
+called translator.T() with no recover (panicking injected translator
+crashes the scan-worker goroutine); fixed with RWMutex + recover. (3+4)
+<code>internal/providers/ai_integration.go</code> — Initialize held
+ai.mu.Lock() then called
+NewConversationManager→GetProvider→ai.mu.RLock() = non-reentrant
+self-deadlock hanging the process (fixed: release write lock before
+building managers, re-acquire to store) +
+<code>vector_integration.go</code> NewVectorIntegration(nil) left config
+nil → Initialize SIGSEGV (fixed: nil-config default mirroring
+NewMemoryIntegration; codifying-the-crash test assertion corrected). (5)
+<code>internal/llm/model_manager.go:341</code> —
+calculateHardwareCompatibility called hardwareDetector.Detect() (mutates
+detector state) under only RLock → data race across concurrent
+SelectOptimalModel callers; fixed with sync.Once (host hardware static).
+(6) <strong>load_balancer follow-up (conductor-fixed, surfaced by the
+llm subagent):</strong> <code>internal/llm/load_balancer.go</code>
+Stop() never cancelled the collectStats goroutine (leak when Start got
+context.Background()) + collectPerformanceStats deref’d lb.manager with
+no nil-guard → nil-pointer panic after the 10s ticker; fixed with a
+cancelStats CancelFunc cancelled in Stop() + nil-guard. Also resolved
+the file’s pre-existing CWE-338 (math/rand→crypto/rand uniform provider
+selection, dropping the deprecated rand.Seed) flagged by the semgrep
+gate. Full internal/llm package now PASSES under -race with NO skip
+(previously the nil-manager test had to be skipped). Each fix
+anti-bluff-proven: revert → DATA RACE / 15s-deadlock-timeout / SIGSEGV /
+FATAL → restore → PASS. <strong>22 in-process targets now covered; 18
+real production bugs fixed this session.</strong> <strong>Batch 9 DONE
+(2026-05-28, subagent-driven §11.4.70):</strong> internal/editor +
+internal/template + internal/cognee (3 parallel disjoint-scope
+subagents). <strong>2 MORE REAL production bugs SURFACED + FIXED in
+internal/template/manager.go:</strong> Register/Update/Delete invoked
+user OnCreate/OnUpdate/OnDelete callbacks (a) with no recover() → a
+panicking callback crashes the process (esp. when Register runs on a
+goroutine), and (b) the On* registrars appended to the callback slices
+with NO lock while the trigger paths iterated them under lock → data
+race. Fix: <code>snapshotCallbacks</code> under lock +
+<code>fireCallbacks</code> panic-isolated AFTER unlock (also prevents
+re-entrant-callback deadlock); On* registrars now lock-guarded.
+internal/editor
+(CodeEditor/WholeEditor/SearchReplaceEditor/LineEditor/DiffEditor over
+real t.TempDir files) and internal/cognee
+(ServiceCache/ServiceStatistics/event-handler fan-out in-process;
+network Client paths honestly out of scope) had no bugs, full coverage
+added. Each anti-bluff-proven: revert → panic / DATA RACE → restore →
+PASS. <strong>25 in-process targets now covered; 20 real production bugs
+fixed this session.</strong> <strong>Batch 10 DONE (2026-05-28,
+subagent-driven §11.4.70):</strong> internal/focus + internal/config +
+internal/persistence (3 parallel disjoint-scope subagents). <strong>5
+MORE REAL production bugs SURFACED + FIXED:</strong> (1+2)
+<code>internal/focus/manager.go</code> —
+CreateChain/SetActiveChain/DeleteChain invoked
+onCreate/onActivate/onDelete callbacks in a loop with no recover() WHILE
+holding m.mu.Lock() → panicking callback crashes the process + a
+callback re-entering the Manager deadlocks the non-reentrant RWMutex;
+fixed via invokeCallbacks (recover) +
+snapshot-then-release-lock-before-dispatch. (3)
+<code>internal/config/config.go</code> — ConfigManager had NO mutex at
+all;
+GetConfig/loadConfig/ImportConfig/UpdateConfig/ResetToDefaults/saveConfig
+read+wrote m.config unguarded while the ConfigAPI HTTP handlers drive
+GET /config concurrently with POST /config/reload → data race; fixed
+with RWMutex + copy-on-write UpdateConfig + load/save split into
+public(locking)+Locked(caller-holds) helpers (non-reentrant-safe) +
+decode-into-fresh-struct-swap-on-success. (4+5)
+<code>internal/persistence/store.go</code> —
+SaveAll/LoadAll/triggerError invoked user callbacks with no recover
+(process crash) + On* registrars appended to callback slices with no
+lock while Save/Load iterated under lock (data race); fixed with
+invoke*Callback recover-wrappers + lock-guarded registration +
+snapshot-dispatch-outside-lock + 3 i18n keys. (Note: a transient
+build-break appeared mid-batch when config’s in-flight edit referenced
+its not-yet-added Locked helpers; the persistence subagent correctly
+verified in an isolated git worktree per §11.4.84/§11.4.96; combined
+final state builds + passes -race, conductor re-verified.)
+internal/focus, config, persistence all CONST-046-compliant. Each
+anti-bluff-proven: revert → panic / deadlock / DATA RACE → restore →
+PASS. <strong>28 in-process targets now covered; 25 real production bugs
+fixed this session.</strong> <strong>Batch 11 DONE (2026-05-28,
+subagent-driven §11.4.70):</strong> internal/auth + internal/deployment
++ internal/project. <strong>4 MORE REAL production bugs SURFACED +
+FIXED:</strong> (1) <strong>SECURITY</strong>
+<code>internal/auth/auth.go</code> VerifyJWT — unchecked type assertions
+<code>claims["username"].(string)</code>/<code>claims["email"].(string)</code>;
+a validly-signed token carrying a missing/numeric/null username/email
+claim PANICS the process (crash-on-untrusted-input DoS — a single forged
+request). Fixed with comma-ok assertions → ErrTokenInvalid. (2+3)
+<code>internal/deployment/production_deployer.go</code> addNotification
+appended to shared status with a declared-but-UNUSED mutex (data race) +
+<code>deployment/translator.go</code> package-var race; fixed with the
+mutex + translatorMu. (4) <code>internal/project/manager.go</code>
+GetActiveProject wrote m.activeProject under only RLock (lazy-scan write
+under read-lock) → data race; fixed with exclusive Lock + re-check. Each
+anti-bluff-proven: revert → panic / DATA RACE → restore → PASS.
+<strong>31 in-process targets now covered; 29 real production bugs fixed
+this session.</strong></p>
+<h2
+id="hxc-014b-systemic-unguarded-i18n-translator.go-data-race-panic-crash-cross-package">HXC-014b
+— Systemic unguarded i18n translator.go data-race + panic-crash
+(cross-package)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Closure (2026-05-28, subagent-driven §11.4.70):</strong> all
+52 remaining unguarded <code>internal/*/translator.go</code> files fixed
+(3 parallel disjoint-group subagents, 18+17+17) to match the proven
+<code>internal/security</code> + <code>internal/deployment</code>
+guarding pattern — added <code>translatorMu sync.RWMutex</code> (Lock in
+SetTranslator, RLock-snapshot in tr) + a <code>recover()</code> in tr
+(named return) degrading a panicking translator to the message ID, and
+removed the inline <code>if translator==nil { translator = Noop }</code>
+write-on-read-path. 54/54 translator.go files now guarded; whole
+<code>internal/...</code>+<code>cmd/...</code> tree builds clean; gofmt
+clean. Anti-bluff proof: new
+<code>internal/logging/translator_race_test.go</code> hammers
+SetTranslator concurrently with tr (16×300) + a panicking translator;
+§1.1 paired mutation (strip the guard) → <code>WARNING: DATA RACE</code>
++ <code>panic</code> + FAIL → restore → PASS. <strong>Regression
+follow-up (2026-05-28, same day):</strong> the sweep’s claim of
+“behaviour-preserving” was incomplete — removing the inline
+<code>if translator==nil { translator = Noop }</code> write-on-read-path
+(the race) broke 10 pre-existing
+<code>TestTr_RecoversFromNilPackageTranslator</code> unit tests
+(adapters/kilocode/verifier/plantree/repomap/logging/projectmemory/quality/render/voice)
+that asserted tr() SELF-HEALS the package-level var back to non-nil —
+i.e. they asserted exactly the racy write the sweep correctly removed.
+The HXC-014b verification gap: it ran <code>go build</code> +
+<code>make stress-chaos</code> (<code>-run 'Stress|Chaos'</code>
+filtered) but NOT the swept packages’ full unit suites, so these unit
+failures were masked. Fixed by removing the stale self-heal assertion
+from all 10 (the msgID-echo assertion already proves graceful
+degradation via the local Noop snapshot — no package-var mutation, no
+race). All 10 packages’ full unit suites + gofmt now green (verified
+per-package); full <code>go test ./internal/...</code> blast-radius
+sweep re-run → exit 0, 0 FAILs (no other HXC-014b regression). Net
+behaviour: tr() with a nil package translator returns the msgID via a
+race-free local Noop, never mutating shared state.
+<strong>Discovered:</strong> 2026-05-28 (HXC-014 batch 8+11 — same
+defect found independently in internal/security AND internal/deployment
+translator.go) <strong>Severity:</strong> Medium (latent: requires
+SetTranslator() concurrent with tr(); existing -race tests pass because
+SetTranslator is boot-only in practice) <strong>Scope:</strong> ~50
+packages under <code>helix_code/internal/*/translator.go</code> share a
+copy-pasted CONST-046 resolver seam with (a) an UNGUARDED package-level
+<code>var translator &lt;pkg&gt;i18n.Translator</code> —
+<code>SetTranslator</code> writes it + <code>tr()</code> reads it (and
+self-heals <code>translator = Noop{}</code> on the read path, a write)
+with NO mutex → data race if SetTranslator is ever called concurrently
+with tr(); (b) NO recover() around <code>translator.T()</code> → a
+panicking injected/buggy Translator crashes the emitting goroutine
+(process-wide). The FIX PATTERN is already proven in
+<code>internal/security/translator.go</code> +
+<code>internal/deployment/translator.go</code>: add
+<code>translatorMu sync.RWMutex</code> (Lock in SetTranslator,
+RLock-snapshot in tr) + a <code>recover()</code> in tr degrading to the
+message ID (named return). Mechanical, identical per file; ~50 files
+remain
+(event/memory/context/rules/repomap/discovery/tools/workflow/hooks/agent/monitoring/commands/mcp/notification/performance/providers/llm/editor/template/cognee/focus/config/persistence/auth/project
++ ~25 more
+incl. approval/clarification/planner/plantree/plugins/quality/redis/render/roocode/secrets/session/verifier/voice/worker/workspace/etc.).
+NOTE: several of those packages’ OTHER concurrency bugs were already
+fixed in batches 3-11, but most still carry the unguarded translator
+seam. <strong>Best fixed as a single carefully-verified mechanical sweep
+(build + -race after) rather than rushed — tracked separately so it is
+not lost.</strong> <strong>INFRA BATCH (partial) DONE (2026-05-28,
+subagent-driven §11.4.70, operator-authorised heavy-infra):</strong>
+brought up real Postgres + Redis via podman (lightweight — only the
+services the tests need, not the full 17-service docker stack).
+<strong>internal/redis</strong> (real Redis localhost:6379) — 13
+integration-tagged stress+chaos tests PASS under -race (sustained
+SET/GET/DEL p50=0.138ms; concurrent INCR atomicity; pub/sub; pipeline;
+cancel/corrupt/pressure/connection-churn chaos; translator-panic
+isolation). <strong>internal/database</strong> (real PG) — 10
+integration-tagged stress+chaos tests PASS under -race (sustained
+p50=3.09ms; 16-goroutine no-lost-writes; tx contention;
+cancel-mid-query; SQL-injection-safe param binding verified;
+pool-exhaustion clean recovery; connection-churn). No new stress/chaos
+bugs (both layers robust; translator already fixed by HXC-014b).
+<strong>Also fixed 2 pre-existing
+<code>database_integration_test.go</code> failures surfaced by running
+the long-dormant integration suite:</strong> (1) TestNew_InvalidHost
+asserted the pre-CONST-046 English “failed to ping database” — updated
+to the i18n message-ID <code>internal_database_ping_failed</code>; (2)
+TestPoolSizing asserted exactly-0 CLI idle conns but New()’s mandatory
+ping legitimately leaves 1 warm idle (CLI MinConns=0 confirmed — no
+pre-warm) — corrected to the true invariant (≤1 post-ping AND strictly
+&lt; server’s pre-warmed pool). New <code>make stress-chaos-infra</code>
+target (integration-tagged, real PG+Redis). Each anti-bluff-proven.
+<strong>INFRA BATCH (part 2) DONE (2026-05-28):</strong>
+<strong>internal/server</strong> — 8 integration-tagged DDoS-class tests
+PASS under -race against the REAL Gin server booted via
+<code>server.New(cfg, real-PG, real-Redis)</code> +
+<code>httptest.NewServer(srv.router)</code> (full middleware chain):
+sustained health p50=0.54ms, 16-goroutine flood, 64KB→8MiB bodies (all
+400, no OOM), malformed-request + handler-panic-isolation + slowloris
+chaos, server stays up (post-chaos /health 200). No new bug; anti-bluff
+proven (remove gin.Recovery → panic escapes → FAIL → restore → pass).
+<strong>internal/verifier</strong> — 14 stress+chaos tests PASS under
+-race (HealthMonitor circuit-breaker 16×4800 concurrent, Cache tiered
+20×4000, EventPublisher pubsub, Poller lifecycle). <strong>1 REAL bug
+fixed:</strong> <code>internal/verifier/adapter.go</code>
+EventPublisher.Publish launched each subscriber via
+<code>go fn(event)</code> with NO recover() → a panicking subscriber
+crashes the process (the Poller publishes to these); fixed with a
+per-subscriber recover guard. Anti-bluff proven. <strong>Remaining
+(long-tail):</strong> internal/llm provider endpoints (need live
+LLM/Ollama), low-concurrency utility packages
+(version/hardware/adapters/fix/logo — minimal concurrent state).
+internal/persistence confirmed NO live-DB path (file-based, covered
+batch 10). <strong>INFRA BATCH (part 3 — Ollama) DONE (2026-05-28, real
+local Ollama qwen2.5:0.5b via podman):</strong> internal/llm Ollama
+provider — 9 integration-tagged stress+chaos tests PASS under -race
+against REAL Ollama (fast-path GetHealth/GetModels sustained+concurrent;
+bounded real-generation concurrency proving non-empty completions
+e.g. “Nonce 64000.”; cancel-mid-generate, hostile-prompt, closed-port
+chaos). <strong>3 REAL production bugs fixed in
+<code>internal/llm/ollama_provider.go</code>:</strong> (1)
+<strong>CONST-035 / Article XI §11.9 GENERATION BLUFF</strong> — the
+provider POSTs <code>/api/chat</code> (completion in
+<code>message.content</code>) but <code>OllamaAPIResponse</code> only
+parsed the top-level <code>response</code> field → real Ollama
+generation returned EMPTY text to the end user; unit tests masked it by
+mocking <code>response</code>. Fixed: decode
+<code>message.content</code> via <code>completionText()</code>
+(preferred, <code>response</code> fallback). (2) data race on
+<code>isRunning</code> plain bool (read by
+Generate/IsAvailable/GetHealth, written by Close) →
+<code>atomic.Bool</code>. (3) connection/goroutine leak (unbounded
+transport + bodies closed-without-drain; GetHealth never closed on
+success) → bounded Transport + drain-then-close (800→2 goroutines). Each
+anti-bluff-proven (revert→empty/FAIL/race→restore→PASS).
+<strong>NOTE:</strong> the <code>internal/llm</code> package’s
+<code>-tags=integration</code> build is PRE-EXISTINGLY BROKEN (stale
+<code>integration_test.go</code>/<code>local_providers_integration_test.go</code>/<code>cloud_providers_integration_test.go</code>/etc.
+reference ~9 deleted provider constructors + a duplicate MockProvider) —
+filed as <strong>HXC-024</strong>; the ollama integration tests pass in
+isolation and land once HXC-024 restores the package integration build.
+<strong>Session total: 34 real production bugs fixed.</strong></p>
+<h2
+id="hxc-028-11.4.99-latest-source-documentation-cross-reference-readme">HXC-028
+— §11.4.99 latest-source documentation cross-reference (README)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Discovered:</strong> 2026-05-29
+(constitution §11.4.99 cascaded in HXC-025 — operator-facing instruction
+docs MUST be verified vs latest official sources) <strong>Closure
+(2026-05-29):</strong> applied §11.4.99 to the primary operator-facing
+doc <code>README.md</code> — cross-referenced its setup/build
+instructions against the latest official sources (WebFetch
+https://go.dev/doc/devel/release) + the repo’s actual state. <strong>3
+real instruction defects found + fixed:</strong> (1) prerequisite “Go
+1.24.0+” → <strong>“Go 1.26+”</strong> (the inner
+<code>helix_code/go.mod</code> is <code>go 1.26</code> — it does NOT
+build below 1.26; verified Go 1.26.0 released 2026-02-10 / latest
+1.26.3, and Go 1.24 is now past support per go.dev’s two-newer-majors
+policy); (2) clone URL
+<code>https://github.com/your-org/helixcode.git</code> → SSH
+<code>git@github.com:HelixDevelopment/HelixCode.git</code> (Rule 3
+SSH-only / CONST-038); (3) build step <code>cd HelixCode</code> →
+<code>cd helix_code</code> (lowercase per CONST-052; on-disk dir
+verified). Also fixed the Support section’s <code>your-org</code>
+placeholder links → in-repo tracker pointers. Added a
+<code>## Sources verified</code> footer (date + go.dev URL + repo
+cross-ref + a negative finding: README still uses the legacy §11.4.44
+bold header, §11.4.61 table migration deferred). PostgreSQL 15+/Redis 7+
+confirmed consistent with CLAUDE.md §3.1. <strong>4th finding
+(follow-up):</strong> the README Documentation section’s 4 links
+(<code>helix_code/docs/{ARCHITECTURE,DEVELOPMENT,USER_GUIDE,API}.md</code>)
+were ALL broken — the canonical docs live under
+<code>helix_code/docs/general/</code> (and API →
+<code>API_DOCUMENTATION.md</code>); all 4 links repointed + verified to
+resolve. README.html + README.pdf regenerated (CONST-062/066 sync).
+<strong>Extended to
+<code>helix_code/docs/general/DEVELOPMENT.md</code>:</strong> fixed “Go
+1.21+” → “Go 1.26+” (verified vs go.dev + go.mod); replaced the
+<code>docker build</code>/<code>docker run</code> section (Rule 4
+violation — host uses podman) with the real repo-root
+<code>./helix</code> facade (subcommands start/status/logs/restart/stop,
+verified against the script); all 8 cited <code>make</code> targets
+verified present; added a <code>## Sources verified</code> footer.
+<strong>§11.4.99 negative finding fixed in CLAUDE.md §3.4:</strong> the
+listed
+<code>make container-builder-image/container-build/container-test/container-shell/container-release</code>
+targets do NOT exist in any Makefile — replaced with the real
+<code>./helix</code> facade + a note. <strong>Systemic sweep
+(2026-05-29):</strong> scanned the doc tree for the recurring stale
+defects + fixed: <code>helix_code/docs/general/ARCHITECTURE.md</code>
+(“Go 1.24+”→“Go 1.26+”), <code>USER_MANUAL.md</code> (“Go 1.24.0+”→“Go
+1.26+”), <code>USER_GUIDE.md</code> (Docker-install
+<code>docker run</code>/<code>docker-compose</code> →
+<code>./helix</code> facade + SSH clone + <code>cd helix_code</code>
+build path), <code>COMPLETE_CLI_REFERENCE.md</code> (“Docker Commands”
+recommending non-existent
+<code>helixcode-security-scanner</code>/<code>-performance-optimizer</code>/<code>-config-validator</code>
+images → real <code>make scan-all</code> +
+<code>go run ./cmd/performance_optimization</code> +
+<code>go run ./cmd/config_test</code>). Every replacement command was
+verified to exist before citing (the point of §11.4.99). Total §11.4.99
+pass: 7 operator-facing docs corrected, all systemic stale-Go-version +
+Rule-4-docker + broken-path/link + non-existent-command defects fixed.
+The §11.4.99 discipline now binds future operator-doc edits.</p>
+<hr />
+<h2
+id="hxc-027-11.4.98-live-test-full-automation-compliance-audit">HXC-027
+— §11.4.98 live-test full-automation compliance audit</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Discovered:</strong> 2026-05-29
+(constitution §11.4.98 cascaded in HXC-025 — mandate requires
+classifying every test COMPLIANT vs NON-COMPLIANT) <strong>Closure
+(2026-05-29):</strong> audited HelixCode’s <code>*_test.go</code> suite
+for §11.4.98 manual-action anti-patterns — RESULT:
+<strong>COMPLIANT</strong>. Scans: (a) stdin/manual-input dependency
+(<code>bufio.NewReader(os.Stdin)</code>/<code>fmt.Scan</code>/<code>os.Stdin.Read</code>)
+→ ZERO; (b) operator-prompt waits (“operator must”/“please type”/“press
+enter”/“manually run”) → ZERO; (c) silent <code>t.Skip()</code> without
+a reason/SKIP-OK marker → ZERO (all skips cite a reason per §11.4.3);
+(d) human-response-window waits → the only long <code>time.Sleep</code>s
+(discovery health-timeout 10s, token_budget 61s, e2e propagation 10-15s,
+hardware/load 10-15s) are DETERMINISTIC machine-timing waits (waiting
+for a timeout/budget-window to elapse, then continuing automatically) —
+fully self-driving, NOT human-response windows, so §11.4.98-compliant.
+The suite reports PASS/FAIL/SKIP-with-reason without human action after
+startup. <strong>Forward note (§11.4.82, not a §11.4.98
+violation):</strong> <code>internal/llm/token_budget_test.go:436</code>
+sleeps a real 61s to exercise a 60s budget window — a
+configurable/shorter window would speed iteration; non-blocking. No
+NON-COMPLIANT tests found → no remediation campaign needed (unlike the
+CONST-046 i18n campaign).</p>
+<hr />
+<h2
+id="hxc-026-workable-items-mddb-sync-gate-11.4.9395-follow-up">HXC-026 —
+workable-items md↔︎db sync gate (§11.4.93/95 follow-up)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Discovered:</strong> 2026-05-29
+(HXC-013 follow-up — the binary + tracked DB existed but no gate
+enforced md↔︎db sync) <strong>Closure (2026-05-29):</strong>
+<code>scripts/gates/workable_items_sync_gate.sh</code>
+(CM-WORKABLE-ITEMS-MD-DB-IN-SYNC) builds the constitution
+<code>workable-items</code> binary and asserts three invariants on TEMP
+COPIES (never opening the tracked DB in-place — SQLite WAL-mode dirties
+the header even on read): (1) the committed
+<code>docs/workable_items.db</code> validates; (2) Issues.md/Fixed.md
+round-trip md→db→md byte-identically; (3) the committed DB’s md
+projection matches the live docs (DB not stale). Honest SKIP-OK when the
+CGO/sqlite binary can’t build in-env (never a fake pass). Wired into the
+CONST-055 sweep as <strong>G11</strong> (full sweep G1-G11 → 0
+failures). Paired-mutation meta-test
+<code>scripts/tests/workable_items_sync_meta_test.sh</code> (plant a
+phantom item in Issues.md → gate FAILs → trap-restore byte-identical →
+gate PASSes; 3/3 assertions). <code>bash -n</code> clean. Completes the
+HXC-013 §11.4.93 enforcement loop (the remaining
+auto-invoke-from-commit_all.sh wiring stays a forward note).</p>
+<hr />
+<h2
+id="hxc-025-constitution-11.4.9899101-cascade-const-047311.4.26">HXC-025
+— Constitution §11.4.98/99/101 cascade (CONST-047/§3/§11.4.26)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Discovered:</strong> 2026-05-29
+(read-only fetch of constitution submodule surfaced new upstream commits
+15cd4bc→6017af9) <strong>Closure (2026-05-29, subagent-driven
+§11.4.70):</strong> the constitution submodule advanced with 3 new
+UNIVERSAL anchors — §11.4.98 (Full-Automation Anti-Bluff: live tests
+self-driving e2e), §11.4.99 (Latest-Source Documentation
+Cross-Reference), §11.4.101 (Autonomous-decision-over-blocking) — plus
+§11.4.100 (video-color) which was DEMOTED to the ATMOSphere project
+(project-specific, NOT cascaded). Per §11.4.26: pinned HelixCode’s
+constitution submodule to 6017af9; cascaded the 3 universal anchors into
+HelixCode’s 5 root govfiles (Phase 1, commit 901e7a55) AND all 68 owned
+submodules’ CONSTITUTION/CLAUDE/AGENTS(/QWEN) govfiles (Phase 2, 6
+parallel subagent waves + a pilot — each submodule committed + pushed to
+its own org remotes; append-only; non-ff rejections union-merged
+preserving all governance content; no force-push). Bumped HelixCode’s 68
+submodule pointers + extended <code>verify-governance-cascade.sh</code>
+COVENANT114_ANCHORS to enforce §11.4.98/99/101 (24→27). <strong>Cascade
+verifier → 0 failures</strong> (root + all 68 submodules carry all 27
+anchors); post-pull CONST-055 sweep (G1-G10) → 0 failures. §11.4.101’s
+decision rule (reversible + evidence-determinable + bounded) authorised
+proceeding autonomously through the org-wide cascade. NOTE: the
+constitution submodule’s own new mandate §11.4.98 (live-test
+full-automation) + §11.4.99 (latest-source doc xref) imply future
+HelixCode work (audit live tests for manual-action dependencies; add
+Sources-verified footers to operator docs) — tracked for follow-up.</p>
+<hr />
+<h2
+id="hxc-024-internalllm--tagsintegration-build-broken-stale-tests-reference-deleted-providers">HXC-024
+— internal/llm <code>-tags=integration</code> build broken (stale tests
+reference deleted providers)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Closure (2026-05-29, subagent-driven §11.4.70):</strong>
+<code>go test -tags=integration ./internal/llm/</code> now compiles +
+runs (<code>ok</code> 86s, real PG/Redis/Ollama). Fixes: (1) deduped
+<code>MockProvider</code> — renamed the integration-only field-based one
+→ <code>integrationMockProvider</code> (the func-based
+<code>tool_provider_test.go</code> one is canonical) + added the
+now-required <code>GetContextWindow()</code>/<code>CountTokens()</code>
+interface methods. (2)
+<code>LlamaConfig.ModelPath</code>→<code>Model</code> rename fixed
+(struct + <code>NewLlamaCPPProvider</code> still exist) + corrected
+degenerate 30ns timeouts to <code>*time.Second</code>. (3)
+<code>local_providers_integration_test.go</code>: 10 constructors
+(NewVLLMProvider/NewLocalAIProvider/NewFastChatProvider/NewTextGenProvider/NewLMStudioProvider/NewJanProvider/NewGPT4AllProvider/NewTabbyAPIProvider/NewMLXProvider/NewMistralRSProvider)
+grep-verified DELETED from production → their dead tests removed;
+<code>NewKoboldAIProvider</code> survives →
+<code>TestKoboldAIProviderIntegration</code> + trimmed helper retained
+(honest SKIP, no endpoint). (4) test-only provider-type collision bug
+fixed (TestProviderHealthIntegration registered 2 mocks both keyed
+ProviderTypeLocal → distinct types). The new ollama integration
+stress/chaos tests now run live + PASS;
+<code>make stress-chaos-infra</code> extended to server + llm. Test-only
+changes (no production code touched). Cloud-provider tests honest-SKIP
+when API keys unset (env-dependent failures with keys present are
+pre-existing + out of scope). gofmt + build + vet clean.
+<strong>Discovered:</strong> 2026-05-28 (HXC-014 Ollama infra batch —
+surfaced running <code>go test -tags=integration ./internal/llm/</code>)
+<strong>Severity:</strong> Medium (CONST-050(B): the llm integration
+suite cannot compile/run; masks integration regressions + blocks the new
+ollama integration stress/chaos tests from running via the normal path)
+<strong>Scope:</strong> Under <code>-tags=integration</code>,
+<code>internal/llm</code> fails to compile:
+<code>tool_provider_test.go</code>/<code>integration_test.go</code>
+redeclare <code>MockProvider</code>;
+<code>local_providers_integration_test.go</code> +
+<code>cloud_providers_integration_test.go</code> +
+<code>integrated_model_manager_test.go</code> +
+<code>cross_provider_test.go</code> +
+<code>model_download_manager_test.go</code> reference ~9 deleted
+constructors (NewVLLMProvider/NewLocalAIProvider/NewLlamaCppProvider/… +
+a removed <code>ModelPath</code> field). Fix: dedup MockProvider +
+update/remove the stale tests to the current provider API (the providers
+were removed from production, so their dead tests should be deleted or
+rewritten against extant constructors), WITHOUT dropping legitimate
+coverage. Then <code>go test -tags=integration ./internal/llm/</code>
+compiles and the new <code>ollama_provider_{stress,chaos}_test.go</code>
+run live. <strong>HXC-014a</strong> (empty TestProviderStress stub)
+already FIXED (f464adb0). <strong>Operator decision deferred:</strong>
+promoting <code>tests/stresschaos/</code> into the constitution
+submodule for cross-project reuse (triggers §11.4.26 cross-project
+workflow) — interim home is project-local.</p>
+<hr />
+<h2 id="hxc-015-cross-platform-parity-11.4.81">HXC-015 — Cross-platform
+parity (§11.4.81)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Closure (2026-05-28, subagent-driven
+§11.4.70):</strong> supported-platforms manifest
+<code>docs/platforms/supported_platforms.yaml</code> (+README) declaring
+linux/macos/windows host-shell targets +
+ios/android/aurora_os/harmony_os cross-compile (macos/windows
+<code>ci_test_hardware: false</code> — honest, no hardware enrolled).
+<code>scripts/gates/cross_platform_parity_gate.sh</code>
+(CM-CROSS-PLATFORM-PARITY) scans for <code>case "$(uname -s)"</code>
+dispatch + asserts no multi-platform script silently drops a manifest
+platform without a <code># PARITY-GAP:</code> honest-kernel-gap
+citation; wired into the CONST-055 sweep as <strong>G10</strong> (PASS).
+Real finding caught+fixed: <code>scripts/install.sh</code> did
+linux+darwin dispatch but silently dropped Windows_NT → added honest gap
+citation. Paired-mutation meta-test
+<code>scripts/tests/cross_platform_parity_meta_test.sh</code> (3
+assertions: missing-Darwin bluff FAILs → add-branch PASS →
+honest-gap-citation PASS), exit 0. <strong>Doc-fix done:</strong> root
+CLAUDE.md §3.2.1 said the inner module is at
+<code>helix_code/helix_code/</code> (nonexistent —
+<code>test -d helix_code/helix_code</code> ABSENT) + mislabelled
+“submodule” — corrected to <code>helix_code/</code> “tracked
+subdirectory” with go.mod evidence inline (inner
+<code>module dev.helix.code</code> go 1.26 at helix_code/go.mod; thin
+root go.mod go 1.25.2). <strong>sandbox.go rlimit re-assessed — NOT the
+“never-applied stub” the original scope claimed:</strong>
+<code>internal/tools/sandbox/native_backend.go</code> (linux) applies
+real <code>syscall.Setrlimit(RLIMIT_AS)</code> (cgroup-v2 preferred,
+rlimit fallback); <code>native_backend_other.go</code> (!linux) is an
+HONEST fail-closed stub (returns “unavailable on non-Linux, deferred to
+F14.5”, not a silent no-op). A real per-OS impl (macOS
+Seatbelt+RLIMIT_CPU/SIGXCPU proxy per the §11.4.81(C) XNU-RLIMIT_AS
+kernel gap; Windows Job Object) is spec-deferred to F14.5 — recommend a
+dedicated F14.5 ticket. bash -n clean. <strong>Operator-gated remainder
+(honest OPERATOR-BLOCKED):</strong> actually running per-OS test
+branches on real macOS/Windows/mobile hardware needs that hardware
+enrolled (none currently); the gate + manifest + honest-gap discipline
+are the enforceable core and are complete. <strong>Discovered:</strong>
+2026-05-28 (constitution pull) <strong>Discovered-By:</strong> AI
+<strong>Scope:</strong> §11.4.81 requires per-OS equivalents (runtime
+dispatch) for platform-specific primitives + honest kernel-gap
+citations. Gaps: shell scripts rarely uname-dispatch, no
+CM-CROSS-PLATFORM-PARITY gate, no supported-platforms manifest,
+shell/sandbox.go rlimits a never-applied stub. Sub-defect
+<strong>HXC-015a (7 platform <code>Assert(true,"...skipped")</code>
+fake-skips) already FIXED in commit f464adb0</strong> (honest v.Skip on
+runtime.GOOS). This item tracks the remaining parity gate + manifest +
+rlimit work. Open decision: which non-Linux platforms have test hardware
+(else honest OPERATOR-BLOCKED). <strong>Doc-fix:</strong> root CLAUDE.md
+§3.2.1 prose says inner module is <code>helix_code/helix_code/</code>;
+actual is <code>helix_code/</code> — correct the prose.</p>
+<hr />
+<h2
+id="hxc-016-11.4.6997-governance-cascade-into-owned-submodules-const-0473-closed-fixed.md">HXC-016
+— §11.4.69–97 governance cascade into owned submodules (CONST-047/§3) —
+CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record.
+<strong>Type:</strong> Task <strong>Discovered:</strong> 2026-05-28
+(constitution pull) <strong>Discovered-By:</strong> AI <strong>Closure
+(2026-05-28):</strong> all 24 anchors (§11.4.69 + §11.4.75–97) cascaded
+into the 5 root govfiles (27929ae1) AND all ~68 owned-submodule
+CONSTITUTION/CLAUDE/AGENTS/QWEN files (batches 1-7:
+ef4b3986/a864039d/e4046668/3adb2e63/464b2401/b4ad4f50/053fd731). A
+loose-grep false-match (the §11.4.93 body cites §11.4.95) had skipped
+the §11.4.95 heading in batch-1-6 submodules — repaired by fix-up A/B/C
+(79478ed5/903b9225/a9a1a6a1) + the gate tightened to the
+<code>## §11.4.NN —</code> heading marker (d2165bf7). 4 HelixDevelopment
+submodules regressed to the wrong branch (main vs canonical master) by
+the cascade reset — repaired (b4b790ea). Gate submodule-scope enabled
+(9031368d). Final <code>verify-governance-cascade.sh</code> → <strong>0
+failures</strong>, 204 submodule covenant-114 PASS lines; paired §1.1
+mutation proven (strip §11.4.95 → 1 failure → restore → 0). Section
+retained as a migration tombstone per §11.4.19.</p>
+<hr />
+<h2
+id="hxc-017-codegraph-own-org-submodule-indexing-update-automation-11.4.7980-closed-fixed.md">HXC-017
+— CodeGraph own-org submodule indexing + update automation (§11.4.79/80)
+— CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record.
+<strong>Type:</strong> Task <strong>Discovered:</strong> 2026-05-28
+(constitution pull) <strong>Discovered-By:</strong> AI <strong>Closure
+(2026-05-28, commits 176fe07b + 551552f7 + 876b3b36):</strong>
+<code>.codegraph/config.json</code> blanket <code>dependencies/**</code>
+exclude replaced with 3 specific third-party excludes
+(LLama_CPP/Ollama/HuggingFace_Hub) so own-org
+<code>dependencies/vasic-digital/**</code> +
+<code>dependencies/HelixDevelopment/**</code> are now INCLUDED;
+credential excludes (<strong>/.env,<em>.key,</em>.pem,secrets) added.
+Root <code>.gitignore</code> fixed so
+<code>.codegraph/config.json</code> is TRACKED (§11.4.78 — it had been
+blanket-ignored). Re-index (<code>codegraph index .</code> exit 0):
+Files 39,024→76,044, Nodes 624,103→1,255,974, Edges 1.64M→3.96M.
+</strong>§11.4.79 anti-bluff probe (independently re-verified by
+conductor):** <code>codegraph query EventBus</code> →
+<code>submodules/event_bus/pkg/bus/bus.go:85</code>; helix_memory →
+<code>submodules/helix_memory/...</code>; third-party <code>llama</code>
+filtered to LLama_CPP → empty. docs/codegraph/Status.md +
+Status_Summary.md created (§11.4.80; weekly automation inherited by
+reference from constitution codegraph_update.sh/codegraph_sync.sh).
+Section retained as a migration tombstone per §11.4.19.</p>
+<hr />
+<h2
+id="hxc-018-obsolete-status-11.4.90-summary-doc-clarity-11.4.91-tracker-tooling">HXC-018
+— Obsolete status (§11.4.90) + summary-doc clarity (§11.4.91) tracker
+tooling</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Discovered:</strong> 2026-05-28
+(constitution pull) <strong>Discovered-By:</strong> AI
+<strong>Scope:</strong> §11.4.90 adds terminal
+<code>Obsolete (→ Fixed.md)</code> status + Obsolete-Details line +
+colorizer <code>cell-status-obsolete</code>; §11.4.91 forbids
+anti-pattern summary one-liners (“Composes with” etc.) and requires
+generators to refuse them. Extend HelixCode’s tracker + summary
+generators + colorizer. <strong>Closure (2026-05-28, subagent-driven
+§11.4.70):</strong> §11.4.90 — <code>docs/_progress-style.css</code>
+adds the <code>tr.cell-status-obsolete</code> rule (light-gray #E0E0E0 +
+strikethrough); <code>scripts/gates/obsolete_colorize.sh</code> tags
+Obsolete-status <code>&lt;tr&gt;</code>s post-render;
+<code>scripts/regenerate-tracker-exports.sh</code> wires
+<code>--css docs/_progress-style.css --embed-resources</code> + the
+colorizer into the HTML render;
+<code>scripts/gates/obsolete_details_gate.sh</code> asserts every
+<code>Obsolete (→ Fixed.md)</code> heading carries a valid
+<code>**Obsolete-Details:**</code> line
+(Since/Reason-from-closed-vocab/Superseding-item/Triple-check). §11.4.91
+— <code>scripts/gates/summary_clarity_gate.sh</code> FAILs on
+anti-pattern one-liners + descriptions &lt;6 words AND &lt;40 chars;
+found + fixed 1 real violation (HXA-001 Issues_Summary row). Both wired
+into the CONST-055 sweep as G8/G9. Anti-bluff:
+<code>scripts/tests/{obsolete_details,summary_clarity}_meta_test.sh</code>
+paired-mutation (plant violation → gate FAIL → remove → PASS), both exit
+0; gates run clean against real docs (0 violations).
+<code>bash -n</code> clean (CONST-068). The §11.4.90 <em>terminal-status
+DB column</em> couples with HXC-013 (SQLite) and remains future; the
+MD-tracker gates + colorizer are complete now.</p>
+<hr />
+<h2 id="hxc-019-docsqa-end-user-evidence-tree-11.4.83">HXC-019 —
+docs/qa/ end-user evidence tree (§11.4.83)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Discovered:</strong> 2026-05-28
+(constitution pull) <strong>Discovered-By:</strong> AI
+<strong>Scope:</strong> §11.4.83 requires every shipped feature to carry
+a recorded e2e transcript + materials under
+<code>docs/qa/&lt;run-id&gt;/</code>; release gate refuses feature
+commits lacking it. Establish the tree + gate. <strong>Closure
+(2026-05-28, subagent-driven §11.4.70 — operator authorised hard-gate
+promotion):</strong> the tree + advisory scanner already existed;
+promoted <code>scripts/verify_qa_evidence.sh</code> to an ENFORCING
+release gate with <code>--enforce</code> + mandatory
+<code>--since &lt;baseline&gt;</code> (baseline = the
+<code>docs/qa/README.md</code>-introducing commit <code>ed84f90e</code>,
+so pre-convention history is exempt) + a <code>[no-qa-evidence]</code>
+per-commit opt-out for non-feature changes. Wired into
+<code>scripts/release-gate-test.sh</code> via
+<code>scripts/gates/qa_evidence_gate.sh</code> AND into the CONST-055
+sweep as G7. Also fixed a latent git-2.50 bug in the original scanner
+(<code>git show -s --name-only</code> matched zero commits → silent
+false-clean; replaced with <code>git diff-tree</code>). The enforcing
+gate correctly flagged this session’s own 10 HXC-014 feature commits as
+lacking evidence → resolved honestly by adding
+<code>docs/qa/HXC-014/transcript.md</code> (real captured stress/chaos
+evidence + anti-bluff mutation proofs); gate now PASSES (10/10 matched).
+Anti-bluff: <code>scripts/tests/verify_qa_evidence_meta_test.sh</code>
+paired-mutation (6 assertions: no-evidence→1, add-evidence→0, opt-out→0,
+untagged→1, no-since→2, pre-baseline-exempt→0), exit 0.
+<code>bash -n</code> clean (CONST-068). NOT wired into
+pre-commit/pre-push (release-gate-only per the mandate wording).</p>
+<hr />
+<h2
+id="hxc-022-test_bank-platform-integration-packages-do-not-compile-pre-existing-closed-fixed.md">HXC-022
+— test_bank platform + integration packages do not compile
+(pre-existing) — CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record.
+<strong>Type:</strong> Bug <strong>Discovered:</strong> 2026-05-28
+(anti-bluff sweep during HXC-021 fix) <strong>Discovered-By:</strong> AI
+(captured: <code>go build ./platform/... ./integration/...</code> in
+helix_code/tests/e2e/test_bank) <strong>Closure (2026-05-28, commit
+02b3081c):</strong> all ~11 named <code>declared and not used</code>
+half-written stubs COMPLETED with real assertions (created-resource IDs
+→ assert non-empty; metric values → assert non-nil; 2 vestigial unsent
+request bodies removed); root-dir package collision resolved by
+<code>git mv performance_security_tests.go → performance/</code>
+subpackage; un-masked pre-existing core/ defects (duplicate
+<code>GetCoreTests</code>, unused imports) fixed too.
+<code>go build ./...</code> exit 0 (whole module),
+<code>go vet ./...</code> clean — independently re-verified. HXC-021
+runtime-verified through the now-compiling banks: platform SKIP=3
+(honest “not running on macOS/Windows/ARM”), integration SKIP=2 (honest
+“Ollama not reachable”/“OPENAI_API_KEY not configured”), no fake
+PASS/green-empty. Section retained as a migration tombstone per
+§11.4.19.</p>
+<hr />
+<h2
+id="hxc-023-asserttrue-asserttruetrue-literal-true-bluffs-across-test_bank-closed-fixed.md">HXC-023
+— <code>Assert(true,…)</code> / <code>AssertTrue(true,…)</code>
+literal-true bluffs across test_bank — CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record.
+<strong>Type:</strong> Bug <strong>Discovered:</strong> 2026-05-28
+(surfaced while fixing HXC-022) <strong>Discovered-By:</strong> AI
+<strong>Closure (2026-05-28, commits 8e80e0c0 + b514f8bb):</strong> ALL
+literal-true PASS-bluffs across the e2e test banks replaced with real
+assertions or honest skips — batch 1 (core/additional_tests.go, 41
+fixed) + batch 2 (distributed 12, integration 11, platform 5,
+core/tests.go 4, performance 1 = 33). Pattern: mislabelled “X succeeded”
+branches that fired on non-2xx → assert the expected 2xx; 401/403/429
+branches → assert that exact status; feature-404 branches → honest
+<code>v.Skip(reason)</code> (§11.4.3); the 4 legitimate “Running on
+<arch/platform>” positive-platform asserts left untouched. Verification:
+<code>go build ./...</code> + <code>go vet ./...</code> exit 0;
+full-tree grep for literal-true bluffs = 0; runtime harness (down
+server) → all changed cases HONEST-FAIL, 0 green-empty. Section retained
+as a migration tombstone per §11.4.19.</p>
+<hr />
+<h2
+id="hxc-029-11.4.98-full-automation-compliance-sweep-of-every-liveintegratione2echallenge-test-no-human-in-the-loop-closed-fixed.md">HXC-029
+— §11.4.98 full-automation compliance sweep of every
+live/integration/e2e/Challenge test (no human-in-the-loop) — CLOSED (→
+Fixed.md)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record. <strong>Closure
+(2026-05-29):</strong> §11.4.98 manual-intervention sweep COMPLETE — 0
+remaining human-in-the-loop violations. Static audit
+(<code>docs/qa/HXC-029/compliance-ledger.md</code>) found exactly 2
+NON-COMPLIANT → both FIXED (server_timeout_test.go manual-skip → real
+self-driving net/http test <code>-count=3</code> green; clean.sh
+interactive <code>read -p</code> → <code>--force</code>/TTY-gated). All
+<strong>7 HelixCode-scope HelixQA banks</strong> verified self-driving
+vs the live :8080 server (4 API + 3 CLI, each 3× deterministic +
+flip-mutation-proof, real <code>bin/cli</code> via os/exec,
+<code>grep -c manual-review-required</code>=0, honest <code>_skip</code>
+for absent tools). <strong>31/31 integration files</strong>
+runtime-verified self-driving (0 manual deps; the 3 FAILs were a real
+product defect → HXC-036, now fixed). The <strong>20
+browser/Android/capture banks are OUT of scope</strong> (HelixQA is
+shared — they target Catalogizer/Yole/HelixQA-engine; HelixCode has no
+web UI (API-only) + no Android app; the 2 connected devices are
+ATMOSphere hardware) — per §11.4.79/§11.4.51 not converted. e2e suites
+static-clean (only config-bootstrap skips = permitted §11.4.98(B)
+exception; no manual signal). Evidence
+docs/qa/HXC-029/{compliance-ledger,<em>/run_</em>,integration-classification,playwright-android}.
+Closed <code>Completed (→ Fixed.md)</code> per CONST-057 (Type
+Task).</p>
+<hr />
+<h2
+id="hxc-030-11.4.99-forward-latest-source-documentation-cross-reference-sweep-across-all-operator-facing-docs-closed-fixed.md">HXC-030
+— §11.4.99 forward: latest-source documentation cross-reference sweep
+across all operator-facing docs — CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record. <strong>Closure
+(2026-05-29):</strong> §11.4.99 operator-instruction sweep COMPLETE —
+<strong>38/38 (100%)</strong> operator-facing
+instruction/guide/manual/setup/troubleshooting/tutorial docs now carry a
+WebFetch-verified <code>## Sources verified</code> footer (8 batches: Go
+1.24→1.26.3, golang:1.21→1.26 Dockerfiles, go1.21.5→1.26.3, postgres
+14→15, stale Anthropic/OpenAI doc-redirect URLs all corrected against
+live official sources; honest negative findings recorded where sources
+were 403/unreachable; per CONST-036 model IDs flagged-not-guessed). New
+<code>scripts/gates/sources_verified_gate.sh</code> wired as <strong>G13
+(now ENFORCING)</strong> in verify-all-constitution-rules.sh — any
+future operator doc lacking a footer FAILs the sweep. Out of §11.4.99
+scope (evidence/internal, not operator instructions): docs/qa_evidence/
+(93 QA reports), docs/helix_qa/, docs/architecture/, docs/coverage/,
+docs/materials/. Ongoing 90-day staleness re-verification is
+steady-state discipline (gate <code>--check-stale</code>), not an open
+task. Section retained as §11.4.19 tombstone. <strong>Type:</strong>
+Task <strong>Discovered:</strong> 2026-05-29 (constitution §11.4.99
+cascaded via HXC-025; HXC-028 applied it to README only)
+<strong>Discovered-By:</strong> AI <strong>Forensic-anchor:</strong>
+§11.4.99 — “ALWAYS check against latest versions of services we use web
+/ online docs before creating instructions”. <strong>Scope:</strong>
+Extend the HXC-028 README treatment to every operator-facing
+guide/manual/setup/troubleshooting doc under <code>docs/</code>; for
+each, WebFetch the latest official source of every referenced
+service/library, cross-reference each instruction, add a
+<code>## Sources verified &lt;date&gt;</code> footer + commit-message
+footer; flag negative findings; classify docs &gt;6 months stale (&gt;90
+days for risk-classified services) for re-verify or §11.4.90 Obsolete
+(<code>Reason=stale-documentation</code>). <strong>Closure
+criteria:</strong> Every operator-facing doc carries a
+<code>## Sources verified</code> footer with URLs+date; release-gate
+check for the footer added; stale-beyond-grace docs triaged.
+<strong>Composes-with:</strong> §11.4.99, §11.4.92, HXC-028.</p>
+<hr />
+<h2
+id="hxc-031-deferred-long-tail-const-052-renames-resolved-none-remain-codexcline-reference-agent-ports">HXC-031
+— Deferred long-tail: CONST-052 renames (RESOLVED — none remain) +
+Codex/Cline reference-agent ports</h2>
+<p><strong>Status:</strong> In progress <strong>Type:</strong> Task
+<strong>Discovered:</strong> 2026-05-29 (carried forward from HXC-001
+deferral notes + Phase-3/5 backlog in docs/CONTINUATION.md)
+<strong>Discovered-By:</strong> AI <strong>Rename-component RESOLVED
+(2026-05-29 — investigation, no guessing per §11.4.6):</strong> the
+“deferred build-breaking renames” were stale CONTINUATION prose. On
+inspection there are NO owned-org renames genuinely left:
+<code>dependencies/HelixDevelopment/*</code> leaves are already
+lowercase snake_case (debate_orchestrator, doc_processor, helix_llm,
+helix_memory, helix_specifier, llm_orchestrator, llm_provider,
+llms_verifier, models, vision_engine);
+<code>dependencies/vasic-digital/*</code> has no PascalCase leaves; the
+only remaining PascalCase dirs (<code>HuggingFace_Hub</code>,
+<code>LLama_CPP</code>, <code>Ollama</code>) + the single remaining
+<code>Upstreams/</code> (<code>cli_agents/claude-code-source/</code>)
+are THIRD-PARTY (CONST-052-exempt vendor names); the parent org-grouping
+dirs <code>HelixDevelopment/</code> + <code>vasic-digital/</code> were
+intentionally kept as namespace carve-outs per HXC-001’s operator
+decision. <code>scripts/const052_verify_refs.sh</code> CHECK 1/2 PASS
+(217 gitlinks resolve, no conflict gitlinks). HXC-001 leaf-rename
+programme is genuinely complete; nothing to do here. <strong>Remaining
+scope:</strong> port “Codex Multimodal” + “Cline Computer Use” reference
+agents (docs/CONTINUATION.md Phase-3 backlog) — genuine feature work,
+not started. <strong>Closure criteria:</strong> each agent port covered
+by tests + Challenge with captured evidence; all pushed per §11.4.71.
+<strong>Composes-with:</strong> CONST-052, HXC-001, §11.4.81,
+§11.4.101.</p>
+<hr />
+<h2
+id="hxc-032-llmorchestrator-submodule-committed-merge-conflict-markers-break-helix_agent-build-closed-fixed.md">HXC-032
+— LLMOrchestrator submodule: committed merge-conflict markers break
+<code>helix_agent</code> build — CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record. <strong>Closure
+(2026-05-29):</strong> all 26 conflict hunks across 5 LLMOrchestrator Go
+files resolved to the HEAD (i18n-migrated) side; <code>bundle.go</code>
+<code>BundleTranslator</code> gained an honest <code>TPlural</code>;
+<code>automation_test.go</code> aligned to the lowercase
+<code>upstreams/</code> rename.
+<code>go build</code>/<code>go vet</code>/<code>go test ./...</code>
+(10/10 pkgs) PASS; downstream <code>helix_agent</code>
+<code>go build ./...</code> exit 0. Submodule <code>d3956ad</code>
+pushed origin/master (FF); meta pointer bumped. Section retained as a
+§11.4.19 migration tombstone. <strong>Type:</strong> Bug
+<strong>Severity:</strong> High (breaks <code>helix_agent</code>
+<code>go build ./...</code>; a §11.4 PASS-bluff at the build layer —
+tracked source does not compile) <strong>Discovered:</strong> 2026-05-29
+(surfaced by <code>scripts/const052_verify_refs.sh</code> CHECK 3 while
+investigating HXC-031) <strong>Discovered-By:</strong> AI
+<strong>Evidence:</strong> <code>submodules/llm_orchestrator</code>
+(digital.vasic.llmorchestrator) has UNRESOLVED git conflict markers
+committed into 5 tracked Go files — <code>pkg/i18n/translator.go</code>
+(1 hunk), <code>pkg/i18n/translator_test.go</code> (2),
+<code>pkg/agent/multi_pool.go</code> (1),
+<code>cmd/orchestrator/main.go</code> (7),
+<code>challenges/runner/main.go</code> (16) = 26 hunks.
+<code>go build ./...</code> fails
+<code>expected 'package', found '&lt;&lt;'</code>. The markers are
+present in commit <code>5d9f5fc</code> and the current HEAD merge
+<code>1e198e3 "Merge branch 'master'"</code>, and are <strong>already
+pushed to <code>origin/master</code></strong>. <strong>Root cause
+(forensic, no guessing per §11.4.6):</strong> a merge between the
+i18n-migration lineage (clean at <code>8032035</code> /
+<code>a7fda2a</code> round-383 CONST-046) and the CONST-052 rename
+commit
+<code>4350384 "fix(const052): rename Upstreams/→upstreams/ (HXC-001)"</code>
+was committed with conflict markers unresolved. <strong>Resolution
+direction (verified-correct side):</strong> the
+<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code> side is the canonical one
+— consumer analysis proves it:
+<code>cmd/orchestrator/i18n_msg.go</code>,
+<code>pkg/agent/claudecode_agent.go</code>, and the package tests call
+<code>i18n.Pkg().T()</code>, <code>i18n.SetPkgTranslator()</code>, and
+<code>Translator.TPlural</code>, which ONLY the HEAD (i18n-migrated)
+side defines; the <code>4350384</code> side is the older
+pre-<code>TPlural</code>/pre-<code>Pkg()</code> variant.
+<code>Tr()</code>/<code>Trf()</code>/<code>Global()</code> live in
+<code>bundle.go</code> (no collision). Fix recipe: restore the 5 files
+from the last-clean i18n-lineage commit (<code>8032035</code> for
+translator.go; locate equivalents per file), <code>go build ./...</code>
++ <code>go test ./...</code> GREEN as the verifier, then
+<code>go build ./...</code> in <code>helix_agent</code> GREEN, commit to
+the submodule, push <code>origin/master</code> per §11.4.71 (merge-first
+per §11.4.41 since the broken state is already on the remote), bump the
+meta <code>.gitmodules</code> pointer in the same meta commit.
+<strong>Why not fixed in the discovering session:</strong> 26 hunks
+across 5 files on an already-pushed branch is irreversible
+high-blast-radius work whose per-hunk safe path needs build+test
+verification (§11.4.101) — deferred to a dedicated verified pass rather
+than rush-pushed. <code>translator.go</code> resolution was proven
+correct but reverted to keep the submodule in a single coherent
+committed state until all 5 are fixed together.
+<strong>Composes-with:</strong> §11.4 (build-layer bluff), §11.4.41
+(merge-first), §11.4.71, HXC-001, CONST-046, CONST-052.</p>
+<hr />
+<h2
+id="hxc-033-codegraph-0.9.7-update-full-indexsync-crashes-own-org-submodules-dropped-from-the-index-11.4.79-regression-closed-fixed.md">HXC-033
+— codegraph 0.9.7 update: full index/sync crashes + own-org submodules
+dropped from the index (§11.4.79 regression) — CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record. <strong>Closure
+(2026-05-29):</strong> ROOT CAUSE confirmed = codegraph 0.9.7 requires
+an explicit <code>codegraph init</code> before <code>index</code>
+(data-compat change; old DB incompatible) — exactly the operator’s
+hypothesis. Fix (operator-directed): full wipe of the gitignored DB +
+<code>codegraph init</code> (tracked config.json preserved) +
+<code>codegraph index .</code>. Result Files 75,663 / Nodes 1,272,492
+(edges finalize async). §11.4.79 probe PASSES via
+<code>codegraph query</code>:
+<code>NewBundleTranslator</code>→<code>submodules/llm_orchestrator/...</code>+<code>vasic-digital/...</code>
+(10 own-org hits), third-party <code>LLama_CPP</code> excluded. Two
+earlier mis-diagnoses corrected per §11.4.6 (the “crash” was a faulty
+pgrep pattern; “own-org unreachable” used the wrong verb
+<code>search</code> vs <code>query</code> + a stale MCP DB). Also
+cleaned Status.md 3.66 MB→8 KB (ANSI-spinner bloat from
+codegraph_sync.sh). Follow-ups (non-blocking, noted in Status.md):
+restart the codegraph MCP server to serve the fresh DB; fix
+codegraph_sync.sh to strip ANSI. Section retained as §11.4.19 tombstone.
+<strong>Type:</strong> Bug <strong>Severity:</strong> High (§11.4.79
+release-blocker — AI agents querying the code-graph get NO own-org
+submodule symbols; index also unbuildable) <strong>Discovered:</strong>
+2026-05-29 (operator installed codegraph 0.9.7; surfaced during §11.4.80
+post-update sync) <strong>Discovered-By:</strong> AI
+<strong>Operator-Blocked-Details:</strong> By: AI; Since: 2026-05-29;
+Reason: external-tool-state (operator-installed codegraph 0.9.7 crashes
+with no actionable diagnostic — not determinable/fixable from captured
+evidence per §11.4.6); Unblock: operator decision required — (a)
+downgrade codegraph to the last version that indexed this repo cleanly,
+(b) file an upstream bug with the maintainer, or (c) accept a
+degraded/partial index temporarily. §11.4.80 mandates latest-installed,
+so an autonomous downgrade would itself violate it — hence
+operator-gated. <strong>Evidence:</strong>
+<code>codegraph --version</code>→<code>0.9.7</code>. Full
+<code>codegraph index .</code> KILLED mid-run twice (no exit
+code/diagnostic; left 54,207 then <code>--force</code> 4,630 files vs
+HXC-017’s 76,044 baseline); <code>codegraph sync .</code> exit 1 (8,461
+files). MCP <code>codegraph_search BundleTranslator</code> resolves ONLY
+<code>helix_code/...</code>, NOT the own-org
+<code>submodules/llm_orchestrator/pkg/i18n/bundle.go</code> → own-org
+unreachable. Host memory ample (51 GiB free — not §12.6 OOM). Tracked
+<code>.codegraph/config.json</code> intact (own-org includes + §11.4.10
+credential excludes present — NOT a config regression). Logs:
+<code>qa-results/codegraph_index_*.log</code>,
+<code>codegraph_recover_*.log</code>;
+<code>docs/codegraph/Status.md</code> 2026-05-29 entry. <strong>Root
+cause:</strong> UNCONFIRMED (§11.4.6) — 0.9.7
+<code>index</code>/<code>sync</code> terminate without diagnostic on
+this 76k-file repo; whether stability bug / submodule-traversal change /
+config-schema change is undetermined. <strong>Composes-with:</strong>
+§11.4.78, §11.4.79, §11.4.80, §11.4.6, §11.4.101, HXC-017.</p>
+<hr />
+<h2
+id="hxc-034-cascade-constitution-11.4.102-into-owned-submodules-implement-cm-covenant-114-102-propagation-gate-closed-fixed.md">HXC-034
+— Cascade constitution §11.4.102 into owned submodules + implement
+CM-COVENANT-114-102-PROPAGATION gate — CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record.</p>
+<hr />
+<h2
+id="hxc-036-systemic-const-046-i18n-defect-74-packages-emitted-raw-message-id-keys-because-boot-time-translator-wiring-was-never-implemented-closed-fixed.md">HXC-036
+— Systemic CONST-046 i18n defect: 74 packages emitted raw message-ID
+keys because boot-time translator wiring was never implemented — CLOSED
+(→ Fixed.md)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record. <strong>Closure
+(2026-05-29, Option A boot-wiring, 4 phases):</strong> the CONST-046
+migration built 74 <code>SetTranslator</code> seams + bundles but never
+wired a real translator at boot (0 <code>.SetTranslator(</code> call
+sites module-wide). Fix: per-package <code>bundle.go</code>
+(<code>//go:embed active.en.yaml</code> →
+<code>i18n.NewBundle</code>/<code>Localizer</code> →
+<code>i18nadapter.New</code>) + central
+<code>internal/i18nwiring.WireAll()</code> (63 internal pkgs
+incl. shared <code>internal/workflow/i18n</code>) called at boot + in
+integration <code>TestMain</code>; 9 <code>package main</code> binaries
+self-wire via <code>cmd/&lt;m&gt;/i18n_boot_wire.go</code> init().
+VERIFIED: the 3 originally-failing integration tests PASS with resolved
+interpolated text; <code>WireAll()</code> returns nil at
+<strong>74/74</strong>; resolved-text captured for askuser (“Enter
+choice [1-3]:”), approval, auth, llm, config, cli (“Inspect or run
+user-defined Markdown slash commands”), autonomy (“Full Auto (Fully
+Autonomous)”), planmode (“Score: 87.5/100”); paired-mutation proven (no
+WireAll → raw keys → FAIL). Evidence docs/qa/HXC-036/phase{1,2,3,4}/.
+Commits f3b864f4 (P1) + 31c57a2a (P2, 70 pkgs) + 1ea79fd2 (P3, 9 mains)
++ d570b05e (P4, autonomy/planmode).</p>
+<hr />
+<h2
+id="hxc-035-post-apiv1authregister-returns-400-internal_auth_failed_create_user-on-the-live-server-blocks-all-authenticated-flows-closed-fixed.md">HXC-035
+— <code>POST /api/v1/auth/register</code> returns 400
+<code>internal_auth_failed_create_user</code> on the live server (blocks
+all authenticated flows) — CLOSED (→ Fixed.md)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) — see
+<code>docs/Fixed.md</code> for the full closure record. <strong>Closure
+(2026-05-29, systematic-debugging per §11.4.102):</strong> ROOT CAUSE
+(confirmed via direct psql INSERT →
+<code>ERROR: column "display_name" of relation "users" does not exist</code>):
+<code>createSchemaSQL</code>‘s <code>CREATE TABLE users</code> omitted
+<code>display_name</code>, while the compensating
+<code>ALTER TABLE … ADD display_name</code> migration in
+<code>InitializeSchema()</code> runs ONLY in the
+<code>if schemaExists</code> branch — so a FRESH DB takes the
+<code>else</code> path, creates <code>users</code> without
+<code>display_name</code>, and <code>auth_db.CreateUser</code>’s INSERT
+fails (error swallowed by the i18n translator into the generic 400).
+FIX: added <code>display_name VARCHAR(255)</code> to
+<code>helix_code/internal/database/database.go</code>
+<code>createSchemaSQL</code>. VERIFIED: fixed server → register
+<code>HTTP 201</code> (was 400) + login → valid session token (evidence
+docs/qa/HXC-035/fix-verification.txt). Unblocks the HXC-029 banks’
+authenticated-positive paths. <strong>Type:</strong> Bug
+<strong>Severity:</strong> High (no user can register → no JWT mintable
+→ every authenticated API path is undrivable; blocks the positive-path
+coverage of all 4 HXC-029 API banks) <strong>Discovered:</strong>
+2026-05-29 (surfaced by HXC-029 bank verification against the live
+server) <strong>Discovered-By:</strong> AI <strong>Evidence:</strong>
+Against the live HelixCode server (real PG+Redis on :8080, schema
+freshly created), <code>POST /api/v1/auth/register</code> with a
+well-formed body returns HTTP 400
+<code>internal_auth_failed_create_user</code>. Reproduced across all 4
+HXC-029 API-bank verification runs
+(entity-management/admin-operations/security-validation/full-qa-api each
+had to <code>_skip</code> their authenticated-positive paths with
+<code>#HXC-029-REGISTER-BROKEN</code>). Captured in
+docs/qa/HXC-029/*/endpoint-probes.txt. <strong>Root cause:</strong>
+PENDING_FORENSICS — being root-caused now via
+<code>superpowers:systematic-debugging</code> per §11.4.102 (the
+create-user DB write fails; need the auth handler + DB-layer forensic to
+determine why: schema mismatch / constraint / missing migration /
+password-hash error). <strong>Composes-with:</strong> §11.4.102
+(mandatory systematic-debugging), §11.4.98 (it blocks live-test positive
+paths), HXC-029.</p>
+<hr />
+<p>*Last updated: 2026-05-29 — filed HXC-035 (POST /auth/register 400
+internal_auth_failed_create_user — High, systematic-debugging in
+progress per §11.4.102); HXC-029 now 4/18 banks verified (full-qa-api +
+entity-management + admin-operations + security-validation, each
+3×+mutation vs live server); filed HXC-034 (cascade constitution
+§11.4.102 into 68 owned submodules + gate — Task); constitution
+submodule §11.4.102 added+pushed (656b43a), meta pointer bumped; HXC-029
+full-qa-api bank verified (§11.4.98); HXC-030 §11.4.99 sweep COMPLETE
+(38/38). Prior: filed HXC-033 (codegraph 0.9.7 index/sync crash +
+§11.4.79 own-org regression — Operator-blocked); HXC-032 FIXED+closed
+(LLMOrchestrator conflict markers; submodule d3956ad, helix_agent
+builds); reclassified HXC-031 (CONST-052 renames RESOLVED/none-remain,
+only Codex/Cline ports remain); HXC-029 §11.4.98 2 confirmed violations
+fixed; HXC-030 §11.4.99 Go 1.24→1.26.3 + PG 14→15 doc reconciliation.
+Prior: filed HXC-029 (§11.4.98 forward sweep), HXC-030 (§11.4.99 forward
+sweep), HXC-031 (deferred rename/port long-tail) per operator “do it
+all”; added scripts/generate_{issues,fixed}_summary.sh + G12
+summary-freshness gate (§11.4.91/12). Previously: 2026-05-28 —
+constitution submodule pulled 7f738df→15cd4bc (§11.4.79–97);
+HXC-013..019,022 filed (open: SQLite-DB / stress+chaos / cross-platform
+/ submodule-cascade / codegraph-own-org / obsolete+summary-tooling /
+docs-qa / test_bank-noncompile); HXC-021 + HXC-014a + HXC-015a
+FIXED→Fixed.md (commit f464adb0 — fake-skip Assert(true) bluffs + empty
+stress stub → honest SKIP); CONST-052/HXC-001 leaf-rename programme
+COMPLETE (Phases 1-4), Phase 5 org-grouping dirs kept as namespace
+carve-outs per operator decision 2026-05-28 → HXC-001 closeable. Prior:
+2026-05-20 (round 463 — HXC-003 closed
+<code>Implemented (→ Fixed.md)</code> and migrated to
+<code>docs/Fixed.md</code>: the CONST-046 i18n migration campaign is
+concluded — the genuine user-facing (C) string-literal surface is
+exhausted across all 7 scope areas (helix_code
+<code>internal/</code>+<code>cmd/</code>+<code>applications/</code>,
+LLMsVerifier, helix_qa, all owned
+<code>vasic-digital/*</code>+<code>HelixDevelopment/*</code>
+submodules); ~91-462 rounds migrated tens of thousands of literals with
+paired-mutation anti-bluff tests; remaining ~55k audit hits are all out
+of CONST-046 scope per
+<code>docs/audits/2026-05-20-internal-const046-classification.md</code>.
+Open set is now HXC-001 (CONST-052 renames — Task, In progress) +
+HXC-010 (Kimi/Qwen codegraph e2e — Operator-blocked Task)). Previous
+round 402 — HXC-011 closed <code>Fixed (→ Fixed.md)</code>: the helix_qa
+runner’s <code>run</code> path on the <code>desktop</code> platform now
+genuinely executes a bank case’s <code>shell:</code> action via
+<code>os/exec</code>. Round 400 — speed-programme close-out: HXC-006
+closed <code>Implemented (→ Fixed.md)</code>. To update
+Issues_Summary.md mechanically, run
+<code>scripts/generate_issues_summary.sh</code> (TODO: create —
+currently this Issues.md is the source of truth and Summary is
+hand-maintained).* ## HXC-038 — docs_chain G14: fixed.yaml fixed_summary
+transform-contract mismatch + stale state.json baseline false-CONFLICT
+on issues context</p>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
+<strong>Severity:</strong> Medium <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>verify-all-constitution-rules.sh G14 (docs_chain verify –all) fails:
+(1) fixed.yaml fixed_summary node perpetually STALE because
+generate_fixed_summary.sh writes the file as a side-effect and prints a
+‘wrote …’ status line to stdout, while docs_chain captures stdout as
+content — content is correct+deterministic, the node I/O contract needs
+a stdout mode or a writes-file declaration; (2) issues context reports a
+§11.4.6 CONFLICT (both issues_md + items_db dirty vs stale state.json
+baseline) though MD⇄DB are verified byte-identical via db-to-md — needs
+a baseline refresh. governance context already in-sync this session.</p>
+<h2
+id="hxc-039-g7-11.4.83-docsqa-evidence-gap-8-past-featurefix-commits-lack-docsqa-directories">HXC-039
+— G7 §11.4.83 docs/qa evidence gap: 8 past feature/fix commits lack
+docs/qa/<run-id>/ directories</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<strong>Severity:</strong> Medium <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>verify-all-constitution-rules.sh G7 (enforcing) reports 8 feature/fix
+commits since baseline ed84f90e without a docs/qa/<run-id>/ evidence dir
+(81f3c482 deployment/perf, 83b2690a config var-expansion, d985e3ae
+worker consensus W6B, cee5cdae Phase-2 cascade, 5c5c44bc, c63c8963,
+3ce30285). Retro-adding to those commits needs history-rewrite which
+§11.4.113 forbids — operator decision on remediation (baseline reset vs
+documented exception). New work this session (HXC-037) ships its docs/qa
+evidence.</p>
+<h2
+id="hxc-051-helix_llm-helix_memory-go.mod-replace-directives-point-to-non-existent-....vasic-digital-sibling-layout-const-051c-dependency-layout">HXC-051
+— helix_llm + helix_memory go.mod replace directives point to
+non-existent ../../vasic-digital/* sibling layout (CONST-051(C)
+dependency-layout)</h2>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+<strong>Severity:</strong> Low <strong>Created-By:</strong> Claude
+<strong>Assigned-To:</strong> Claude</p>
+<p>Owned-submodule health sweep (D-2): helix_llm
+(internal/knowledge/embedding_providers.go) + helix_memory
+(pkg/provider/adapter.go) fail to build standalone because their go.mod
+‘replace’ directives target ../../vasic-digital/<Module> sibling dirs
+not materialized in the HelixCode layout. CONST-051(C) requires deps
+resolvable from the project root (submodules/<name>). The other 8/24
+packages build+test ok; only the replace-dep-needing packages fail.
+Investigation: confirm whether HelixCode’s build actually compiles these
+(vs reference/standalone), then rewire replace paths to the root
+submodule layout OR document the standalone-build requirement. Not
+breaking helix_code’s own build. Found by D-2 health sweep.</p>
+</body>
+</html>

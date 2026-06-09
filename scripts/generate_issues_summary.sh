@@ -11,11 +11,34 @@
 # body line (Closure/Evidence/Resolution), never from arbitrary prose, so a
 # regenerated row can never carry a §11.4.91 anti-pattern note.
 #
-# Idempotent. Usage: scripts/generate_issues_summary.sh [--check]
-#   (no args)  rewrite docs/Issues_Summary.md
+# Idempotent. Usage: scripts/generate_issues_summary.sh [--check | --stdout] [<in...> <outfile> [extra...]]
+#   (no args)  rewrite docs/Issues_Summary.md (+ a "wrote ..." status line)
 #   --check    exit 1 (and print a unified diff) if the on-disk summary differs
 #              from a fresh regeneration — the CM-ISSUES-SUMMARY-SYNC gate body.
+#   --stdout   emit ONLY the canonical summary content (no "wrote ..." status
+#              line) to the docs_chain-supplied output file (the LAST positional)
+#              when invoked by the engine, or to real stdout for ad-hoc use.
+#
+# The docs_chain exec-transform contract (internal/runner.execTransform) invokes
+# a transform as `script <input_files...> <output_file> <extra_args...>` and reads
+# the engine-supplied <output_file> back as the node content — it does NOT capture
+# stdout. Honoring that contract is the --stdout mode below; the default (no-flag)
+# file-writing + --check behavior is UNCHANGED for the existing script/gate
+# callers (HXC-038 pattern, mirroring scripts/generate_fixed_summary.sh).
 set -euo pipefail
+
+# --- Argument mode parsing -------------------------------------------------
+# Recognize --check / --stdout anywhere in the args; collect the remaining
+# positional args (docs_chain passes <input_files...> <output_file> [extra]).
+MODE="file"          # file | check | stdout
+POSITIONAL=()
+for arg in "$@"; do
+  case "$arg" in
+    --check)  MODE="check"  ;;
+    --stdout) MODE="stdout" ;;
+    *)        POSITIONAL+=("$arg") ;;
+  esac
+done
 
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 SRC="$ROOT/docs/Issues.md"
@@ -102,15 +125,34 @@ $ROWS
 EOF
 )"
 
-if [[ "${1:-}" == "--check" ]]; then
-  if ! diff -u <(printf '%s\n' "$NEW") "$OUT" >/tmp/issues_summary.diff 2>/dev/null; then
-    echo "CM-ISSUES-SUMMARY-SYNC: FAIL — docs/Issues_Summary.md is stale; run scripts/generate_issues_summary.sh" >&2
-    cat /tmp/issues_summary.diff >&2
-    exit 1
-  fi
-  echo "CM-ISSUES-SUMMARY-SYNC: PASS — summary in sync with Issues.md"
-  exit 0
-fi
-
-printf '%s\n' "$NEW" > "$OUT"
-echo "wrote $OUT ($TOTAL items: $OPEN open / $CLOSED closed)"
+case "$MODE" in
+  check)
+    if ! diff -u <(printf '%s\n' "$NEW") "$OUT" >/tmp/issues_summary.diff 2>/dev/null; then
+      echo "CM-ISSUES-SUMMARY-SYNC: FAIL — docs/Issues_Summary.md is stale; run scripts/generate_issues_summary.sh" >&2
+      cat /tmp/issues_summary.diff >&2
+      exit 1
+    fi
+    echo "CM-ISSUES-SUMMARY-SYNC: PASS — summary in sync with Issues.md"
+    exit 0
+    ;;
+  stdout)
+    # docs_chain derive-node contract: the LAST positional arg (if any) is the
+    # engine-supplied output file the node content is read back from; the
+    # preceding positionals are staged input files we don't need (SRC is read
+    # directly above). Write canonical content there — NO status line, NO write
+    # to docs/Issues_Summary.md (so verify never mutates the live artefact and is
+    # not polluted by a "wrote ..." status line). With no positionals, emit to
+    # real stdout for ad-hoc inspection.
+    if [[ ${#POSITIONAL[@]} -gt 0 ]]; then
+      OUTFILE="${POSITIONAL[${#POSITIONAL[@]}-1]}"
+      printf '%s\n' "$NEW" > "$OUTFILE"
+    else
+      printf '%s\n' "$NEW"
+    fi
+    exit 0
+    ;;
+  *)
+    printf '%s\n' "$NEW" > "$OUT"
+    echo "wrote $OUT ($TOTAL items: $OPEN open / $CLOSED closed)"
+    ;;
+esac
