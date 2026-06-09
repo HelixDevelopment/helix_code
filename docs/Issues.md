@@ -599,16 +599,6 @@ verify-all-constitution-rules.sh G14 (docs_chain verify --all) fails: (1) fixed.
 
 verify-all-constitution-rules.sh G7 (enforcing) reports 8 feature/fix commits since baseline ed84f90e without a docs/qa/<run-id>/ evidence dir (81f3c482 deployment/perf, 83b2690a config var-expansion, d985e3ae worker consensus W6B, cee5cdae Phase-2 cascade, 5c5c44bc, c63c8963, 3ce30285). Retro-adding to those commits needs history-rewrite which §11.4.113 forbids — operator decision on remediation (baseline reset vs documented exception). New work this session (HXC-037) ships its docs/qa evidence.
 
-## HXC-047 — internal/redis TestNewClient_WithDatabase needs-live-Redis with no SKIP-OK guard (§11.4.98) + i18n error no longer contains literal Redis
-
-**Status:** Queued
-**Type:** Task
-**Severity:** Low
-**Created-By:** Claude
-**Assigned-To:** Claude
-
-Hermetic unit run found this test silently depends on a live Redis at 127.0.0.1:6379 (no SKIP-OK §11.4.3/§11.4.98) AND asserts the error contains literal 'Redis' which the i18n-keyed error (internal_redis_failed_connect) no longer contains. Fix: SKIP-OK guard when no Redis + reconcile assertion. Evidence docs/qa/HXC-047/evidence.md (HEAD 54ab4e95).
-
 ## HXC-048 — helixcode-system.yaml HelixQA bank: 11 self-driving http cases for the non-auth server surface (health/server-info/system-status/llm-providers + negatives)
 
 **Status:** Queued

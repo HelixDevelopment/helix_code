@@ -219,3 +219,14 @@ Found by isolated-worktree full unit sweep (go test ./internal/... HEAD 54ab4e95
 
 Found by isolated-worktree full unit sweep (go test ./internal/... HEAD 54ab4e95, hermetic test, no infra). See docs/qa/HXC-044/evidence.md for the exact failing test + file:line + message. Genuine product defect reproducible deterministically.
 
+## HXC-047 — internal/redis TestNewClient_WithDatabase needs-live-Redis with no SKIP-OK guard (§11.4.98) + i18n error no longer contains literal Redis
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/qa/HXC-047/evidence.md
+**Severity:** Low
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+Hermetic unit run found this test silently depends on a live Redis at 127.0.0.1:6379 (no SKIP-OK §11.4.3/§11.4.98) AND asserts the error contains literal 'Redis' which the i18n-keyed error (internal_redis_failed_connect) no longer contains. Fix: SKIP-OK guard when no Redis + reconcile assertion. Evidence docs/qa/HXC-047/evidence.md (HEAD 54ab4e95).
+
