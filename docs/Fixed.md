@@ -321,3 +321,21 @@ Discovery sweep: leak_detector test exhibits non-deterministic PASS/FAIL under p
 
 Discovery sweep: formatters test relies on brittle 'cat --version' (§11.4.81 cross-platform), and committed go_hello fixture sources break a tree-wide go build; both need isolation/fixing. Open.
 
+## HXC-056 — 7 submodules: CONST-052 capitalised replace => ../PliniusCommon (dir is plinius_common)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-056/evidence.md
+**Severity:** Medium
+
+auto_temp, claritas, gandalf_solutions, hyper_tune, leak_hub, ouroborous, veritas each have go.mod line replace digital.vasic.pliniuscommon => ../PliniusCommon; capitalised dir absent, lowercase sibling plinius_common exists; go build ./... fails on all 7.
+
+## HXC-057 — recovery go.mod missing require+replace for digital.vasic.concurrency (pkg/breaker import unwired)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-057/evidence.md
+**Severity:** Medium
+
+recovery/pkg/breaker/breaker.go imports digital.vasic.concurrency/pkg/breaker but recovery/go.mod has no require/replace for the concurrency sibling; go build ./... fails: no required module provides package. Sibling submodules/concurrency provides pkg/breaker.
+

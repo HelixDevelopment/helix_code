@@ -589,22 +589,6 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 
 verify-all-constitution-rules.sh G7 (enforcing) reports 8 feature/fix commits since baseline ed84f90e without a docs/qa/<run-id>/ evidence dir (81f3c482 deployment/perf, 83b2690a config var-expansion, d985e3ae worker consensus W6B, cee5cdae Phase-2 cascade, 5c5c44bc, c63c8963, 3ce30285). Retro-adding to those commits needs history-rewrite which §11.4.113 forbids — operator decision on remediation (baseline reset vs documented exception). New work this session (HXC-037) ships its docs/qa evidence.
 
-## HXC-056 — 7 submodules: CONST-052 capitalised replace => ../PliniusCommon (dir is plinius_common)
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** Medium
-
-auto_temp, claritas, gandalf_solutions, hyper_tune, leak_hub, ouroborous, veritas each have go.mod line replace digital.vasic.pliniuscommon => ../PliniusCommon; capitalised dir absent, lowercase sibling plinius_common exists; go build ./... fails on all 7.
-
-## HXC-057 — recovery go.mod missing require+replace for digital.vasic.concurrency (pkg/breaker import unwired)
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** Medium
-
-recovery/pkg/breaker/breaker.go imports digital.vasic.concurrency/pkg/breaker but recovery/go.mod has no require/replace for the concurrency sibling; go build ./... fails: no required module provides package. Sibling submodules/concurrency provides pkg/breaker.
-
 ## HXC-058 — helix_agent go build fails on vendored third-party cli_agents/continue test fixture (quarantine)
 
 **Status:** Queued
