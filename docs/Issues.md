@@ -507,19 +507,6 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 
 ---
 
-## HXC-031 — Deferred long-tail: CONST-052 renames (RESOLVED — none remain) + Codex/Cline reference-agent ports
-
-**Status:** In progress
-**Type:** Task
-**Discovered:** 2026-05-29 (carried forward from HXC-001 deferral notes + Phase-3/5 backlog in docs/CONTINUATION.md)
-**Discovered-By:** AI
-**Rename-component RESOLVED (2026-05-29 — investigation, no guessing per §11.4.6):** the "deferred build-breaking renames" were stale CONTINUATION prose. On inspection there are NO owned-org renames genuinely left: `dependencies/HelixDevelopment/*` leaves are already lowercase snake_case (debate_orchestrator, doc_processor, helix_llm, helix_memory, helix_specifier, llm_orchestrator, llm_provider, llms_verifier, models, vision_engine); `dependencies/vasic-digital/*` has no PascalCase leaves; the only remaining PascalCase dirs (`HuggingFace_Hub`, `LLama_CPP`, `Ollama`) + the single remaining `Upstreams/` (`cli_agents/claude-code-source/`) are THIRD-PARTY (CONST-052-exempt vendor names); the parent org-grouping dirs `HelixDevelopment/` + `vasic-digital/` were intentionally kept as namespace carve-outs per HXC-001's operator decision. `scripts/const052_verify_refs.sh` CHECK 1/2 PASS (217 gitlinks resolve, no conflict gitlinks). HXC-001 leaf-rename programme is genuinely complete; nothing to do here.
-**Remaining scope:** port "Codex Multimodal" + "Cline Computer Use" reference agents (docs/CONTINUATION.md Phase-3 backlog) — genuine feature work, not started.
-**Closure criteria:** each agent port covered by tests + Challenge with captured evidence; all pushed per §11.4.71.
-**Composes-with:** CONST-052, HXC-001, §11.4.81, §11.4.101.
-
----
-
 ## HXC-032 — LLMOrchestrator submodule: committed merge-conflict markers break `helix_agent` build — CLOSED (→ Fixed.md)
 
 **Status:** Fixed (→ Fixed.md) — see `docs/Fixed.md` for the full closure record.
