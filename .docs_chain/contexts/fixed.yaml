@@ -1,0 +1,23 @@
+context: fixed
+description: >-
+  Closed-archive tracker chain (Fixed_Summary parity). Fixed_Summary.md is
+  regenerated from Fixed.md, with synchronized HTML + PDF exports.
+  Mandates: §11.4.53 (Fixed_Summary parity), §11.4.19 (column alignment).
+  Supersedes: generate_fixed_summary.sh, sync_issues_docs.sh (Fixed stage).
+nodes:
+  fixed_md:      { kind: markdown, path: docs/Fixed.md }
+  fixed_summary: { kind: summary,  path: docs/Fixed_Summary.md }
+  fixed_html:    { kind: html,     path: docs/Fixed.html }
+  fixed_pdf:     { kind: pdf,      path: docs/Fixed.pdf }
+  fsum_html:     { kind: html,     path: docs/Fixed_Summary.html }
+  fsum_pdf:      { kind: pdf,      path: docs/Fixed_Summary.pdf }
+edges:
+  - { type: derive-from, from: fixed_md,      to: fixed_summary, transform: gen-fixed-summary }
+  - { type: derive-from, from: fixed_md,      to: fixed_html,    transform: md-to-html }
+  - { type: derive-from, from: fixed_html,    to: fixed_pdf,     transform: html-to-pdf }
+  - { type: derive-from, from: fixed_summary, to: fsum_html,     transform: md-to-html }
+  - { type: derive-from, from: fsum_html,     to: fsum_pdf,      transform: html-to-pdf }
+transforms:
+  gen-fixed-summary: { exec: "scripts/generate_fixed_summary.sh" }
+  md-to-html:        { builtin: pandoc-html }
+  html-to-pdf:       { builtin: weasyprint-pdf }

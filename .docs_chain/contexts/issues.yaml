@@ -1,0 +1,30 @@
+context: issues
+description: >-
+  Workable-items tracker chain (DB single source of truth). Issues.md and
+  workable_items.db are bidirectional views of the same data; Issues_Summary.md
+  is generated from the Markdown; HTML + PDF exports are derived.
+  Mandates: §11.4.93 (DB single source of truth), §11.4.12 (Issues_Summary sync),
+  §11.4.95 (DB tracked + WAL-checkpoint). Supersedes: sync_issues_docs.sh,
+  generate_issues_summary.sh.
+nodes:
+  items_db:       { kind: sqlite,   path: docs/workable_items.db }
+  issues_md:      { kind: markdown, path: docs/Issues.md }
+  issues_summary: { kind: summary,  path: docs/Issues_Summary.md }
+  issues_html:    { kind: html,     path: docs/Issues.html }
+  issues_pdf:     { kind: pdf,      path: docs/Issues.pdf }
+  summary_html:   { kind: html,     path: docs/Issues_Summary.html }
+  summary_pdf:    { kind: pdf,      path: docs/Issues_Summary.pdf }
+edges:
+  - { type: sync, a: issues_md, b: items_db, authority: items_db,
+      transform_a_to_b: md-to-db, transform_b_to_a: db-to-md }
+  - { type: derive-from, from: issues_md,      to: issues_summary, transform: gen-issues-summary }
+  - { type: derive-from, from: issues_md,      to: issues_html,    transform: md-to-html }
+  - { type: derive-from, from: issues_html,    to: issues_pdf,     transform: html-to-pdf }
+  - { type: derive-from, from: issues_summary, to: summary_html,   transform: md-to-html }
+  - { type: derive-from, from: summary_html,   to: summary_pdf,    transform: html-to-pdf }
+transforms:
+  md-to-db:           { exec: "constitution/scripts/workable-items/bin/workable-items", args: ["sync", "md-to-db"] }
+  db-to-md:           { exec: "constitution/scripts/workable-items/bin/workable-items", args: ["sync", "db-to-md"] }
+  gen-issues-summary: { exec: "scripts/generate_issues_summary.sh" }
+  md-to-html:         { builtin: pandoc-html }
+  html-to-pdf:        { builtin: weasyprint-pdf }
