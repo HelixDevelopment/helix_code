@@ -7,7 +7,6 @@
   <title>Fixed</title>
   <style>
 
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
 div.column{flex: auto; overflow-x: auto;}
@@ -291,7 +290,7 @@ stale WAL) + <code>codegraph init</code> (tracked
 <strong>Result: Files 75,663 / Nodes 1,272,492</strong> (≈ HXC-017’s
 76,044/1.26M baseline; edges finalize async). <strong>§11.4.79
 anti-bluff probe PASS (<code>codegraph query</code>):</strong>
-<code>NewBundleTranslator</code>→<code>dependencies/HelixDevelopment/llm_orchestrator/pkg/i18n/bundle.go:34</code>
+<code>NewBundleTranslator</code>→<code>submodules/llm_orchestrator/pkg/i18n/bundle.go:34</code>
 + <code>dependencies/vasic-digital/...</code> (10 own-org hits);
 <code>EventBus</code> resolves; third-party
 <code>llama_model_load</code>@<code>LLama_CPP</code> empty (excluded).
@@ -363,9 +362,8 @@ stay ignored (<code>git check-ignore</code> verified). (3) Re-index
 624,103→<strong>1,255,974</strong>, Edges 1.64M→<strong>3.96M</strong>.
 <strong>§11.4.79 anti-bluff probe (conductor-independently-verified):
 <code>codegraph query EventBus</code> →
-<code>dependencies/vasic-digital/event_bus/pkg/bus/bus.go:85</code>;
-helix_memory →
-<code>dependencies/HelixDevelopment/helix_memory/...</code>; third-party
+<code>submodules/event_bus/pkg/bus/bus.go:85</code>; helix_memory →
+<code>submodules/helix_memory/...</code>; third-party
 <code>llama</code>→empty.</strong> (4) docs/codegraph/Status.md +
 Status_Summary.md created (§11.4.80; weekly automation
 inherited-by-reference from constitution
@@ -642,14 +640,13 @@ post-constitution-pull validation sweep</td>
 bumps</td>
 <td>Two pre-existing cascade-drift defects fixed. (a)
 <code>docs/improvements/submodule_owned.txt</code> line 10 referenced a
-non-existent <code>dependencies/HelixDevelopment/Models</code> path
-(post-CONST-052 batch-1 rename <code>a1ea3c8</code> lowercased it to
-<code>models</code>); corrected to
-<code>dependencies/HelixDevelopment/models</code>.
+non-existent <code>submodules/models</code> path (post-CONST-052 batch-1
+rename <code>a1ea3c8</code> lowercased it to <code>models</code>);
+corrected to <code>submodules/models</code>.
 <code>scripts/verify-governance-cascade.sh</code> re-run: the
-<code>FAIL: dependencies/HelixDevelopment/Models — path does not exist on disk</code>
-line is gone, now
-<code>PASS: dependencies/HelixDevelopment/models/{CONSTITUTION,CLAUDE,AGENTS}.md</code>.
+<code>FAIL: submodules/models — path does not exist on disk</code> line
+is gone, now
+<code>PASS: submodules/models/{CONSTITUTION,CLAUDE,AGENTS}.md</code>.
 (b) <code>helix_qa/CONSTITUTION.md</code> was missing anchors
 CONST-047..057 (CLAUDE.md/AGENTS.md already carried them) — cascaded the
 contiguous CONST-047..057 block from the meta-repo CONSTITUTION.md (217
@@ -682,7 +679,7 @@ Meta <code>.gitmodules</code> constitution pointer confirmed at
 <code>160000 commit 34a82b3859...</code>). Spot-check:
 <code>grep -c &quot;11.4.70\|11.4.74&quot;</code> returns 6 for
 <code>helix_qa/CLAUDE.md</code>,
-<code>dependencies/HelixDevelopment/LLMProvider/CLAUDE.md</code>,
+<code>submodules/llm_provider/CLAUDE.md</code>,
 <code>challenges/CLAUDE.md</code> — all carry §11.4.70-74. CONST-049
 step-4 multi-upstream reconciliation that kept this item
 <code>In progress</code> is itself closed (see HXC-009).</td>
@@ -1797,9 +1794,9 @@ helix_agent (round-342 HXA-002) + meta pointer-bump | Round-342 §11.4 /
 CONST-035. <strong>Investigation finding (operator’s explicit ask —
 moved vs deleted): GENUINELY DELETED, not moved.</strong>
 <code>git log</code> on <code>digital.vasic.debate</code>
-(<code>dependencies/HelixDevelopment/debate_orchestrator</code>) shows
-the orchestrator was rebuilt from scratch (commit <code>196d0ea</code>
-“initial DebateOrchestrator reconstruction (Phase 1)”);
+(<code>submodules/debate_orchestrator</code>) shows the orchestrator was
+rebuilt from scratch (commit <code>196d0ea</code> “initial
+DebateOrchestrator reconstruction (Phase 1)”);
 <code>git log --follow orchestrator/api.go</code> = single entry — the
 slim <code>CreateDebate</code>/<code>GetStatistics</code> API is the
 first and only version. Tree-wide <code>grep</code> of
