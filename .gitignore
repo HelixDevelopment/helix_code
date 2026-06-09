@@ -189,3 +189,7 @@ tools/codegraph/package-lock.json
 !/.codegraph/config.json
 !/.codegraph/.gitignore
 # === END CodeGraph incorporation ===
+
+# docs_chain runtime artifacts (§11.4.77) — contexts/*.yaml stay tracked
+.docs_chain/state.json
+*.docs_chain.tmp

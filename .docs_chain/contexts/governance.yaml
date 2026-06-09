@@ -1,0 +1,37 @@
+context: governance
+description: >-
+  Root consumer governance manuals -> html + pdf siblings (constitution
+  §11.4.65 universal-markdown-export, §11.4.75 sibling-check, mechanized by
+  §11.4.106 docs_chain). md is the source of truth; html derives from md,
+  pdf derives from html. Run `docs_chain verify --root . governance` as a
+  pre-build gate; `docs_chain sync --root . governance` to regenerate.
+nodes:
+  claude_md:   { kind: markdown, path: CLAUDE.md }
+  claude_html: { kind: html,     path: CLAUDE.html }
+  claude_pdf:  { kind: pdf,      path: CLAUDE.pdf }
+  agents_md:   { kind: markdown, path: AGENTS.md }
+  agents_html: { kind: html,     path: AGENTS.html }
+  agents_pdf:  { kind: pdf,      path: AGENTS.pdf }
+  const_md:    { kind: markdown, path: CONSTITUTION.md }
+  const_html:  { kind: html,     path: CONSTITUTION.html }
+  const_pdf:   { kind: pdf,      path: CONSTITUTION.pdf }
+  qwen_md:     { kind: markdown, path: QWEN.md }
+  qwen_html:   { kind: html,     path: QWEN.html }
+  qwen_pdf:    { kind: pdf,      path: QWEN.pdf }
+  crush_md:    { kind: markdown, path: CRUSH.md }
+  crush_html:  { kind: html,     path: CRUSH.html }
+  crush_pdf:   { kind: pdf,      path: CRUSH.pdf }
+edges:
+  - { type: derive-from, from: claude_md,  to: claude_html, transform: md2html }
+  - { type: derive-from, from: claude_html, to: claude_pdf, transform: html2pdf }
+  - { type: derive-from, from: agents_md,  to: agents_html, transform: md2html }
+  - { type: derive-from, from: agents_html, to: agents_pdf, transform: html2pdf }
+  - { type: derive-from, from: const_md,   to: const_html,  transform: md2html }
+  - { type: derive-from, from: const_html, to: const_pdf,   transform: html2pdf }
+  - { type: derive-from, from: qwen_md,    to: qwen_html,    transform: md2html }
+  - { type: derive-from, from: qwen_html,  to: qwen_pdf,     transform: html2pdf }
+  - { type: derive-from, from: crush_md,   to: crush_html,   transform: md2html }
+  - { type: derive-from, from: crush_html, to: crush_pdf,    transform: html2pdf }
+transforms:
+  md2html:  { builtin: pandoc-html }
+  html2pdf: { builtin: weasyprint-pdf }
