@@ -55,7 +55,8 @@
 | HXC-045 | internal/hooks: cancelled hook ExecutionResult leaves duration unset (should always be populated) | Bug | Queued |  | internal/hooks: cancelled hook ExecutionResult leaves duration unset (should always be populated) |
 | HXC-046 | internal/memory/providers: generateThreadID() non-unique under fast back-to-back calls (timestamp-only, same-nanosecond collision) | Bug | Queued |  | internal/memory/providers: generateThreadID() non-unique under fast back-to-back calls (timestamp-only, same-nanosecond collision) |
 | HXC-047 | internal/redis TestNewClient_WithDatabase needs-live-Redis with no SKIP-OK guard (§11.4.98) + i18n error no longer contains literal Redis | Task | Queued |  | internal/redis TestNewClient_WithDatabase needs-live-Redis with no SKIP-OK guard (§11.4.98) + i18n error no longer contains literal Redis |
+| HXC-048 | helixcode-system.yaml HelixQA bank: 11 self-driving http cases for the non-auth server surface (health/server-info/system-status/llm-providers + negatives) | Feature | Queued |  | helixcode-system.yaml HelixQA bank: 11 self-driving http cases for the non-auth server surface (health/server-info/system-status/llm-providers + negatives) |
 
-**Counts**: 49 tracked item-sections in `docs/Issues.md` — **8 open** (non-terminal status) / **41 closed** (terminal `(→ Fixed.md)` status; retained as §11.4.19 migration tombstones).
+**Counts**: 50 tracked item-sections in `docs/Issues.md` — **9 open** (non-terminal status) / **41 closed** (terminal `(→ Fixed.md)` status; retained as §11.4.19 migration tombstones).
 
 *Last regenerated: 2026-06-09 by `scripts/generate_issues_summary.sh`. HTML/PDF exports via `scripts/regenerate-tracker-exports.sh`.*
