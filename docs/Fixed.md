@@ -263,3 +263,32 @@ Owned-submodule health sweep found internal automation_test.go:140 os.ReadDir("U
 
 Owned-submodule health sweep found pkg/nats/integration_test.go:23,120 env-gated t.Skip (legitimately runs vs real NATS when NATS_URL is set) without literal SKIP-OK markers. Added 'SKIP-OK: #HXC-050 ...' to both; build+skip clean. Commit 1cae683.
 
+## HXC-052 — background_tasks go.mod build break — capitalised replace paths
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-052/evidence.md
+**Severity:** Medium
+
+submodules/background_tasks/go.mod replace directives pointed at ../Concurrency and ../Models which no longer exist after the CONST-052 lowercase rename; go build ./... failed until corrected to ../concurrency and ../models.
+
+## HXC-053 — conversation go.mod build break — capitalised replace path ../Messaging
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-053/evidence.md
+**Severity:** Medium
+
+submodules/conversation/go.mod line 24 replace digital.vasic.messaging pointed at ../Messaging (capitalised) which broke go build ./... after the CONST-052 lowercase rename; corrected to ../messaging.
+
+## HXC-038 — docs_chain G14: fixed.yaml fixed_summary transform-contract mismatch + stale state.json baseline false-CONFLICT on issues context
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-038/evidence.md
+**Severity:** Medium
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+verify-all-constitution-rules.sh G14 (docs_chain verify --all) fails: (1) fixed.yaml fixed_summary node perpetually STALE because generate_fixed_summary.sh writes the file as a side-effect and prints a 'wrote ...' status line to stdout, while docs_chain captures stdout as content — content is correct+deterministic, the node I/O contract needs a stdout mode or a writes-file declaration; (2) issues context reports a §11.4.6 CONFLICT (both issues_md + items_db dirty vs stale state.json baseline) though MD⇄DB are verified byte-identical via db-to-md — needs a baseline refresh. governance context already in-sync this session.
+
