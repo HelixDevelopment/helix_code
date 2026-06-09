@@ -421,3 +421,30 @@ internal/platforms/desktop.go:304 unconditional return nil makes lines 305+ dead
 
 internal/cognee TestProbeAMDGPU_HandlesAltKeyName + _GpuUtilization call queryAMDGPUUsage() which execs a fake rocm-smi via a 2s const timeout; under heavy batch/parallel host load the echo subprocess is signal-killed before completing → product correctly returns sentinel -1 but the parser tests assert 33/77 → non-deterministic FAIL. Product correct; test timeout load-fragile. Fix: make rocmSmiQueryTimeout an overridable var (prod default unchanged) + parser tests raise it.
 
+## HXC-065 — cache/pkg/postgres: finite-TTL Set invisible to immediate Get (expires_at clock/timezone skew vs real PG)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-065/evidence.md
+**Severity:** Medium
+
+digital.vasic.cache pkg/postgres integration_test.go:195 — a value Set with a finite TTL (200ms) returns empty on an immediate Get even before expiry, deterministic across -count=3 vs real booted PG. Siblings TestSetGet/Exists/ZeroTTL pass, so isolated to the finite-TTL expires_at WHERE-clause: likely Go-process time.Now() vs PG server now() timezone/clock skew making the just-written row appear already-expired. Real cache-backend correctness defect.
+
+## HXC-066 — inner internal/database integration tests hardcode localhost:5433/helix_test, never read HELIX_DATABASE_* env
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-066/evidence.md
+**Severity:** Low
+
+helix_code/internal/database/database_integration_test.go hardcodes Config{Host:localhost,Port:5433,User:helix_test,DBName:helix_test} (lines 19-20,43-46,330-333) with zero env sourcing; port 5433 closed → internal_database_ping_failed against booted PG (15432). DB layer sound (persistence passes). Harness defect: should read DB_*/HELIX_DATABASE_* env.
+
+## HXC-067 — inner internal/redis stress suite reads TEST_REDIS_HOST/PORT (default :6379) not HELIX_REDIS_HOST/PORT
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-067/evidence.md
+**Severity:** Low
+
+helix_code/internal/redis/redis_stress_test.go:38-39 reads TEST_REDIS_HOST/TEST_REDIS_PORT (default localhost:6379) instead of the standard HELIX_REDIS_HOST/HELIX_REDIS_PORT contract; causes false 100%-error FAIL against booted Redis on 16379. Pointed at TEST_REDIS_PORT=16379 it's GREEN. Env-var-contract inconsistency (harness).
+

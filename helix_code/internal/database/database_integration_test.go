@@ -5,6 +5,8 @@ package database
 
 import (
 	"context"
+	"os"
+	"strconv"
 	"testing"
 	"time"
 
@@ -12,16 +14,44 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestNew_Integration tests database connection with real PostgreSQL
-func TestNew_Integration(t *testing.T) {
-	config := Config{
-		Host:     "localhost",
-		Port:     5433,
-		User:     "helix_test",
-		Password: "test_password_secure_123",
-		DBName:   "helix_test",
+// testDBConfig builds the integration DB config from env (HXC-066), honouring
+// the standard DB_* / HELIX_DATABASE_* contract so the suite targets the booted
+// test PostgreSQL rather than a hardcoded localhost:5433. Defaults preserve the
+// historical legacy coordinates when no env is set.
+func testDBConfig() Config {
+	port := 5433
+	for _, k := range []string{"DB_PORT", "HELIX_DATABASE_PORT"} {
+		if v := os.Getenv(k); v != "" {
+			if p, err := strconv.Atoi(v); err == nil {
+				port = p
+				break
+			}
+		}
+	}
+	return Config{
+		Host:     firstEnv("DB_HOST", "HELIX_DATABASE_HOST", "localhost"),
+		Port:     port,
+		User:     firstEnv("DB_USER", "HELIX_DATABASE_USER", "helix_test"),
+		Password: firstEnv("DB_PASSWORD", "HELIX_DATABASE_PASSWORD", "test_password_secure_123"),
+		DBName:   firstEnv("DB_NAME", "HELIX_DATABASE_NAME", "helix_test"),
 		SSLMode:  "disable",
 	}
+}
+
+// firstEnv returns the first non-empty env value among keys[:len-1], else the
+// last element as the default.
+func firstEnv(keys ...string) string {
+	for _, k := range keys[:len(keys)-1] {
+		if v := os.Getenv(k); v != "" {
+			return v
+		}
+	}
+	return keys[len(keys)-1]
+}
+
+// TestNew_Integration tests database connection with real PostgreSQL
+func TestNew_Integration(t *testing.T) {
+	config := testDBConfig()
 
 	db, err := New(config)
 	require.NoError(t, err)
@@ -38,14 +68,7 @@ func TestNew_Integration(t *testing.T) {
 
 // TestInitializeSchema_Integration tests schema initialization
 func TestInitializeSchema_Integration(t *testing.T) {
-	config := Config{
-		Host:     "localhost",
-		Port:     5433,
-		User:     "helix_test",
-		Password: "test_password_secure_123",
-		DBName:   "helix_test",
-		SSLMode:  "disable",
-	}
+	config := testDBConfig()
 
 	db, err := New(config)
 	require.NoError(t, err)
@@ -97,14 +120,7 @@ func TestInitializeSchema_Integration(t *testing.T) {
 
 // TestInitializeSchema_AlreadyExists tests idempotent schema initialization
 func TestInitializeSchema_AlreadyExists(t *testing.T) {
-	config := Config{
-		Host:     "localhost",
-		Port:     5433,
-		User:     "helix_test",
-		Password: "test_password_secure_123",
-		DBName:   "helix_test",
-		SSLMode:  "disable",
-	}
+	config := testDBConfig()
 
 	db, err := New(config)
 	require.NoError(t, err)
@@ -122,14 +138,7 @@ func TestInitializeSchema_AlreadyExists(t *testing.T) {
 
 // TestClose_Integration tests closing database connection
 func TestClose_Integration(t *testing.T) {
-	config := Config{
-		Host:     "localhost",
-		Port:     5433,
-		User:     "helix_test",
-		Password: "test_password_secure_123",
-		DBName:   "helix_test",
-		SSLMode:  "disable",
-	}
+	config := testDBConfig()
 
 	db, err := New(config)
 	require.NoError(t, err)
@@ -145,14 +154,7 @@ func TestClose_Integration(t *testing.T) {
 
 // TestHealthCheck_Integration tests health check with real database
 func TestHealthCheck_Integration(t *testing.T) {
-	config := Config{
-		Host:     "localhost",
-		Port:     5433,
-		User:     "helix_test",
-		Password: "test_password_secure_123",
-		DBName:   "helix_test",
-		SSLMode:  "disable",
-	}
+	config := testDBConfig()
 
 	db, err := New(config)
 	require.NoError(t, err)
@@ -173,14 +175,7 @@ func TestHealthCheck_Integration(t *testing.T) {
 
 // TestGetDB_Integration tests getting standard sql.DB
 func TestGetDB_Integration(t *testing.T) {
-	config := Config{
-		Host:     "localhost",
-		Port:     5433,
-		User:     "helix_test",
-		Password: "test_password_secure_123",
-		DBName:   "helix_test",
-		SSLMode:  "disable",
-	}
+	config := testDBConfig()
 
 	db, err := New(config)
 	require.NoError(t, err)
@@ -205,14 +200,7 @@ func TestGetDB_Integration(t *testing.T) {
 
 // TestConnectionPool_Integration tests connection pool configuration
 func TestConnectionPool_Integration(t *testing.T) {
-	config := Config{
-		Host:     "localhost",
-		Port:     5433,
-		User:     "helix_test",
-		Password: "test_password_secure_123",
-		DBName:   "helix_test",
-		SSLMode:  "disable",
-	}
+	config := testDBConfig()
 
 	db, err := New(config)
 	require.NoError(t, err)
@@ -263,14 +251,7 @@ func TestNew_InvalidCredentials(t *testing.T) {
 
 // TestCRUD_Integration tests basic CRUD operations
 func TestCRUD_Integration(t *testing.T) {
-	config := Config{
-		Host:     "localhost",
-		Port:     5433,
-		User:     "helix_test",
-		Password: "test_password_secure_123",
-		DBName:   "helix_test",
-		SSLMode:  "disable",
-	}
+	config := testDBConfig()
 
 	db, err := New(config)
 	require.NoError(t, err)
@@ -325,14 +306,7 @@ func TestCRUD_Integration(t *testing.T) {
 
 // TestTransaction_Integration tests transaction support
 func TestTransaction_Integration(t *testing.T) {
-	config := Config{
-		Host:     "localhost",
-		Port:     5433,
-		User:     "helix_test",
-		Password: "test_password_secure_123",
-		DBName:   "helix_test",
-		SSLMode:  "disable",
-	}
+	config := testDBConfig()
 
 	db, err := New(config)
 	require.NoError(t, err)

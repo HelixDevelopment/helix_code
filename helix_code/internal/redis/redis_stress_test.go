@@ -33,11 +33,14 @@ import (
 // (§11.4.3) ONLY if Redis is genuinely unreachable. It never fakes a connection.
 func testClient(t *testing.T) *Client {
 	t.Helper()
+	// HXC-067: honour the standard HELIX_REDIS_* contract first, then the
+	// legacy TEST_REDIS_* names, then the default — so the suite targets the
+	// booted test Redis without a false 100%-error FAIL on a port mismatch.
 	cfg := &config.RedisConfig{
 		Enabled:  true,
-		Host:     envOr("TEST_REDIS_HOST", "localhost"),
-		Port:     envOrInt("TEST_REDIS_PORT", 6379),
-		Password: envOr("TEST_REDIS_PASSWORD", ""),
+		Host:     firstNonEmptyEnv("HELIX_REDIS_HOST", "TEST_REDIS_HOST", "localhost"),
+		Port:     firstNonEmptyEnvInt("HELIX_REDIS_PORT", "TEST_REDIS_PORT", 6379),
+		Password: firstNonEmptyEnv("HELIX_REDIS_PASSWORD", "TEST_REDIS_PASSWORD", ""),
 		Database: envOrInt("TEST_REDIS_DB", 0),
 	}
 	c, err := NewClient(cfg)
@@ -102,6 +105,35 @@ func envOr(k, d string) string {
 
 func envOrInt(k string, d int) int {
 	if v := os.Getenv(k); v != "" {
+		var n int
+		if _, err := fmt.Sscanf(v, "%d", &n); err == nil {
+			return n
+		}
+	}
+	return d
+}
+
+// firstNonEmptyEnv returns the first non-empty value among preferred, legacy,
+// else the default (HXC-067 — prefer the standard HELIX_REDIS_* contract).
+func firstNonEmptyEnv(preferred, legacy, d string) string {
+	if v := os.Getenv(preferred); v != "" {
+		return v
+	}
+	if v := os.Getenv(legacy); v != "" {
+		return v
+	}
+	return d
+}
+
+// firstNonEmptyEnvInt is the int form of firstNonEmptyEnv.
+func firstNonEmptyEnvInt(preferred, legacy string, d int) int {
+	if v := os.Getenv(preferred); v != "" {
+		var n int
+		if _, err := fmt.Sscanf(v, "%d", &n); err == nil {
+			return n
+		}
+	}
+	if v := os.Getenv(legacy); v != "" {
 		var n int
 		if _, err := fmt.Sscanf(v, "%d", &n); err == nil {
 			return n
