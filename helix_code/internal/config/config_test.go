@@ -129,7 +129,13 @@ server:
 	os.Chdir(tempDir)
 
 	found := findConfigFile()
-	assert.Equal(t, configPath, found)
+	// §11.4.81 macOS: /var is a symlink to /private/var; resolve both sides
+	// before comparing so the test is platform-neutral.
+	resolvedExpected, err := filepath.EvalSymlinks(configPath)
+	require.NoError(t, err)
+	resolvedFound, err := filepath.EvalSymlinks(found)
+	require.NoError(t, err)
+	assert.Equal(t, resolvedExpected, resolvedFound)
 }
 
 func TestCreateDefaultConfig(t *testing.T) {
