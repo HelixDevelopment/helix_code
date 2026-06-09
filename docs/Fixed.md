@@ -339,3 +339,12 @@ auto_temp, claritas, gandalf_solutions, hyper_tune, leak_hub, ouroborous, verita
 
 recovery/pkg/breaker/breaker.go imports digital.vasic.concurrency/pkg/breaker but recovery/go.mod has no require/replace for the concurrency sibling; go build ./... fails: no required module provides package. Sibling submodules/concurrency provides pkg/breaker.
 
+## HXC-058 — helix_agent go build fails on vendored third-party cli_agents/continue test fixture (quarantine)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/qa/HXC-058/evidence.md
+**Severity:** Low
+
+helix_agent go build ./... fails ONLY in vendored third-party cli_agents/continue/ subtree (upstream continue project test fixture with bogus relative import); no owned dev.helix.agent package fails; needs build-exclusion/quarantine of the vendored fixture subtree, not an owned-code fix.
+

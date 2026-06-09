@@ -589,11 +589,3 @@ Operator supplied OpenAI-compatible router credentials (2026-05-21). Both `cg-ch
 
 verify-all-constitution-rules.sh G7 (enforcing) reports 8 feature/fix commits since baseline ed84f90e without a docs/qa/<run-id>/ evidence dir (81f3c482 deployment/perf, 83b2690a config var-expansion, d985e3ae worker consensus W6B, cee5cdae Phase-2 cascade, 5c5c44bc, c63c8963, 3ce30285). Retro-adding to those commits needs history-rewrite which §11.4.113 forbids — operator decision on remediation (baseline reset vs documented exception). New work this session (HXC-037) ships its docs/qa evidence.
 
-## HXC-058 — helix_agent go build fails on vendored third-party cli_agents/continue test fixture (quarantine)
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** Low
-
-helix_agent go build ./... fails ONLY in vendored third-party cli_agents/continue/ subtree (upstream continue project test fixture with bogus relative import); no owned dev.helix.agent package fails; needs build-exclusion/quarantine of the vendored fixture subtree, not an owned-code fix.
-
