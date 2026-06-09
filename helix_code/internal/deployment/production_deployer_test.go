@@ -1605,11 +1605,14 @@ func TestExecutePerformanceCheck(t *testing.T) {
 	t.Run("PerformanceCheck_Enabled_Failed_Throughput", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:            "test-project",
-			BinaryPath:   "/tmp/helixcode-test-binary",
+			BinaryPath:             "/tmp/helixcode-test-binary",
 			PerformanceGateEnabled: true,
 			TargetServers:          []string{"server1"},
 			PerformanceGateStatus: PerformanceGateStatus{
-				ThroughputTarget: 100000, // Very high threshold - will fail
+				// 1<<50 (~1.1e15 ops/sec) is mathematically unattainable: the benchmark
+			// runs exactly 10_000 iterations, so even with elapsed=1ns (hardware floor)
+			// max throughput = 10_000/1e-9 = 1e13, safely below 1<<50.
+				ThroughputTarget: 1 << 50,
 				LatencyTarget:    "500ms",
 				CPUTarget:        90.0,
 				MemoryTarget:     8 * 1024 * 1024 * 1024,
@@ -1632,14 +1635,17 @@ func TestExecutePerformanceCheck(t *testing.T) {
 	t.Run("PerformanceCheck_Enabled_Failed_Latency", func(t *testing.T) {
 		config := &DeploymentConfig{
 			ProjectName:            "test-project",
-			BinaryPath:   "/tmp/helixcode-test-binary",
+			BinaryPath:             "/tmp/helixcode-test-binary",
 			PerformanceGateEnabled: true,
 			TargetServers:          []string{"server1"},
 			PerformanceGateStatus: PerformanceGateStatus{
 				ThroughputTarget: 100,
-				LatencyTarget:    "1ms", // Very low threshold - will fail
-				CPUTarget:        90.0,
-				MemoryTarget:     8 * 1024 * 1024 * 1024,
+				// "1ns" is below any real benchmark latency (benchmark does 10_000
+				// integer ops; even at peak speed elapsed >= ~1µs), so this reliably
+				// forces a latency-gate failure against the real implementation.
+				LatencyTarget: "1ns",
+				CPUTarget:     90.0,
+				MemoryTarget:  8 * 1024 * 1024 * 1024,
 			},
 		}
 
