@@ -107,9 +107,25 @@ func TestNewClient_WithDatabase(t *testing.T) {
 	if err != nil {
 		// Redis isn't running locally — that's expected in unit-test mode.
 		// Assert the documented failure-mode contract: nil client + a
-		// descriptive error that mentions Redis (not some other backend).
+		// descriptive error that identifies the Redis backend.
+		//
+		// HXC-047 reconcile (§11.4.120): the package is CONST-046-migrated
+		// (round-173). NewClient surfaces the connect failure via the i18n
+		// message-ID `internal_redis_failed_connect` (redis.go:47). Under the
+		// NoopTranslator used in unit tests the message-ID is echoed loud, so
+		// the error text is `internal_redis_failed_connect: dial tcp ...` —
+		// it does NOT contain the literal "Redis". Asserting on the stable
+		// message-ID (as the sibling TestNewClient_InvalidConfig /
+		// _InvalidPort tests already do) reconciles the assertion to the real
+		// contract instead of the pre-i18n literal. The assertion stays
+		// meaningful: it still pins the error to the Redis connect path.
 		assert.Nil(t, client, "NewClient must return nil client when connection fails")
-		assert.Contains(t, err.Error(), "Redis", "error must identify Redis as the failing backend")
+		assert.Contains(t, err.Error(), "internal_redis_failed_connect",
+			"error must identify the Redis connect-failure via its CONST-046 message-ID")
+		// The success path below needs a live Redis to exercise. Without one
+		// it cannot run — that is an honest SKIP, not a silent PASS, per
+		// §11.4.98 / §11.4.3.
+		t.Skip("SKIP-OK: #HXC-047 no live Redis at 127.0.0.1:6379 — success path (db-15 ping) not exercisable")
 		return
 	}
 	// Redis was reachable: client must be usable and configured for db 15.
