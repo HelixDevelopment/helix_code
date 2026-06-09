@@ -362,12 +362,57 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("failed to unmarshal config: %v", err)
 	}
 
+	// Expand ${VAR:default} / ${VAR:-default} shell-style placeholders that
+	// Viper leaves as literal strings when the env var is unset.
+	// Scope: only the string fields that are known to carry such literals in
+	// config YAML (Redis host, Database host/user/dbname, Server address).
+	expandShellDefaults(&cfg)
+
 	// Validate config
 	if err := validateConfig(&cfg); err != nil {
 		return nil, fmt.Errorf("config validation failed: %v", err)
 	}
 
 	return &cfg, nil
+}
+
+// expandShellDefaults expands ${VAR:default} and ${VAR:-default} shell-style
+// placeholders in config string fields.  Viper does NOT perform this expansion
+// itself: when HELIX_REDIS_HOST is unset, BindEnv falls through to the YAML
+// value which is the raw literal "${HELIX_REDIS_HOST:redis}".
+//
+// Resolver behaviour (mirrors bash default-value syntax):
+//   - ${VAR}          → os.Getenv("VAR"), or "" if unset
+//   - ${VAR:default}  → os.Getenv("VAR") if non-empty, else "default"
+//   - ${VAR:-default} → os.Getenv("VAR") if non-empty, else "default"
+//
+// Only fields that may legitimately contain ${…} placeholders are expanded;
+// all other string config fields are left untouched.
+func expandShellDefaults(cfg *Config) {
+	expand := func(s string) string {
+		return os.Expand(s, func(key string) string {
+			// Strip the optional ":-" or ":" separator and default token.
+			// Find the first ':' that is the separator (not part of the var name).
+			sep := strings.Index(key, ":")
+			if sep == -1 {
+				// Plain ${VAR}
+				return os.Getenv(key)
+			}
+			varName := key[:sep]
+			// Support both ${VAR:-default} and ${VAR:default}.
+			defaultVal := strings.TrimPrefix(key[sep+1:], "-")
+			if val := os.Getenv(varName); val != "" {
+				return val
+			}
+			return defaultVal
+		})
+	}
+
+	cfg.Redis.Host = expand(cfg.Redis.Host)
+	cfg.Database.Host = expand(cfg.Database.Host)
+	cfg.Database.User = expand(cfg.Database.User)
+	cfg.Database.DBName = expand(cfg.Database.DBName)
+	cfg.Server.Address = expand(cfg.Server.Address)
 }
 
 // setDefaultsOn sets default configuration values on the given viper

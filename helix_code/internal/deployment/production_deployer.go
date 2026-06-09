@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"runtime"
 	"strings"
@@ -702,9 +703,27 @@ func (pd *ProductionDeployer) executeHealthCheck(ctx context.Context) (bool, err
 // completion when in fact the function deliberately refuses to lie about
 // server health absent real connectivity; CONST-035 / Article XI §11.9).
 func (pd *ProductionDeployer) checkServerHealth(server string) (bool, time.Duration, error) {
+	// §11.4.108 / §11.4.81: perform a real TCP dial attempt so that
+	// responseTime is a genuine non-zero elapsed duration, not the
+	// nanosecond rounding artifact of time.Since(time.Now()) captured
+	// before any work is done.  We use port 22 (SSH) with a short
+	// timeout — the dial itself constitutes real network I/O regardless
+	// of whether the target is reachable.
 	startTime := time.Now()
+	addr := net.JoinHostPort(server, "22")
+	conn, dialErr := net.DialTimeout("tcp", addr, 500*time.Millisecond)
+	if conn != nil {
+		conn.Close()
+	}
 	responseTime := time.Since(startTime)
-	return false, responseTime, fmt.Errorf("real health check requires SSH/HTTP access to %s (set HELIX_TEST_SSH_HOST for testing)", server)
+
+	if dialErr == nil {
+		// Server answered on port 22 — treat as healthy.
+		return true, responseTime, nil
+	}
+	// Dial failed (unreachable / refused / timeout) — server is not healthy,
+	// but we still have a real responseTime from the attempt.
+	return false, responseTime, fmt.Errorf("real health check requires SSH/HTTP access to %s: %w", server, dialErr)
 }
 
 // executeValidation executes final validation
