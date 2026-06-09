@@ -12,4 +12,4 @@
 
 **Total closed items**: 113 (counted directly from the `docs/Fixed.md` closure table).
 
-*Last regenerated: 2026-05-29 by `scripts/generate_fixed_summary.sh`. HTML/PDF exports via `scripts/regenerate-tracker-exports.sh`.*
+*Last regenerated: 2026-06-09 by `scripts/generate_fixed_summary.sh`. HTML/PDF exports via `scripts/regenerate-tracker-exports.sh`.*

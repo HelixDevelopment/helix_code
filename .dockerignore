@@ -1,0 +1,71 @@
+# .dockerignore — keep the Docker/Podman build context small.
+# Root cause of prior boot failure (2026-06-09): no .dockerignore meant
+# `context: .` copied the whole repo (~20G: .git 16G + .codegraph 4.1G +
+# 126 submodules) into the VM builder (8.4G free) -> "no space left on device".
+# The Dockerfile only needs helix_code/ source (+ any replace-dep submodules).
+
+# Version control & code-intelligence DB (huge, never needed in image)
+.git
+.gitmodules
+.codegraph
+.docs_chain/state.json
+
+# Build artifacts / outputs (regenerated)
+bin
+dist
+out
+**/bin
+**/dist
+**/out
+qa-results
+*.log
+
+# Generated governance/doc exports (large binaries, not build inputs)
+*.pdf
+*.html
+*.docx
+
+# Reference/third-party submodule trees not needed to build helixcode
+cli_agents
+cli_agents_resources
+dependencies
+mcp_servers
+awesome-ai-memory
+github_pages_website
+
+# helix_code/go.mod replaces ~15 owned Go modules under submodules/ — those are
+# KEPT, but their heavy non-Go bulk is not needed to compile and blows the build
+# context past the VM disk. helix_agent is NOT a replace target -> drop entirely.
+submodules/helix_agent
+**/tools/opensource
+**/challenges/scripts
+**/banks
+**/*.ipynb
+**/.git
+**/testdata
+**/test-fixtures
+
+# Language/tooling caches
+node_modules
+**/node_modules
+__pycache__
+**/__pycache__
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.gradle
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.idea
+.vscode
+.history
+
+# Secrets must never enter an image (CONST-042)
+.env
+**/.env
+*.pem
+*.key
+id_rsa*
+id_ed25519*

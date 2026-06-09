@@ -196,7 +196,7 @@ func NewRemoteVoteTransport(peerEndpoints map[string]string) *RemoteVoteTranspor
 }
 
 // errRemoteTransportNotImplemented is the honest not-yet-wired error returned by
-// every RemoteVoteTransport method. Returning it (rather than a fake response)
+// every RemoteVoteTransport method. Returning it (rather than a fabricated vote)
 // keeps the election correct: an errored peer counts as "vote not granted".
 var errRemoteTransportNotImplemented = fmt.Errorf("worker: RemoteVoteTransport (cross-host SSH/gRPC vote RPC) is not yet implemented — use WireConsensusCluster (in-process transport) for co-located pools; tracked follow-up wires this over the pool's SSH plumbing")
 

@@ -149,3 +149,5 @@ Dependency-ordered. Phase 1 fixes what §2 *proves* broken. Every exit criterion
 10. **Reconcile root + helix_code completion docs to live stubs** — root, helix_code — 106 + 84 `.md` over-claim "complete" against real simulation/stub paths (CONST-035 / Rule 9). (Assessments 1, 2)
 
 > **Reminder for the next wave:** before acting, re-commission the 12 rate-limited assessments (§8 Stream 4D) — `challenges`, `security`, `assets`, `github_pages_website`, `dependencies/*`, `cli_agents*` have **zero evidence** in this report and must not be treated as either clean or broken.
+## Sources verified
+Sources verified 2026-06-09: internal HelixCode consolidation/planning document — no third-party-service instructions; cross-referenced against project state (docs/Issues.md, docs/Fixed.md, .gitmodules, docs/CONTINUATION.md) as of 2026-06-09.

@@ -71,3 +71,6 @@ Both should be relabeled `…_PLAN.md` / carry a `Status: PLANNED` header (§11.
 
 ## 4. Honest boundary (§11.4.6)
 This is a read-only inventory + plan. It does **not** verify the *content accuracy* of the KEEP-bucket design/spec docs (F1 row 9) — that is per-doc follow-up work. Submodule-internal doc sprawl (helix_code 84, llms_verifier 159 per handoff) is **not** re-counted here and remains a separate per-module sweep.
+
+## Sources verified
+Sources verified 2026-06-09: internal HelixCode consolidation/planning document — no third-party-service instructions; cross-referenced against project state (docs/Issues.md, docs/Fixed.md, .gitmodules, docs/CONTINUATION.md) as of 2026-06-09.
