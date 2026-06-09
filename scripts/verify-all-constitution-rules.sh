@@ -48,6 +48,12 @@
 #                                    `## Sources verified` footer (advisory
 #                                    coverage report; sources_verified_gate.sh;
 #                                    --enforce blocks at 100% per HXC-030)
+#   G14 §11.4.106 docs_chain verify  — governance docs tree in-sync
+#                                    (md→html→pdf hashes checked by the
+#                                    docs_chain engine via `verify --all`);
+#                                    SKIP-with-reason if engine absent;
+#                                    uses `go run` fallback so no pre-built
+#                                    binary required
 #
 # Per CONST-055 anti-bluff: this sweep MUST be paired with a meta-test
 # that plants a known violation per gate and asserts the sweep reports
@@ -462,6 +468,55 @@ if want_gate G13; then
     else
         gate_fail G13 "operator-facing doc(s) lack a §11.4.99 Sources-verified footer (see /tmp/g13-sv.out)" \
             "$(grep -E '    - |FAIL' /tmp/g13-sv.out | head -8)"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# G14 — §11.4.106 docs_chain verify — governance docs tree in-sync
+# ---------------------------------------------------------------------------
+if want_gate G14; then
+    GATES_RUN=$((GATES_RUN + 1))
+    gate_header "G14 — §11.4.106 docs_chain verify (CM-COVENANT-114-106-PROPAGATION)"
+
+    # Locate the docs_chain engine.  Strategy (in order of preference):
+    #   1. Pre-built binary at .docs_chain/bin/docs_chain (optional, fast)
+    #   2. `docs_chain` on PATH (if globally installed)
+    #   3. go run ../docs_chain/cmd/docs_chain  (sibling project — no prebuilt needed)
+    # If NONE is available: honest SKIP-with-reason per §11.4.3 + §11.4.106.
+    # NEVER fake-pass when the tool is absent (§11.4.106 anti-bluff invariant).
+    DC_CMD=""
+    DC_ROOT_ARGS=(--root "$ROOT")
+
+    if [[ -x "$ROOT/.docs_chain/bin/docs_chain" ]]; then
+        DC_CMD="$ROOT/.docs_chain/bin/docs_chain"
+    elif command -v docs_chain &>/dev/null; then
+        DC_CMD="docs_chain"
+    elif [[ -f "$ROOT/../docs_chain/cmd/docs_chain/main.go" ]]; then
+        # go run path — build into a temp binary so we can time it once per sweep
+        _dc_tmp="/tmp/_docs_chain_gate14"
+        if go build -o "$_dc_tmp" "$ROOT/../docs_chain/cmd/docs_chain" 2>/tmp/g14-build.log; then
+            DC_CMD="$_dc_tmp"
+        else
+            gate_fail G14 \
+                "docs_chain build from sibling ../docs_chain failed (see /tmp/g14-build.log)" \
+                "run: cd /Volumes/T7/Projects/docs_chain && go build -o /tmp/docs_chain ./cmd/docs_chain"
+        fi
+    fi
+
+    if [[ -z "$DC_CMD" ]]; then
+        # SKIP-with-reason: engine not available — do NOT fake-pass (§11.4.106 §11.4.3)
+        GATE_RESULTS+=("G14|SKIP|docs_chain engine absent (not on PATH, no sibling ../docs_chain, no .docs_chain/bin/docs_chain) — SKIP-OK: install engine to enforce §11.4.106")
+        [[ "$QUIET" -eq 0 ]] && echo "  SKIP (G14): docs_chain engine absent — §11.4.106 cannot be mechanically enforced until engine is installed. SKIP-OK: §11.4.3"
+    else
+        if "$DC_CMD" verify --all "${DC_ROOT_ARGS[@]}" >/tmp/g14-verify.log 2>&1; then
+            gate_pass G14 \
+                "docs_chain contexts all in-sync (governance md→html→pdf hashes verified)"
+        else
+            gate_fail G14 \
+                "docs_chain verify --all reported drift or error — run: docs_chain sync --all --root . (see /tmp/g14-verify.log)" \
+                "$(tail -6 /tmp/g14-verify.log)"
+            cat /tmp/g14-verify.log >&2
+        fi
     fi
 fi
 

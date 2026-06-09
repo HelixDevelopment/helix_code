@@ -2,6 +2,7 @@ package voice
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -20,8 +21,8 @@ func TestVoiceRecorder_StartStop(t *testing.T) {
 
 	err := rec.Start(path)
 	if err != nil {
-		if err == ErrNoMicrophone {
-			t.Skip("SKIP-OK: no microphone available")
+		if errors.Is(err, ErrNoMicrophone) {
+			t.Skip("SKIP-OK: no microphone available (arecord/sox/parec absent on this host) — §11.4.3")
 		}
 		t.Fatalf("Start: %v", err)
 	}
@@ -55,8 +56,8 @@ func TestVoiceRecorder_AlreadyRecording(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "dbl.wav")
 
 	err := rec.Start(path)
-	if err == ErrNoMicrophone {
-		t.Skip("SKIP-OK: no microphone")
+	if errors.Is(err, ErrNoMicrophone) {
+		t.Skip("SKIP-OK: no microphone available (arecord/sox/parec absent on this host) — §11.4.3")
 		return
 	}
 	require.NoError(t, err)

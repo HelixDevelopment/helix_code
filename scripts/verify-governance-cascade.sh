@@ -16,21 +16,40 @@ CONST057_ANCHOR="CONST-057"
 CONST058_ANCHOR="CONST-058"
 CONST059_ANCHOR="CONST-059"
 
-# Covenant-114 propagation anchors (§11.4.69, §11.4.75..§11.4.99, §11.4.101) — see §11.4.32
-# / CONST-055. Literal form = "## §11.4.NN —" (the H2 HEADING marker). The
-# leading "## " is MANDATORY: it ensures we match the anchor's own HEADING, not
-# a cross-reference to §11.4.NN inside another anchor's body (e.g. the §11.4.93
-# block body cites "§11.4.95 —" — without the "## " prefix that would falsely
-# satisfy the §11.4.95 check). The trailing " — " also guards prefix collisions
-# (§11.4.8 vs §11.4.84/87, §11.4.9 vs §11.4.90..97, §11.4.7 vs §11.4.75..78).
+# Covenant-114 propagation anchors (§11.4.69, §11.4.75..§11.4.141) — see §11.4.32
+# / CONST-055. The leading prefix is MANDATORY to match each anchor's own
+# HEADING or block-opener, not a cross-reference inside another anchor's body.
+# Prefix conventions (derived from actual consumer-file formatting):
+#   "## §11.4.NN —"   — H2 heading  (§11.4.69, §11.4.75..§11.4.102)
+#   "## §11.4.NNN —"  — H2 heading  (§11.4.103..§11.4.121; same H2 level)
+#   "### §11.4.NNN —" — H3 heading  (§11.4.122..§11.4.134)
+#   "**§11.4.NNN —"   — bold inline  (§11.4.135..§11.4.139, §11.4.141)
+#   "§11.4.140 —"     — bare (inside blockquote; no heading marker in files)
+# The trailing " — " guards prefix collisions (§11.4.8 vs §11.4.84/87, etc.).
 # Grep is fixed-string (-F) so § (U+00A7) and — (U+2014) match literally.
 COVENANT114_ANCHORS=(
+  # §11.4.69, §11.4.75..§11.4.102 — H2 heading format (original set, 28 entries)
   "## §11.4.69 —" "## §11.4.75 —" "## §11.4.76 —" "## §11.4.77 —" "## §11.4.78 —"
   "## §11.4.79 —" "## §11.4.80 —" "## §11.4.81 —" "## §11.4.82 —" "## §11.4.83 —"
   "## §11.4.84 —" "## §11.4.85 —" "## §11.4.86 —" "## §11.4.87 —" "## §11.4.88 —"
   "## §11.4.89 —" "## §11.4.90 —" "## §11.4.91 —" "## §11.4.92 —" "## §11.4.93 —"
   "## §11.4.94 —" "## §11.4.95 —" "## §11.4.96 —" "## §11.4.97 —"
   "## §11.4.98 —" "## §11.4.99 —" "## §11.4.101 —" "## §11.4.102 —"
+  # §11.4.103..§11.4.121 — H2 heading format (19 new entries)
+  "## §11.4.103 —" "## §11.4.104 —" "## §11.4.105 —" "## §11.4.106 —" "## §11.4.107 —"
+  "## §11.4.108 —" "## §11.4.109 —" "## §11.4.110 —" "## §11.4.111 —" "## §11.4.112 —"
+  "## §11.4.113 —" "## §11.4.114 —" "## §11.4.115 —" "## §11.4.116 —" "## §11.4.117 —"
+  "## §11.4.118 —" "## §11.4.119 —" "## §11.4.120 —" "## §11.4.121 —"
+  # §11.4.122..§11.4.134 — H3 heading format (13 new entries)
+  "### §11.4.122 —" "### §11.4.123 —" "### §11.4.124 —" "### §11.4.125 —" "### §11.4.126 —"
+  "### §11.4.127 —" "### §11.4.128 —" "### §11.4.129 —" "### §11.4.130 —" "### §11.4.131 —"
+  "### §11.4.132 —" "### §11.4.133 —" "### §11.4.134 —"
+  # §11.4.135..§11.4.139 — bold inline format (5 new entries)
+  "**§11.4.135 —" "**§11.4.136 —" "**§11.4.137 —" "**§11.4.138 —" "**§11.4.139 —"
+  # §11.4.140 — bare form (inside blockquote; no heading marker) (1 new entry)
+  "§11.4.140 —"
+  # §11.4.141 — bold inline format (1 new entry)
+  "**§11.4.141 —"
 )
 
 # Map "## §11.4.NN —" -> CM-COVENANT-114-NN-PROPAGATION (exact gate ID in FAILs).
@@ -72,7 +91,7 @@ done
 # 1b. Root govfiles — covenant-114 propagation (§11.4.69, §11.4.75..97).
 #     All 5 consumer-extension govfiles must carry every cascaded anchor.
 echo ""
-echo "--- Root govfiles — covenant-114 propagation (§11.4.69, §11.4.75..97) ---"
+echo "--- Root govfiles — covenant-114 propagation (§11.4.69, §11.4.75..§11.4.141) ---"
 for f in CLAUDE.md AGENTS.md QWEN.md CRUSH.md CONSTITUTION.md; do
   if [ ! -f "$ROOT/$f" ]; then
     echo "FAIL: root/$f — file missing (covenant-114 scope)"; FAILURES=$((FAILURES+1))
@@ -81,7 +100,7 @@ for f in CLAUDE.md AGENTS.md QWEN.md CRUSH.md CONSTITUTION.md; do
   missing_anchors=""
   check_covenant114_anchors "$ROOT/$f"
   if [ -z "$missing_anchors" ]; then
-    echo "PASS: root/$f (all 27 covenant-114 anchors present)"
+    echo "PASS: root/$f (all 67 covenant-114 anchors present)"
   else
     echo "FAIL: root/$f — missing:$missing_anchors"; FAILURES=$((FAILURES+1))
   fi
@@ -133,11 +152,11 @@ if [ -f "$OWNED_FILE" ]; then
       grep -q "$CONST057_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-057"
       grep -q "$CONST058_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-058"
       grep -q "$CONST059_ANCHOR" "$ROOT/$sm/$f" 2>/dev/null || missing_anchors+=" CONST-059"
-      # §11.4.32/CONST-055: covenant-114 propagation (§11.4.69 + §11.4.75..97)
+      # §11.4.32/CONST-055: covenant-114 propagation (§11.4.69 + §11.4.75..§11.4.141)
       # folds into the same per-file accounting + $FAILURES counter.
       check_covenant114_anchors "$ROOT/$sm/$f"
       if [ -z "$missing_anchors" ]; then
-        echo "PASS: $sm/$f (§11.9 + CONST-047..059 + §11.4 covenant-114)"
+        echo "PASS: $sm/$f (§11.9 + CONST-047..059 + §11.4 covenant-114 §11.4.69..§11.4.141)"
       else
         echo "FAIL: $sm/$f — missing:$missing_anchors"; FAILURES=$((FAILURES+1))
       fi
