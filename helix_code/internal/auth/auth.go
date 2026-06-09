@@ -24,6 +24,14 @@ var (
 	ErrTokenInvalid       = errors.New("invalid token")
 	ErrUserNotFound       = errors.New("user not found")
 	ErrUserExists         = errors.New("user already exists")
+	// ErrAuthBackendUnavailable is returned when the authentication
+	// service has no usable data store (HXC-043). The HelixCode server
+	// boots with db=nil on its documented "continuing without database"
+	// path; every db-touching AuthService method MUST surface this clean
+	// error instead of dereferencing a nil s.db and panicking. The server
+	// maps it to HTTP 503 (auth backend down) — the request fails cleanly
+	// rather than crashing the connection with an empty 500.
+	ErrAuthBackendUnavailable = errors.New("authentication backend unavailable")
 )
 
 // User represents an authenticated user
@@ -107,8 +115,25 @@ func NewAuthService(config AuthConfig, db AuthRepository) *AuthService {
 	}
 }
 
+// dbAvailable reports whether this AuthService has a usable data store.
+// It is nil-receiver safe: the HelixCode server may invoke a method on a
+// nil *AuthService (server boots with db=nil → authService stays nil, and
+// a method call on a nil pointer receiver is legal in Go until the body
+// dereferences a field). Every db-touching method calls this first so a
+// missing backend yields ErrAuthBackendUnavailable instead of a
+// nil-pointer panic (HXC-043).
+func (s *AuthService) dbAvailable() bool {
+	return s != nil && s.db != nil
+}
+
 // Register creates a new user account
 func (s *AuthService) Register(ctx context.Context, username, email, password, displayName string) (*User, error) {
+	// HXC-043: no data store → cannot persist a new user. Fail cleanly
+	// instead of panicking on a nil s.db.
+	if !s.dbAvailable() {
+		return nil, ErrAuthBackendUnavailable
+	}
+
 	// Validate input
 	if err := s.validateRegistration(username, email, password); err != nil {
 		return nil, err
@@ -152,6 +177,15 @@ func (s *AuthService) Register(ctx context.Context, username, email, password, d
 
 // Login authenticates a user and creates a session
 func (s *AuthService) Login(ctx context.Context, username, password, clientType, ipAddress, userAgent string) (*Session, *User, error) {
+	// HXC-043: with no data store there is no user to authenticate against.
+	// Return the existing invalid-credentials sentinel (handler maps it to
+	// 401 "Login failed") rather than dereferencing a nil s.db and panicking
+	// into an empty HTTP 500. A login attempt can never succeed without a
+	// user store, so 401 is the honest, scheme-preserving verdict.
+	if !s.dbAvailable() {
+		return nil, nil, ErrInvalidCredentials
+	}
+
 	// Get user and password hash
 	user, passwordHash, err := s.db.GetUserByUsername(ctx, strings.ToLower(username))
 	if err != nil {
@@ -208,6 +242,12 @@ func (s *AuthService) Login(ctx context.Context, username, password, clientType,
 
 // VerifySession verifies a session token and returns the associated user
 func (s *AuthService) VerifySession(ctx context.Context, sessionToken string) (*User, error) {
+	// HXC-043: no session store → token cannot be verified. Treat as an
+	// invalid token (handler maps to 401) rather than panicking on nil s.db.
+	if !s.dbAvailable() {
+		return nil, ErrTokenInvalid
+	}
+
 	session, err := s.db.GetSession(ctx, sessionToken)
 	if err != nil {
 		return nil, ErrTokenInvalid
@@ -233,16 +273,29 @@ func (s *AuthService) VerifySession(ctx context.Context, sessionToken string) (*
 
 // Logout invalidates a session
 func (s *AuthService) Logout(ctx context.Context, sessionToken string) error {
+	// HXC-043: no session store → nothing to invalidate. Fail cleanly.
+	if !s.dbAvailable() {
+		return ErrAuthBackendUnavailable
+	}
 	return s.db.DeleteSession(ctx, sessionToken)
 }
 
 // LogoutAll invalidates all sessions for a user
 func (s *AuthService) LogoutAll(ctx context.Context, userID uuid.UUID) error {
+	// HXC-043: no session store → nothing to invalidate. Fail cleanly.
+	if !s.dbAvailable() {
+		return ErrAuthBackendUnavailable
+	}
 	return s.db.DeleteUserSessions(ctx, userID)
 }
 
 // UpdateUser updates user profile information
 func (s *AuthService) UpdateUser(ctx context.Context, userID uuid.UUID, displayName, email string) (*User, error) {
+	// HXC-043: no user store → nothing to update. Fail cleanly.
+	if !s.dbAvailable() {
+		return nil, ErrAuthBackendUnavailable
+	}
+
 	// Validate email if provided
 	if email != "" && (len(email) < 5 || len(email) > 255 || !strings.Contains(email, "@")) {
 		return nil, errors.New(tr(ctx, "internal_auth_invalid_email", nil))
@@ -253,6 +306,10 @@ func (s *AuthService) UpdateUser(ctx context.Context, userID uuid.UUID, displayN
 
 // DeleteUser soft-deletes a user account
 func (s *AuthService) DeleteUser(ctx context.Context, userID uuid.UUID) error {
+	// HXC-043: no user store → nothing to delete. Fail cleanly.
+	if !s.dbAvailable() {
+		return ErrAuthBackendUnavailable
+	}
 	return s.db.DeleteUser(ctx, userID)
 }
 
@@ -326,6 +383,12 @@ func (s *AuthService) VerifyJWT(tokenString string) (*User, error) {
 // This is slower than VerifyJWT but returns complete user data including
 // IsActive, IsVerified, MFAEnabled, DisplayName, LastLogin, and timestamps.
 func (s *AuthService) VerifyJWTWithDB(ctx context.Context, tokenString string) (*User, error) {
+	// HXC-043: no user store → cannot fetch the full user record. Fail
+	// cleanly instead of panicking on nil s.db after a successful parse.
+	if !s.dbAvailable() {
+		return nil, ErrAuthBackendUnavailable
+	}
+
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New(tr(ctx, "internal_auth_unexpected_signing_method", map[string]any{"Alg": token.Header["alg"]}))

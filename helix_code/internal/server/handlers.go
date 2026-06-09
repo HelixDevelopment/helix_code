@@ -161,6 +161,21 @@ func (s *Server) login(c *gin.Context) {
 
 	session, user, err := s.auth.Login(c.Request.Context(), req.Username, req.Password, "rest_api", c.ClientIP(), c.GetHeader("User-Agent"))
 	if err != nil {
+		// HXC-043: when the auth backend is entirely unavailable (server
+		// booted with db=nil), Login returns ErrInvalidCredentials so this
+		// stays a clean 401 "Login failed" rather than the pre-fix empty
+		// HTTP 500 panic. If a future caller surfaces the explicit
+		// backend-unavailable sentinel, map it to 503 (service down) — the
+		// only deviation from the existing 401 mapping, and only for that
+		// distinct condition.
+		if errors.Is(err, auth.ErrAuthBackendUnavailable) {
+			c.JSON(http.StatusServiceUnavailable, gin.H{
+				"status":  "error",
+				"message": "Login failed",
+				"error":   err.Error(),
+			})
+			return
+		}
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"status":  "error",
 			"message": "Login failed",
