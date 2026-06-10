@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-SP7-harness-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-SP7-harness-design</h1>
+</header>
+<h1 id="sp7-local-harness-design-ddos-scaling-ux-ui-read-only-design">SP7 —
+Local Harness Design: ddos / scaling / ux / ui (read-only design)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>draft</td>
+</tr>
+<tr>
+<td>Scope</td>
+<td><code>helix_code/</code> (inner Go app <code>dev.helix.code</code>)
+test surface — design only, no code written</td>
+</tr>
+<tr>
+<td>Authority</td>
+<td>SP7 plan
+<code>docs/superpowers/specs/plans/2026-06-10-SP7-testing-qa-plan.md</code>
+§3 Phase A (Tasks A1–A5) + coverage matrix
+<code>docs/testing/coverage-matrix.md</code> §2 (GAP-1..GAP-4)</td>
+</tr>
+<tr>
+<td>Pattern mirrored</td>
+<td><code>helix_code/tests/stresschaos/{stresschaos.go,chaos.go}</code>
++ meta-test
+<code>helix_code/tests/stresschaos/stresschaos_meta_test.go</code> (§1.1
+paired mutation)</td>
+</tr>
+<tr>
+<td>Evidence rule</td>
+<td>every claim cites a real <code>file:line</code> / <code>dir/</code>.
+Honest gaps marked explicitly (§11.4.6). PLANNING only — nothing
+executed, no code edited.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Anti-bluff frame.</strong> Each harness below is a
+HelixCode-LOCAL Go harness that produces real captured evidence
+(CONST-050(B)) — NOT a delegation to a HelixQA shell script. The matter
+at issue is the delegation-bluff risk flagged in the coverage matrix:
+ddos/scaling/ux exist today ONLY as HelixQA challenge scripts
+(<code>docs/testing/coverage-matrix.md:53,54,60</code>), ui is
+THIN-local (<code>coverage-matrix.md:59</code>). Each harness mirrors
+the proven <code>stresschaos</code> contract: a Go harness that WRITES
+then RE-READS a non-empty evidence artefact under
+<code>qa-results/&lt;run-id&gt;/</code> (the <code>writeJSON</code> →
+<code>verifyArtefact</code> pattern at
+<code>helix_code/tests/stresschaos/stresschaos.go:159-181</code>), plus
+a paired §1.1 meta-test that plants a defect and asserts the harness
+DETECTS it (the <code>failTB</code> capturing-TB pattern at
+<code>helix_code/tests/stresschaos/stresschaos_meta_test.go:21-68</code>).</p>
+</blockquote>
+<hr />
+<h2 id="table-of-contents">Table of contents</h2>
+<ol type="1">
+<li><a href="#1-verified-ground-truth">Verified ground truth</a></li>
+<li><a href="#2-harness-1--ddos-gap-1">Harness 1 — ddos (GAP-1)</a></li>
+<li><a href="#3-harness-2--scaling-gap-2">Harness 2 — scaling
+(GAP-2)</a></li>
+<li><a href="#4-harness-3--ux-gap-4">Harness 3 — ux (GAP-4)</a></li>
+<li><a href="#5-harness-4--ui-gap-3">Harness 4 — ui (GAP-3)</a></li>
+<li><a href="#6-anti-delegation-gates-task-a5">Anti-delegation gates
+(Task A5)</a></li>
+<li><a href="#7-summary">Summary: 4 designs +
+automatable-vs-operator-attended + gate names</a></li>
+</ol>
+<hr />
+<h2 id="verified-ground-truth">1. Verified ground truth</h2>
+<p>Confirmed by direct inspection this session (read-only):</p>
+<ul>
+<li><strong>The stresschaos harness is real and is the canonical
+extend-precedent.</strong>
+<code>helix_code/tests/stresschaos/stresschaos.go:159-181</code> writes
+JSON evidence then RE-READS it and fails on empty
+(<code>verifyArtefact</code>); <code>:221-295</code>
+<code>RunSustainedLoad</code> captures p50/p95/p99 to
+<code>latency.json</code> and enforces the §11.4.85
+<code>MinSustainedN=100</code> floor (<code>:39</code>,
+<code>:229-231</code>); <code>:315-411</code> <code>RunConcurrent</code>
+enforces <code>MinParallelism=10</code> (<code>:46</code>), guards
+deadlock by timeout (<code>:363-368</code>), measures goroutine-leak
+delta (<code>:400-403</code>). Chaos taxonomy Recovered/Degraded/Fatal
+at <code>chaos.go:18-41</code>.</li>
+<li><strong>The §1.1 meta-test pattern is real.</strong>
+<code>stresschaos_meta_test.go:21-68</code>
+(<code>failTB</code>/<code>runWithFailTB</code>), <code>:72-78</code>
+(<code>isolatedEvidence</code> redirects
+<code>STRESSCHAOS_EVIDENCE_ROOT</code> to a <code>t.TempDir()</code>),
+<code>:82-133</code> plant deadlock/leak/error-rate/below-floor,
+<code>:178-193</code> proves the happy path writes a non-empty
+<code>latency.json</code>.</li>
+<li><strong>A REAL booted-server httptest harness ALREADY EXISTS to
+reuse for ddos.</strong>
+<code>helix_code/internal/server/server_chaos_test.go:74-79</code>
+<code>newRealServerHarness(t)</code> builds the REAL <code>Server</code>
+(real PG pool + real Redis) and serves <code>srv.router</code> over
+<code>httptest.NewServer</code>; <code>server_stress_test.go:1-2</code>
+is <code>//go:build integration</code> and drives sustained/concurrent
+HTTP load via
+<code>stresschaos.RunSustainedLoad</code>/<code>RunConcurrent</code>
+against <code>/health</code> (<code>server_stress_test.go:37-55</code>).
+The ddos harness EXTENDS this — it does not re-invent it.</li>
+<li><strong>Honest finding (load-bearing for ddos design): there is NO
+rate-limit middleware today.</strong>
+<code>internal/server/server.go:58-61</code> wires only
+<code>gin.Logger</code> → <code>gin.Recovery</code> →
+<code>CORSMiddleware</code> → <code>SecurityMiddleware</code>; the only
+middleware funcs are <code>authMiddleware</code>
+(<code>server.go:394</code>), <code>CORSMiddleware</code>
+(<code>:457</code>), <code>SecurityMiddleware</code>
+(<code>:474</code>). <code>grep</code> for
+<code>tollbooth</code>/<code>ulule/limiter</code>/<code>golang.org/x/time/rate</code>/<code>RateLimit</code>
+in <code>internal/server/*.go</code> (non-test) returns nothing. The
+only <code>rate_limit</code> token is a <em>model
+VerificationStatus</em> string at <code>handlers.go:1242-1243</code>,
+unrelated to HTTP rate-limiting. <strong>Implication:</strong> today the
+ddos harness must assert GRACEFUL DEGRADATION (no goroutine leak, no
+deadlock, no 5xx storm, bounded latency growth) — NOT a 429 refusal
+ratio, because there is no limiter to produce 429s. A 429-refusal
+assertion only becomes valid once a real limiter lands (SP-owned). This
+is documented below, not faked.</li>
+<li><strong>Worker pool is real and in-process testable for
+scaling.</strong> <code>internal/worker/worker_pool.go:195</code>
+<code>WorkerPool</code>; <code>:205</code> <code>NewWorkerPool</code>;
+<code>:215</code> <code>RegisterWorker</code>; <code>:259</code>
+<code>AssignTask</code>; <code>:286-318</code> <code>GetPoolStats</code>
+returns
+<code>total_workers</code>/<code>available_workers</code>/<code>busy_workers</code>/<code>utilization_rate</code>.
+Existing <code>internal/worker/worker_pool_stress_test.go</code> +
+<code>worker_pool_chaos_test.go</code> already use the stresschaos
+harness against this pool.</li>
+<li><strong>CLI journey surface is real for ux.</strong>
+<code>cmd/cli/main.go:1356</code> <code>handleListModels</code>,
+<code>:1562</code> <code>handleGenerate</code>, <code>:2004</code>
+<code>handleCommand</code> (executes locally via <code>os/exec</code>
+per BLUFF-003). These are the real end-user CLI steps a ux journey
+drives.</li>
+<li><strong>TUI surface is real for ui (note:
+<code>applications/terminal_ui/</code>, snake_case — NOT
+<code>terminal-ui</code>).</strong>
+<code>applications/terminal_ui/components.go:6</code> imports
+<code>github.com/rivo/tview</code>; <code>:29</code>
+<code>CreateForm</code>, <code>:95</code> <code>CreateList</code>,
+<code>:109-125</code> <code>CreateTable</code> (<code>SetCell</code>).
+<code>applications/terminal_ui/main.go</code> builds the
+<code>tview.Application</code>. tview is built on <code>tcell</code>,
+which ships <code>tcell.SimulationScreen</code> for headless cell-level
+assertions.</li>
+<li><strong>i18n seams are real for ux (CONST-046 resolution
+invariant).</strong> <code>internal/server/i18n_seam.go:8-40</code>
+<code>SetTranslator</code>/<code>NoopTranslator</code> (echoes the
+message ID verbatim — loud failure); bundle
+<code>internal/server/i18n/bundles/active.en.yaml</code> maps
+<code>internal_server_*</code> IDs → English; seam test
+<code>internal/server/i18n_seam_test.go:87</code>
+<code>TestTr_RoutesThroughWiredTranslator</code>. TUI mirror:
+<code>applications/terminal_ui/i18n/translator.go:46-54</code>
+<code>NoopTranslator.T</code>.</li>
+<li><strong><code>qa-results/</code> is gitignored</strong>
+(<code>helix_code/.gitignore:23</code>, root
+<code>.gitignore:170</code>) — so raw harness artefacts stay out of git
+(§11.4.30); only curated evidence is committed at release prep (§11.4.83
+<code>docs/qa/&lt;run-id&gt;/</code>).</li>
+<li><strong>Makefile target pattern is real.</strong>
+<code>helix_code/Makefile:114</code> <code>stress-chaos</code>,
+<code>:121</code> <code>stress-chaos-meta</code>, <code>:132</code>
+<code>stress-chaos-infra</code> — the new
+<code>test-ddos</code>/<code>test-scaling</code>/<code>test-ux</code>/<code>test-ui</code>
++ <code>*-meta</code> targets follow this exact shape
+(<code>$(GO_TEST) -race -run ... ; echo evidence under qa-results/</code>).</li>
+<li><strong>CM-gate script + meta-test pattern is real.</strong>
+<code>scripts/gates/cross_platform_parity_gate.sh:1-40</code>
+(PASS/FAIL/SOFT classification, exit 0/1/2) +
+<code>scripts/tests/cross_platform_parity_meta_test.sh</code> (paired
+mutation) is the template every <code>CM-*-HITS-HELIXCODE</code> gate
+replicates.</li>
+</ul>
+<hr />
+<h2 id="harness-1-ddos-gap-1">2. Harness 1 — ddos (GAP-1)</h2>
+<p><strong>Owning SP:</strong> SP1 (<code>/api/v1/llm/generate</code> +
+rate-limit), SP2 (exposure-endpoint flood). <strong>Fully
+automatable.</strong></p>
+<h3 id="test-file-path-structure">2.1 Test file path + structure</h3>
+<ul>
+<li><strong>Harness:</strong>
+<code>helix_code/tests/ddos/ddos_harness.go</code> — package
+<code>ddos</code>. Thin layer over the existing <code>stresschaos</code>
+primitives + a real booted server. It does NOT duplicate
+<code>RunSustainedLoad</code>/<code>RunConcurrent</code> (§11.4.74
+extend-don’t-reimplement); it adds a <code>FloodReport</code> shape that
+records per-status-code counts and a refusal ratio on top of the
+stresschaos latency capture.</li>
+<li><strong>Driver test:</strong>
+<code>helix_code/tests/ddos/ddos_flood_test.go</code>
+(<code>//go:build integration</code> — boots a real server like
+<code>server_stress_test.go:1</code>).</li>
+<li><strong>Meta-test:</strong>
+<code>helix_code/tests/ddos/ddos_meta_test.go</code> (NO build tag, like
+<code>stresschaos_meta_test.go</code> — runs in the fast lane).</li>
+<li><strong>Makefile:</strong> <code>test-ddos</code>
+(integration-tagged, real server) + <code>test-ddos-meta</code>
+(fast).</li>
+</ul>
+<h3 id="real-assertion-evidence-captured">2.2 Real assertion + evidence
+captured</h3>
+<p>The harness boots the REAL <code>internal/server.Server</code> over
+<code>httptest.NewServer(srv.router)</code> — reusing the
+<code>newRealServerHarness</code> construction proven at
+<code>server_chaos_test.go:79</code> — then drives a concurrent flood of
+<code>N≥100</code> (sustained) / <code>parallelism≥10</code>
+(concurrent) real HTTP requests across a TCP socket against
+<code>/health</code>, <code>/api/v1/...</code> and (when SP1 lands)
+<code>/api/v1/llm/generate</code>.</p>
+<p>Captured to
+<code>qa-results/&lt;run-id&gt;/ddos_&lt;scenario&gt;/</code>: -
+<code>latency.json</code> — p50/p95/p99/min/max + error-rate,
+written+re-read non-empty via the stresschaos
+<code>writeJSON</code>/<code>verifyArtefact</code> path (so a hollow
+PASS is impossible). - <code>concurrency_report.json</code> —
+goroutine-before/after delta + deadlock flag from
+<code>RunConcurrent</code>. - <code>flood_report.json</code> (new shape)
+—
+<code>{ requests_sent, status_2xx, status_4xx, status_429, status_5xx, refusal_ratio, p99_under_flood_ms }</code>.</p>
+<p><strong>Assertions (today, no-limiter reality — graceful
+degradation):</strong> 1. <strong>No goroutine leak / no
+deadlock</strong> under the flood (<code>RunConcurrent</code> already
+fails on <code>GoroutineDelta &gt; tolerance</code> and on timeout —
+<code>stresschaos.go:400-403,397-399</code>). 2. <strong>Zero
+5xx</strong> — <code>status_5xx == 0</code>. A server-error storm under
+load is a defect. 3. <strong>Bounded latency growth</strong> —
+<code>p99_under_flood_ms</code> ≤ a calibrated multiple of the idle p99
+baseline (threshold calibrated on the project’s own first run per
+§11.4.6, NOT a literature constant per §11.4.107(13)). 4. <strong>Real
+responses came back over the wire</strong> — body markers asserted
+exactly as <code>server_stress_test.go:51-53</code> asserts the
+<code>/health</code> body contains <code>healthy</code> (proves the
+server actually served, not a no-op).</p>
+<p><strong>Assertion when a real limiter lands (SP-owned,
+gated):</strong> when <code>internal/server</code> gains rate-limit
+middleware, the harness additionally asserts
+<code>status_429 &gt; 0</code> AND <code>refusal_ratio</code> within an
+expected band AND that 429s carry a <code>Retry-After</code> header —
+i.e. the limiter <em>refuses</em> excess load rather than melting. The
+harness ships this assertion behind a <code>DDOS_EXPECT_RATELIMIT</code>
+env switch that defaults OFF until the limiter exists, so it never
+asserts a 429 the codebase cannot produce (honest, per §11.4.6).</p>
+<h3 id="paired-1.1-meta-test-mutation">2.3 Paired §1.1 meta-test
+mutation</h3>
+<p><code>ddos_meta_test.go</code>, mirroring
+<code>stresschaos_meta_test.go:82-133</code>, uses an in-process
+<code>httptest.Server</code> with hand-written handlers (no real DB
+needed — meta-tests isolate the HARNESS, not the system): -
+<strong>Plant A (5xx-storm server):</strong> a handler that returns
+<code>500</code> for every request → assert the harness FLAGS the
+5xx-storm (records <code>status_5xx &gt; 0</code> and fails). A harness
+that PASSes a 500-storm is a bluff. - <strong>Plant B (latency-bomb
+server):</strong> a handler that <code>time.Sleep</code>s a large fixed
+delay → assert the harness records a p99 blowout and fails the
+bounded-latency assertion. - <strong>Plant C (leak server):</strong> a
+handler that spawns a never-returning goroutine per request → assert
+<code>RunConcurrent</code> flags the goroutine leak (re-using the proven
+leak detection at <code>stresschaos.go:400-403</code>). - <strong>Plant
+D (limiter-mode, off-by-default):</strong> with
+<code>DDOS_EXPECT_RATELIMIT=1</code> against a server that NEVER returns
+429 → assert the harness fails “expected refusals, got none” (so the
+limiter assertion itself cannot bluff once enabled). - <strong>Positive
+path:</strong> a 200-OK handler → assert <code>flood_report.json</code>
+is written non-empty (the
+<code>TestMeta_PositivePathWritesEvidence</code> analogue at
+<code>stresschaos_meta_test.go:178-193</code>).</p>
+<h3 id="anti-delegation-gate">2.4 Anti-delegation gate</h3>
+<p><code>CM-DDOS-HITS-HELIXCODE</code> — see §6. Asserts the ddos run
+(local harness OR the HelixQA
+<code>ddos_health_flood_challenge.sh</code>) emitted a
+<code>flood_report.json</code> referencing a LIVE HelixCode endpoint
+with real p50/p95/p99 — not a config-only PASS.</p>
+<hr />
+<h2 id="harness-2-scaling-gap-2">3. Harness 2 — scaling (GAP-2)</h2>
+<p><strong>Owning SP:</strong> SP5 (SSH worker-pool horizontal
+scale-out), SP1 (provider-fanout throughput vs N). <strong>Fully
+automatable.</strong></p>
+<h3 id="test-file-path-structure-1">3.1 Test file path + structure</h3>
+<ul>
+<li><strong>Harness:</strong>
+<code>helix_code/tests/scaling/scaling_harness.go</code> — package
+<code>scaling</code>. Reuses the stresschaos percentile +
+<code>writeJSON</code>/<code>verifyArtefact</code> evidence path; adds a
+<code>ScalingReport</code> shape and a <code>RunScaleSweep</code>
+helper.</li>
+<li><strong>Driver test:</strong>
+<code>helix_code/tests/scaling/scaling_sweep_test.go</code> (no build
+tag for the in-process worker-pool sweep; an
+<code>//go:build integration</code> variant for the real-SSH-worker path
+once SP5 wires it).</li>
+<li><strong>Meta-test:</strong>
+<code>helix_code/tests/scaling/scaling_meta_test.go</code>.</li>
+<li><strong>Makefile:</strong> <code>test-scaling</code> +
+<code>test-scaling-meta</code>.</li>
+</ul>
+<h3 id="real-assertion-evidence-captured-1">3.2 Real assertion +
+evidence captured</h3>
+<p><code>RunScaleSweep</code> exercises the REAL
+<code>internal/worker.WorkerPool</code>
+(<code>worker_pool.go:195</code>): for each N in <code>{1,2,4,8}</code>
+it <code>RegisterWorker</code>s N in-process workers
+(<code>worker_pool.go:215</code>), then drives a fixed total workload of
+K tasks through <code>AssignTask</code> (<code>:259</code>) from
+<code>parallelism≥10</code> concurrent submitters (reusing
+<code>stresschaos.RunConcurrent</code>), and measures
+<strong>completed-tasks-per-second</strong> plus p50/p95/p99 per-task
+latency at each N.</p>
+<p>Captured to
+<code>qa-results/&lt;run-id&gt;/scaling_&lt;scenario&gt;/</code>: -
+<code>scaling_throughput.json</code> —
+<code>[{ n_workers, total_tasks, throughput_tps, p50_ms, p95_ms, p99_ms, pool_utilization }]</code>
+(utilization read from the real <code>GetPoolStats</code> map,
+<code>worker_pool.go:286-318</code>), written+re-read non-empty. -
+<code>concurrency_report.json</code> per N (deadlock/leak guard from
+<code>RunConcurrent</code>).</p>
+<p><strong>Assertions:</strong> 1. <strong>Scale-out is real, not
+flat</strong> — throughput at N=8 ≥ a calibrated multiple (e.g. ≥1.5×,
+threshold from the project’s own first run per §11.4.6) of throughput at
+N=1. A pool that ignores added workers shows flat throughput → FAIL.
+This is the core “the feature actually scales” claim. 2.
+<strong>Monotonic non-degradation</strong> — throughput does not
+<em>regress</em> as N grows past the contention point (catches a
+lock-convoy / scheduler bug). 3. <strong>No deadlock / no goroutine
+leak</strong> at any N (from <code>RunConcurrent</code>). 4.
+<strong>Pool utilization tracks N</strong> —
+<code>utilization_rate</code> from the real <code>GetPoolStats</code> is
+non-zero while busy and returns to idle after (proves workers were
+actually used, not bypassed).</p>
+<blockquote>
+<p><strong>Honest boundary (§11.4.6):</strong> the in-process sweep
+proves the <em>pool’s</em> scale-out logic (assignment, scheduling,
+utilization). True <em>horizontal</em> SSH-worker scale-out
+(<code>internal/worker/ssh_pool.go</code>) needs real remote hosts; that
+path is <code>//go:build integration</code> and SKIPs-with-reason
+(§11.4.3) when no SSH workers are configured — never a fake PASS. The
+in-process sweep is the always-available local proof; the SSH sweep is
+the operator-/CI-provisioned extension.</p>
+</blockquote>
+<h3 id="paired-1.1-meta-test-mutation-1">3.3 Paired §1.1 meta-test
+mutation</h3>
+<p><code>scaling_meta_test.go</code>, mirroring the plant-and-detect
+pattern: - <strong>Plant A (ignores-added-workers pool):</strong> a fake
+pool wrapper that serializes all tasks onto one worker regardless of N →
+assert the harness detects FLAT throughput across N and FAILS the
+scale-out assertion. (Direct analogue of the SP7-plan A2 requirement:
+“plant a pool that ignores added workers → assert harness detects flat
+throughput”.) - <strong>Plant B (degrading pool):</strong> a wrapper
+whose throughput <em>drops</em> as N grows → assert the
+monotonic-non-degradation assertion fails. - <strong>Plant C
+(below-floor parallelism):</strong> call the sweep with
+<code>parallelism &lt; MinParallelism</code> → assert it’s rejected
+(reuses <code>RunConcurrent</code>’s floor check at
+<code>stresschaos.go:322-324</code>). - <strong>Positive path:</strong>
+a pool that genuinely scales → <code>scaling_throughput.json</code>
+written non-empty with rising throughput.</p>
+<h3 id="anti-delegation-gate-1">3.4 Anti-delegation gate</h3>
+<p><code>CM-SCALING-HITS-HELIXCODE</code> — see §6. Asserts the scaling
+run exercised real <code>internal/worker</code> with a captured
+throughput table referencing live worker registration counts.</p>
+<hr />
+<h2 id="harness-3-ux-gap-4">4. Harness 3 — ux (GAP-4)</h2>
+<p><strong>Owning SP:</strong> SP4 (end-user CLI journey), SP6
+(human-in-loop UX flows). <strong>Mostly automatable</strong> (see
+honest boundary on subjective UX).</p>
+<h3 id="honest-framing-what-ux-means-for-an-apicli-only-product-11.4.6">4.1
+Honest framing: what “UX” means for an API/CLI-only product
+(§11.4.6)</h3>
+<p>HelixCode ships no consumer GUI as its primary surface — it is a
+server + CLI + (secondary) TUI/desktop. “User experience” for a no-GUI
+product is NOT subjective aesthetics (which is genuinely
+operator-attended); it is the set of <strong>mechanically-checkable
+interaction invariants</strong> that determine whether the product is
+<em>usable</em>:</p>
+<ol type="1">
+<li><strong>Journey completeness</strong> — the documented end-user CLI
+journey (init → list-models → generate → command-exec) runs end-to-end
+and each step produces real, asserted output (not a canned string).</li>
+<li><strong>Error-message clarity</strong> — when a step fails, the
+message is a real, locale-resolved, actionable string — NOT a raw
+message ID, NOT an empty string, NOT a Go error like
+<code>nil pointer</code>.</li>
+<li><strong>i18n resolution (CONST-046)</strong> — user-facing text
+resolves through a wired translator to locale text, never leaking the
+raw <code>internal_server_*</code> / TUI message ID. This is the single
+most mechanizable UX invariant in this codebase because the seams
+already exist (<code>i18n_seam.go:8-40</code>,
+<code>terminal_ui/i18n/translator.go:46-54</code>).</li>
+<li><strong>Response-shape consistency</strong> — API error responses
+share a consistent JSON envelope (same top-level keys) so a client can
+parse them uniformly. Inconsistent shapes are a real UX defect for API
+consumers.</li>
+</ol>
+<p>What is genuinely <strong>operator-attended</strong> and honestly
+excluded: subjective “does this feel pleasant / is the wording natural”
+judgement, and visual layout aesthetics. Those are tracked as
+operator-attended per §11.4.52, never auto-PASSed.</p>
+<h3 id="test-file-path-structure-2">4.2 Test file path + structure</h3>
+<ul>
+<li><strong>Harness/test:</strong>
+<code>helix_code/tests/ux/ux_journey_test.go</code>
+(<code>//go:build integration</code> for the live-server journey; an
+in-process variant for the i18n + response-shape invariants needs no
+infra).</li>
+<li><strong>Meta-test:</strong>
+<code>helix_code/tests/ux/ux_meta_test.go</code>.</li>
+<li><strong>Makefile:</strong> <code>test-ux</code> +
+<code>test-ux-meta</code>.</li>
+</ul>
+<h3 id="real-assertion-evidence-captured-2">4.3 Real assertion +
+evidence captured</h3>
+<p>Drives the real CLI journey programmatically (zero human action after
+startup, §11.4.98) — invoking the real handlers
+<code>handleListModels</code>/<code>handleGenerate</code>/<code>handleCommand</code>
+(<code>cmd/cli/main.go:1356,1562,2004</code>) against a booted server,
+OR shelling the built <code>bin/cli</code> via <code>os/exec</code> so
+the FULL binary path is exercised.</p>
+<p>Captured to <code>docs/qa/&lt;run-id&gt;/ux_journey/</code> (§11.4.83
+— bidirectional transcript, committed at release prep) and
+<code>qa-results/&lt;run-id&gt;/ux_&lt;scenario&gt;/</code>: -
+<code>journey_transcript.jsonl</code> — one line per step:
+<code>{ step, command_sent, response_received, assertion, verdict }</code>
+(the FULL bidirectional thread, §11.4.83). -
+<code>i18n_resolution.json</code> —
+<code>[{ message_id, locale, resolved_text, leaked_id: bool }]</code>. -
+<code>error_shape_report.json</code> — top-level key sets across sampled
+error responses + a consistency verdict.</p>
+<p><strong>Assertions:</strong> 1. <strong>Each journey step asserts
+REAL output</strong> — e.g. <code>list-models</code> output contains
+real provider/model rows (not a hardcoded list, ties BLUFF-002);
+<code>generate</code> output is real LLM text (ties BLUFF-001);
+<code>command-exec</code> surfaces a real exit code (ties BLUFF-003). A
+step that prints a canned constant FAILS. 2. <strong>i18n
+no-leak</strong> — for each sampled user-facing string,
+<code>resolved_text != message_id</code> when a real translator is
+wired; <code>leaked_id == false</code>. Drives a real translator (like
+<code>i18n_seam_test.go:87</code>) and asserts the resolved text differs
+from the raw ID. A leaked
+<code>internal_server_qa_engine_disabled</code> to a user is a CONST-046
+UX defect. 3. <strong>Error clarity</strong> — on a forced failure, the
+error body is non-empty, is a resolved string, and names the subject (≥
+a minimum descriptive length, mirroring the §11.4.91 clarity bar). 4.
+<strong>Response-shape consistency</strong> — sampled error responses
+share the same top-level envelope keys.</p>
+<h3 id="paired-1.1-meta-test-mutation-2">4.4 Paired §1.1 meta-test
+mutation</h3>
+<p><code>ux_meta_test.go</code>: - <strong>Plant A (canned-string
+step):</strong> a journey step whose handler returns a fixed constant
+instead of real output → assert the journey’s real-output assertion
+FAILS the canned plant (the SP7-plan A3 requirement: “plant a step that
+prints a canned string → assert journey asserts on REAL output and
+FAILS”). - <strong>Plant B (leaked message ID):</strong> wire the
+<code>NoopTranslator</code> (which echoes the ID,
+<code>i18n_seam.go</code> default) and assert the i18n-no-leak assertion
+catches <code>resolved_text == message_id</code> → FAIL. (This is a true
+paired mutation: the Noop path IS the planted defect.) - <strong>Plant C
+(inconsistent error shape):</strong> feed two error responses with
+divergent top-level keys → assert the consistency assertion fails. -
+<strong>Positive path:</strong> a real journey →
+<code>journey_transcript.jsonl</code> written non-empty with per-step
+real-output verdicts.</p>
+<h3 id="anti-delegation-gate-2">4.5 Anti-delegation gate</h3>
+<p><code>CM-UX-HITS-HELIXCODE</code> — see §6. Asserts the ux journey
+drove the real CLI/server with a captured bidirectional transcript
+referencing live endpoints/binary — not a config-only PASS.</p>
+<hr />
+<h2 id="harness-4-ui-gap-3">5. Harness 4 — ui (GAP-3)</h2>
+<p><strong>Owning SP:</strong> SP4 (terminal interaction), SP6
+(human-in-loop flow-node UI). <strong>Partly automatable (TUI headless),
+partly operator-attended (desktop GUI + non-introspectable
+surfaces).</strong></p>
+<h3 id="honest-split-tui-automatable-headless-vs-desktop-operator-attended">5.1
+Honest split: TUI (automatable headless) vs Desktop
+(operator-attended)</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Tech</th>
+<th>Headless-testable?</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TUI</strong></td>
+<td><code>tview</code>/<code>tcell</code>
+(<code>terminal_ui/components.go:6</code>)</td>
+<td><strong>YES</strong> — <code>tcell.SimulationScreen</code> renders
+to an in-memory cell grid; inject keys, read back exact cells</td>
+<td><strong>Fully automatable</strong></td>
+</tr>
+<tr>
+<td><strong>Desktop GUI</strong></td>
+<td><code>Fyne v2.7</code> (<code>applications/desktop/</code>)</td>
+<td><strong>Partial</strong> — Fyne has a <code>test</code> package
+(<code>fyne.io/fyne/v2/test</code>) that drives widgets headlessly
+WITHOUT a display server; pixel-level / native-window behaviour is
+NOT</td>
+<td><strong>Widget-tree automatable; pixel/native =
+operator-attended</strong></td>
+</tr>
+<tr>
+<td><strong>Non-introspectable surfaces</strong> (canvas-rendered, blank
+a11y tree)</td>
+<td>—</td>
+<td><strong>Pixel-oracle (§11.4.117 CV/OCR) or
+operator-attended</strong></td>
+<td><strong>Operator-attended fallback when neither hierarchy nor pixel
+oracle works</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="test-file-path-structure-3">5.2 Test file path + structure</h3>
+<ul>
+<li><strong>TUI harness/test:</strong>
+<code>helix_code/tests/ui/tui_interaction_test.go</code> — drives the
+real <code>tview</code> components via
+<code>tcell.NewSimulationScreen()</code>.</li>
+<li><strong>Desktop harness/test:</strong>
+<code>helix_code/tests/ui/desktop_widget_test.go</code> — drives Fyne
+widgets via <code>fyne.io/fyne/v2/test</code> (build-tagged;
+SKIP-with-reason when the Fyne <code>test</code> harness or GUI build
+tag is unavailable, never fake-PASS).</li>
+<li><strong>Pixel-oracle (§11.4.117) self-validation:</strong>
+<code>helix_code/tests/ui/ocr_oracle_test.go</code> — only if/when a
+non-introspectable surface is in scope; carries the
+golden-good/golden-bad fixture pair.</li>
+<li><strong>Meta-test:</strong>
+<code>helix_code/tests/ui/ui_meta_test.go</code>.</li>
+<li><strong>Makefile:</strong> <code>test-ui</code> +
+<code>test-ui-meta</code>.</li>
+</ul>
+<h3 id="real-assertion-evidence-captured-3">5.3 Real assertion +
+evidence captured</h3>
+<p><strong>TUI (automatable):</strong> construct the real TUI components
+(<code>CreateList</code>/<code>CreateTable</code>/<code>CreateForm</code>,
+<code>components.go:95,109,29</code>) bound to a
+<code>tcell.SimulationScreen</code> of fixed size; inject a key sequence
+(e.g. arrow-down, enter) via the simulation screen; call
+<code>Draw</code>; read back the rendered cell grid via
+<code>SimulationScreen.GetContents()</code> and assert the expected
+glyphs/text appear at the expected cell coordinates.</p>
+<p>Captured to
+<code>qa-results/&lt;run-id&gt;/ui_&lt;scenario&gt;/</code>: -
+<code>rendered_cells.json</code> —
+<code>{ width, height, asserted_strings: [{ text, row, col, found }] }</code>
+written+re-read non-empty. - <code>tui_key_trace.jsonl</code> — injected
+keys + resulting screen-state hash per step. - (pixel-oracle path only)
+<code>ocr_self_validation.json</code> — golden-good PASS + golden-bad
+FAIL verdicts.</p>
+<p><strong>Assertions:</strong> 1. <strong>Real rendered
+content</strong> — the asserted strings appear in the actual rendered
+cell grid (a TUI that renders nothing → empty grid → FAIL). This is
+genuine pixel-equivalent evidence: <code>tcell</code> actually
+composited the widgets. 2. <strong>Interaction works</strong> —
+injecting a navigation key changes the rendered state in the expected
+way (e.g. selection highlight moves), proving the input path is wired,
+not stubbed. 3. <strong>i18n in the TUI</strong> — rendered labels are
+resolved text, not raw message IDs (reuses the
+<code>terminal_ui/i18n/translator.go:46</code> seam; a leaked ID in a
+rendered cell → FAIL). 4. <strong>(pixel-oracle, §11.4.107(10))</strong>
+the CV/OCR analyzer PASSes its golden-good fixture and FAILS its
+golden-bad fixture — an analyzer that PASSes golden-bad is itself a
+bluff and the gate FAILs.</p>
+<h3 id="paired-1.1-meta-test-mutation-3">5.4 Paired §1.1 meta-test
+mutation</h3>
+<p><code>ui_meta_test.go</code>: - <strong>Plant A (blank-render
+component):</strong> a component whose <code>Draw</code> writes nothing
+to the simulation screen → assert the rendered-content assertion FAILS
+(empty cell grid is not a PASS). - <strong>Plant B (dead
+key-handler):</strong> a component that ignores injected keys → assert
+the interaction assertion detects the unchanged screen-state and FAILS.
+- <strong>Plant C (leaked message ID in cell):</strong> render with
+<code>NoopTranslator</code> → assert a raw message ID in the cell grid
+is caught → FAIL. - <strong>Plant D (pixel-oracle
+self-validation):</strong> feed the OCR analyzer its golden-BAD fixture
+→ assert the analyzer FAILS it (if the analyzer PASSes golden-bad, the
+meta-test FAILs, per §11.4.107(10)). - <strong>Positive path:</strong>
+real render → <code>rendered_cells.json</code> written non-empty with
+found-string verdicts.</p>
+<h3 id="honest-gaps-operator-attended-11.4.52">5.5 Honest gaps
+(operator-attended, §11.4.52)</h3>
+<ul>
+<li><strong>Desktop pixel-/native-window behaviour</strong> (actual
+on-screen Fyne pixels, native dialogs, OS clipboard) — NOT headlessly
+assertable; tracked as operator-attended with a §11.4.52 migration item.
+Widget-tree state IS automatable via <code>fyne.io/fyne/v2/test</code>;
+only the pixel/native layer is the gap.</li>
+<li><strong>Subjective visual quality</strong> (spacing, color harmony)
+— operator-attended, never auto-PASSed.</li>
+<li><strong>Non-introspectable canvas surfaces</strong> where BOTH the
+widget tree is blank AND no OCR/CV oracle is feasible — SKIP-with-reason
+(§11.4.3) + tracked operator-attended item, never fake-PASS.</li>
+</ul>
+<h3 id="anti-delegation-gate-3">5.6 Anti-delegation gate</h3>
+<p><code>CM-UI-HITS-HELIXCODE</code> — see §6. Asserts the ui run
+asserted on real rendered cells / OCR self-validation referencing the
+live TUI/desktop components — not a config-only PASS.</p>
+<hr />
+<h2 id="anti-delegation-gates-task-a5">6. Anti-delegation gates (Task
+A5)</h2>
+<p>Four pre-build gates convert the delegated HelixQA rows from
+coverage-bluff risk into evidence-backed delegation. Each follows the
+<code>scripts/gates/cross_platform_parity_gate.sh</code> template
+(PASS/FAIL/SOFT classification, exit 0/1/2) and ships a paired §1.1
+meta-test under <code>scripts/tests/</code> (mirroring
+<code>scripts/tests/cross_platform_parity_meta_test.sh</code>).</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Lives at (PLANNED)</th>
+<th>Asserts (parses <code>qa-results/</code>)</th>
+<th>Paired §1.1 mutation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CM-DDOS-HITS-HELIXCODE</code></td>
+<td><code>scripts/gates/ddos_hits_helixcode_gate.sh</code></td>
+<td>the ddos run emitted <code>flood_report.json</code> referencing a
+LIVE HelixCode endpoint with real p50/p95/p99 (non-empty,
+non-placeholder)</td>
+<td>strip the endpoint-hit/latency assertion from the evidence → gate
+FAILs</td>
+</tr>
+<tr>
+<td><code>CM-SCALING-HITS-HELIXCODE</code></td>
+<td><code>scripts/gates/scaling_hits_helixcode_gate.sh</code></td>
+<td>scale-out exercised real <code>internal/worker</code> with a
+captured <code>scaling_throughput.json</code> table (real worker counts,
+rising throughput)</td>
+<td>replace the throughput table with a flat/empty one → gate FAILs</td>
+</tr>
+<tr>
+<td><code>CM-UX-HITS-HELIXCODE</code></td>
+<td><code>scripts/gates/ux_hits_helixcode_gate.sh</code></td>
+<td>the journey drove the real CLI/server with a captured bidirectional
+<code>journey_transcript.jsonl</code> (both directions present, real
+output)</td>
+<td>one-sided transcript / canned output → gate FAILs</td>
+</tr>
+<tr>
+<td><code>CM-UI-HITS-HELIXCODE</code></td>
+<td><code>scripts/gates/ui_hits_helixcode_gate.sh</code></td>
+<td>the TUI/desktop run asserted on real rendered cells
+(<code>rendered_cells.json</code>) / OCR self-validation passed
+golden-good + failed golden-bad</td>
+<td>empty cell grid / analyzer that PASSes golden-bad → gate FAILs</td>
+</tr>
+</tbody>
+</table>
+<p>Each gate is wired into the pre-build sweep (the
+<code>make</code>/<code>scripts</code> gate runner) and each Makefile
+harness target writes the evidence the gate parses. The gates are the
+mechanical proof that a delegated HelixQA
+<code>challenges/scripts/*.sh</code> last-run actually hit HelixCode —
+not a config-only PASS (CONST-050(B)).</p>
+<hr />
+<h2 id="summary">7. Summary</h2>
+<p><strong>Four HelixCode-LOCAL harness designs (each: Go harness
+writing re-read non-empty evidence to
+<code>qa-results/&lt;run-id&gt;/</code>, plus a paired §1.1
+plant-and-detect meta-test, mirroring
+<code>stresschaos</code>):</strong></p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Harness</th>
+<th>File path (PLANNED)</th>
+<th>Real assertion (core)</th>
+<th>Evidence</th>
+<th>Automatable?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>ddos</strong></td>
+<td><code>helix_code/tests/ddos/ddos_harness.go</code> +
+<code>ddos_flood_test.go</code> + <code>ddos_meta_test.go</code></td>
+<td>concurrent flood vs REAL booted <code>internal/server</code> (reuses
+<code>newRealServerHarness</code>); no goroutine-leak/deadlock, zero
+5xx, bounded p99; 429-refusal assertion behind
+<code>DDOS_EXPECT_RATELIMIT</code> (OFF until a limiter lands —
+<strong>honest: no rate-limit middleware exists today</strong>,
+<code>server.go:58-61</code>)</td>
+<td><code>latency.json</code>, <code>concurrency_report.json</code>,
+<code>flood_report.json</code></td>
+<td><strong>Fully automatable</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>scaling</strong></td>
+<td><code>helix_code/tests/scaling/scaling_harness.go</code> +
+<code>scaling_sweep_test.go</code> +
+<code>scaling_meta_test.go</code></td>
+<td>throughput sweep over REAL <code>internal/worker.WorkerPool</code>
+at N=1,2,4,8 with p50/p95/p99; assert genuine scale-out (not flat) + no
+degradation + real utilization</td>
+<td><code>scaling_throughput.json</code>,
+<code>concurrency_report.json</code></td>
+<td><strong>Fully automatable in-process</strong>; real-SSH horizontal
+sweep is <code>//go:build integration</code>, SKIP-with-reason when no
+SSH workers configured</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>ux</strong></td>
+<td><code>helix_code/tests/ux/ux_journey_test.go</code> +
+<code>ux_meta_test.go</code></td>
+<td>real CLI journey (init→list→generate→exec, real-output assertions
+tying BLUFF-001/002/003) + i18n no-leak (CONST-046) + error clarity +
+response-shape consistency</td>
+<td><code>journey_transcript.jsonl</code> (§11.4.83),
+<code>i18n_resolution.json</code>,
+<code>error_shape_report.json</code></td>
+<td><strong>Mostly automatable</strong> — subjective aesthetics honestly
+operator-attended (§11.4.52)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>ui</strong></td>
+<td><code>helix_code/tests/ui/tui_interaction_test.go</code> +
+<code>desktop_widget_test.go</code> + <code>ocr_oracle_test.go</code> +
+<code>ui_meta_test.go</code></td>
+<td>TUI via <code>tcell.SimulationScreen</code> — inject keys, assert
+real rendered cells + interaction + i18n no-leak; Fyne via
+<code>fyne.io/fyne/v2/test</code>; pixel-oracle self-validated
+(§11.4.107(10))</td>
+<td><code>rendered_cells.json</code>, <code>tui_key_trace.jsonl</code>,
+<code>ocr_self_validation.json</code></td>
+<td><strong>TUI fully automatable</strong>; <strong>desktop widget-tree
+automatable, pixel/native operator-attended</strong>; non-introspectable
+canvas = SKIP-with-reason + operator-attended item</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Fully automatable vs operator-attended (honest,
+§11.4.6):</strong> - <strong>Fully automatable:</strong> ddos (entire);
+scaling (in-process worker-pool sweep); ux (journey + i18n +
+error-clarity + response-shape); ui (TUI headless via
+<code>tcell.SimulationScreen</code>, Fyne widget-tree via the Fyne
+<code>test</code> package). - <strong>Operator-attended (genuine gaps,
+tracked §11.4.52, never fake-PASS):</strong> ux subjective
+aesthetics/wording-naturalness; ui desktop pixel-/native-window
+rendering; ui non-introspectable canvas surfaces where neither
+widget-tree nor an OCR/CV oracle is feasible. -
+<strong>Conditional-automatable (SKIP-with-reason until provisioned,
+§11.4.3):</strong> scaling real-SSH horizontal scale-out (needs
+configured remote workers); ddos 429-refusal assertion (needs a
+rate-limit middleware that does NOT exist today —
+<code>server.go:58-61</code>).</p>
+<p><strong>The four anti-delegation <code>CM-*-HITS-HELIXCODE</code>
+gate names (each with a paired §1.1 mutation, templated on
+<code>scripts/gates/cross_platform_parity_gate.sh</code>):</strong> 1.
+<code>CM-DDOS-HITS-HELIXCODE</code> 2.
+<code>CM-SCALING-HITS-HELIXCODE</code> 3.
+<code>CM-UX-HITS-HELIXCODE</code> 4.
+<code>CM-UI-HITS-HELIXCODE</code></p>
+<h2 id="sources-verified-2026-06-10">Sources verified 2026-06-10</h2>
+<ul>
+<li><code>helix_code/tests/stresschaos/stresschaos.go:39,46,159-181,221-295,315-411</code>
+(harness primitives, floors, evidence write+re-read).</li>
+<li><code>helix_code/tests/stresschaos/chaos.go:18-41</code>
+(Recovered/Degraded/Fatal taxonomy).</li>
+<li><code>helix_code/tests/stresschaos/stresschaos_meta_test.go:21-68,72-78,82-133,178-193</code>
+(§1.1 failTB plant-and-detect pattern).</li>
+<li><code>helix_code/internal/server/server.go:47,58-61,394,457,474</code>
+(server wiring — NO rate-limit middleware).</li>
+<li><code>helix_code/internal/server/handlers.go:1242-1243</code>
+(<code>rate_limit</code> is a model-status string, not HTTP
+limiting).</li>
+<li><code>helix_code/internal/server/server_chaos_test.go:74-79</code>
+(<code>newRealServerHarness</code>) +
+<code>server_stress_test.go:1-2,37-55</code> (real httptest server load
+pattern).</li>
+<li><code>helix_code/internal/worker/worker_pool.go:195,205,215,259,286-318</code>
+(real worker pool + GetPoolStats).</li>
+<li><code>helix_code/cmd/cli/main.go:1356,1562,2004</code> (real CLI
+journey handlers).</li>
+<li><code>helix_code/applications/terminal_ui/components.go:6,29,95,109-125</code>
+(real tview TUI) +
+<code>applications/terminal_ui/i18n/translator.go:46-54</code>.</li>
+<li><code>helix_code/internal/server/i18n_seam.go:8-40</code> +
+<code>internal/server/i18n/bundles/active.en.yaml</code> +
+<code>internal/server/i18n_seam_test.go:87</code> (CONST-046 i18n
+seam).</li>
+<li><code>helix_code/Makefile:114,121,132</code> (target pattern) +
+<code>scripts/gates/cross_platform_parity_gate.sh:1-40</code> +
+<code>scripts/tests/cross_platform_parity_meta_test.sh</code> (gate +
+paired-mutation template).</li>
+<li><code>helix_code/.gitignore:23</code>, root
+<code>.gitignore:170</code> (<code>qa-results/</code> ignored).</li>
+</ul>
+</body>
+</html>

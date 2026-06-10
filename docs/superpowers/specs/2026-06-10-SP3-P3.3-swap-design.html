@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-SP3-P3.3-swap-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-SP3-P3.3-swap-design</h1>
+</header>
+<h1 id="sp3-p3.3p3.4-cli_agents-submodule-swap-to-caf--forks-gitlab-population-design">SP3
+P3.3/P3.4 — cli_agents submodule swap to <code>caf-*</code> forks +
+GitLab population (DESIGN)</h1>
+<p><strong>Date:</strong> 2026-06-10 <strong>Author:</strong> READ-ONLY
+DESIGN subagent (no submodule swapped, no <code>.gitmodules</code> edit,
+no commit/push, no mutating <code>gh</code>/<code>glab</code>)
+<strong>Scope:</strong> Design + validate the SP3 P3.3 (swap 49
+<code>cli_agents/&lt;name&gt;</code> submodule URLs → their
+<code>vasic-digital/caf-*</code> GitHub forks, keep upstream as a named
+remote) and P3.4 (populate the empty GitLab <code>caf-*</code> mirrors)
+procedures. Execution is <strong>OPERATOR-CONFIRM</strong> (high blast
+radius). <strong>Status:</strong> Design complete; map validated;
+dry-run rewrite proven. NOT executed.</p>
+<hr />
+<h2 id="map-validation-result-task-1">1. Map validation result (Task
+1)</h2>
+<p>Source: <code>docs/caf/map.tsv</code> (cols:
+<code>name \t upstream-ssh \t github-fork-ssh \t gitlab-fork-ssh</code>).</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Check</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total rows</td>
+<td><strong>80</strong></td>
+</tr>
+<tr>
+<td><strong>Unique names</strong></td>
+<td><strong>49</strong></td>
+</tr>
+<tr>
+<td>Duplicate rows (byte-identical)</td>
+<td><strong>31</strong> — names
+<code>agent-deck</code>…<code>fauxpilot</code> appear 2–3×</td>
+</tr>
+<tr>
+<td>Columns per row</td>
+<td>4 on every row (no ragged rows)</td>
+</tr>
+<tr>
+<td>Line endings</td>
+<td>LF (no CRLF)</td>
+</tr>
+<tr>
+<td>Deduped names vs <code>.gitmodules</code> <code>cli_agents/*</code>
+(50 entries) minus <code>claude-code-source</code></td>
+<td><strong>IDENTICAL 1:1</strong> (<code>diff -q</code> → no
+differences)</td>
+</tr>
+<tr>
+<td><code>claude-code-source</code> in map?</td>
+<td><strong>No</strong> — correctly EXCLUDED. It is in
+<code>.gitmodules</code> (own-org private repo
+<code>git@gitlab.com:milos85vasic/ccode-private.git</code>), not a
+third-party fork target.</td>
+</tr>
+<tr>
+<td><code>cline</code> in map?</td>
+<td><strong>Yes</strong> (row points
+<code>git@github.com:cline/cline.git</code> →
+<code>caf-cline</code>).</td>
+</tr>
+<tr>
+<td><code>cline-bench</code> in map?</td>
+<td><strong>No</strong> (see §6 — it is a <em>nested</em> submodule
+inside <code>cline</code>, not a top-level <code>cli_agents/</code>
+entry).</td>
+</tr>
+<tr>
+<td>Map <code>upstream</code> col vs current <code>.gitmodules</code>
+url for all 49</td>
+<td><strong>0 mismatches</strong> — the map’s upstream column equals the
+live submodule URL, confirming the swap baseline.</td>
+</tr>
+<tr>
+<td>All 49 <code>github-fork-ssh</code> well-formed
+<code>git@github.com:vasic-digital/caf-&lt;slug&gt;.git</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>All 49 <code>gitlab-fork-ssh</code> well-formed
+<code>git@gitlab.com:vasic-digital/caf-&lt;slug&gt;.git</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Fork slug == <code>caf-&lt;name&gt;</code> for every row</td>
+<td>✅ (no slug mismatch)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>FINDING — data-integrity defect (non-blocking for the swap,
+but should be fixed):</strong> <code>docs/caf/map.tsv</code> contains
+<strong>31 duplicate rows</strong> (some names triplicated). Root cause:
+G-1’s planner (see <code>docs/caf/Status.md</code>) emitted its PLAN log
+across ~3 passes and the map was appended each pass for the
+early-alphabet names. The duplicates are <em>byte-identical</em>, so
+dedup is lossless and the <strong>unique set is a clean 49 mapping
+1:1</strong> onto the swappable submodules. The swap procedure below
+dedups defensively (<code>awk &#39;!seen[$0]++&#39;</code>), so it is correct
+even against the un-cleaned file, <strong>but the map SHOULD be
+rewritten to 49 unique rows</strong> before execution (separate,
+low-risk commit —
+<code>awk &#39;!seen[$0]++&#39; map.tsv &gt; map.tsv.new</code>).</p>
+<p><strong>Conclusion:</strong> The 49 unique map rows map 1:1 onto the
+49 swappable <code>cli_agents/*</code> submodules;
+<code>claude-code-source</code> is correctly excluded; URL formedness is
+clean. ✅ (modulo the duplicate-rows hygiene fix).</p>
+<hr />
+<h2 id="fork-content-vs-gitlab-empty-verification-task-2">2.
+Fork-content vs GitLab-empty verification (Task 2)</h2>
+<p>Sample-checked 3 names (<code>caf-agent-deck</code>,
+<code>caf-aider</code>, <code>caf-crush</code>), READ-ONLY.</p>
+<p><strong>GitHub forks — have content</strong>
+(<code>gh repo view ... --json name,isEmpty,defaultBranchRef,diskUsage,parent</code>):</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Fork</th>
+<th>isEmpty</th>
+<th>defaultBranch</th>
+<th>diskUsage (KiB)</th>
+<th>parent (real fork)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vasic-digital/caf-agent-deck</code></td>
+<td><code>false</code></td>
+<td><code>main</code></td>
+<td>238623</td>
+<td><code>asheshgoplani/agent-deck</code></td>
+</tr>
+<tr>
+<td><code>vasic-digital/caf-aider</code></td>
+<td><code>false</code></td>
+<td><code>main</code></td>
+<td>140356</td>
+<td><code>Aider-AI/aider</code></td>
+</tr>
+<tr>
+<td><code>vasic-digital/caf-crush</code></td>
+<td><code>false</code></td>
+<td><code>main</code></td>
+<td>26916</td>
+<td><code>charmbracelet/crush</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>GitLab repos — empty</strong>
+(<code>glab api projects/&lt;enc&gt;</code> →
+<code>empty_repo</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Repo</th>
+<th>empty_repo</th>
+<th>default_branch</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vasic-digital/caf-agent-deck</code></td>
+<td><code>True</code></td>
+<td><code>main</code></td>
+</tr>
+<tr>
+<td><code>vasic-digital/caf-aider</code></td>
+<td><code>True</code></td>
+<td><code>main</code></td>
+</tr>
+<tr>
+<td><code>vasic-digital/caf-crush</code></td>
+<td><code>True</code></td>
+<td><code>main</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Conclusion (Task 2):</strong> The swap MUST point the
+submodule URL at the <strong>GitHub fork</strong> (has content, is a
+real fork with a <code>parent</code>). The <strong>GitLab
+<code>caf-*</code> repo is empty</strong> and is a <strong>secondary
+push mirror to be populated</strong> in P3.4. Confirmed. ✅</p>
+<hr />
+<h2 id="swap-procedure-task-3-.gitmodules-rewrite-sync-per-fork-upstream-remote">3.
+SWAP procedure (Task 3) — <code>.gitmodules</code> rewrite + sync +
+per-fork upstream remote</h2>
+<blockquote>
+<p><strong>OPERATOR-CONFIRM at execution.</strong> Swapping 49 submodule
+URLs is high-blast-radius (§11.4.101: irreversible-ish in effect on
+every developer clone, high blast radius). Gate the first mutating run
+behind an explicit operator yes. Default to a plan/dry-run.</p>
+</blockquote>
+<h3 id="pre-flight-read-only-11.4.71-fetch-first">3.1 Pre-flight
+(read-only, §11.4.71 fetch-first)</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /Volumes/T7/Projects/HelixCode</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> fetch <span class="at">--all</span> <span class="at">--prune</span> <span class="at">--tags</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule status cli_agents/        <span class="co"># capture pre-state SHAs (evidence baseline)</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">awk</span> <span class="st">&#39;!seen[$0]++&#39;</span> docs/caf/map.tsv <span class="op">&gt;</span> /tmp/map_uniq.tsv   <span class="co"># dedup defensively (49 rows)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="bu">test</span> <span class="st">&quot;</span><span class="va">$(</span><span class="fu">wc</span> <span class="at">-l</span> <span class="op">&lt;</span> /tmp/map_uniq.tsv<span class="va">)</span><span class="st">&quot;</span> <span class="at">-eq</span> 49 <span class="kw">||</span> <span class="kw">{</span> <span class="bu">echo</span> <span class="st">&quot;map not 49 unique&quot;</span><span class="kw">;</span> <span class="bu">exit</span> 1<span class="kw">;</span> <span class="kw">}</span></span></code></pre></div>
+<h3 id="gitmodules-url-rewrite-per-row">3.2 <code>.gitmodules</code> URL
+rewrite (per row)</h3>
+<p>For each of the 49 unique rows, rewrite ONLY
+<code>submodule.cli_agents/&lt;name&gt;.url</code> to the <strong>GitHub
+fork</strong> column. <code>claude-code-source</code> is never in the
+map, so it is never touched.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="va">IFS</span><span class="op">=</span><span class="st">$&#39;</span><span class="dt">\t</span><span class="st">&#39;</span> <span class="bu">read</span> <span class="at">-r</span> <span class="va">name</span> <span class="va">up</span> <span class="va">gh</span> <span class="va">gl</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">[</span> <span class="ot">-z</span> <span class="st">&quot;</span><span class="va">$name</span><span class="st">&quot;</span> <span class="bu">]</span> <span class="kw">&amp;&amp;</span> <span class="cf">continue</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="st">&quot;</span><span class="va">$name</span><span class="st">&quot;</span> <span class="kw">in</span> <span class="dt">\#</span><span class="pp">*</span><span class="kw">)</span> <span class="cf">continue</span> <span class="cf">;;</span> <span class="cf">esac</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">git</span> config <span class="at">-f</span> .gitmodules <span class="st">&quot;submodule.cli_agents/</span><span class="va">$name</span><span class="st">.url&quot;</span> <span class="st">&quot;</span><span class="va">$gh</span><span class="st">&quot;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span> <span class="op">&lt;</span> /tmp/map_uniq.tsv</span></code></pre></div>
+<h3 id="sync-the-config-into-.gitconfig-each-worktree-then-update">3.3
+Sync the config into <code>.git/config</code> + each worktree, then
+update</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule sync <span class="at">--recursive</span>          <span class="co"># push .gitmodules urls into .git/config + submodule .git/config</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule update <span class="at">--init</span> <span class="at">--recursive</span> cli_agents/   <span class="co"># re-point each working submodule at the fork</span></span></code></pre></div>
+<p>Because the fork is a true fork of upstream, the
+previously-checked-out commit SHA is present in the fork’s object graph,
+so <code>git submodule update</code> re-points cleanly without re-clone
+in most cases. If a pinned SHA is NOT yet in the fork (fork behind
+upstream), update that fork first via
+<code>update_fork_from_upstream.sh --only &lt;name&gt; --execute</code>
+(P3.4 machinery) THEN re-run <code>git submodule update</code> for
+it.</p>
+<h3 id="keep-upstream-as-a-named-remote-per-fork-11.4.71-merge-from-upstream">3.4
+Keep upstream as a named remote per fork (§11.4.71
+merge-from-upstream)</h3>
+<p>Inside each submodule working tree, <code>origin</code> now = the
+<code>caf-*</code> fork. Add upstream as a second named remote so future
+<code>update_fork_from_upstream.sh</code> (and manual merges) can fetch
+upstream:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="va">IFS</span><span class="op">=</span><span class="st">$&#39;</span><span class="dt">\t</span><span class="st">&#39;</span> <span class="bu">read</span> <span class="at">-r</span> <span class="va">name</span> <span class="va">up</span> <span class="va">gh</span> <span class="va">gl</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="va">d</span><span class="op">=</span><span class="st">&quot;cli_agents/</span><span class="va">$name</span><span class="st">&quot;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">(</span> <span class="bu">cd</span> <span class="st">&quot;</span><span class="va">$d</span><span class="st">&quot;</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="dt">\</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&amp;&amp;</span> <span class="fu">git</span> remote get-url origin <span class="op">&gt;</span>/dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="dt">\</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&amp;&amp;</span> <span class="kw">{</span> <span class="fu">git</span> remote add upstream <span class="st">&quot;</span><span class="va">$up</span><span class="st">&quot;</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="fu">git</span> remote set-url upstream <span class="st">&quot;</span><span class="va">$up</span><span class="st">&quot;</span><span class="kw">;</span> <span class="kw">}</span> <span class="dt">\</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&amp;&amp;</span> <span class="fu">git</span> remote add gitlab <span class="st">&quot;</span><span class="va">$gl</span><span class="st">&quot;</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="fu">git</span> remote set-url gitlab <span class="st">&quot;</span><span class="va">$gl</span><span class="st">&quot;</span> <span class="kw">)</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span> <span class="op">&lt;</span> /tmp/map_uniq.tsv</span></code></pre></div>
+<p>Result per submodule: <code>origin</code>→ GitHub fork (fetch+push),
+<code>upstream</code>→ third-party source (fetch only, for §11.4.71
+merges), <code>gitlab</code>→ GitLab mirror (push). NOTE: the
+<code>upstream</code>/<code>gitlab</code> remotes live in each
+submodule’s <code>.git/config</code> (per-clone, NOT versioned in
+<code>.gitmodules</code>); document them in
+<code>docs/caf/README.md</code> so a fresh clone re-adds them (or wire
+into <code>scripts/init-submodules.sh</code>).</p>
+<h3 id="buildability-spot-check-anti-bluff-11.4.5-captured-evidence">3.5
+Buildability spot-check (anti-bluff, §11.4.5 captured evidence)</h3>
+<p>The cli_agents submodules are <em>reference</em> agents
+(multi-language), not part of the Go build graph, so “buildable” = (a)
+submodule checks out at its pinned SHA, (b) a representative few
+build/parse in their own toolchain. Spot-check ≥3 across languages:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule status cli_agents/ <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&#39;^-&#39;</span>   <span class="co"># no &#39;-&#39; prefix =&gt; all initialised (not de-init)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Rust:   ( cd cli_agents/aichat   &amp;&amp; cargo metadata --no-deps &gt;/dev/null )   # crush is Go; aichat is Rust</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Go:     ( cd cli_agents/crush    &amp;&amp; go vet ./... 2&gt;&amp;1 | head )</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Python: ( cd cli_agents/aider    &amp;&amp; python -c &#39;import sys; print(sys.version)&#39; &amp;&amp; ls pyproject.toml )</span></span></code></pre></div>
+<p>Capture stdout/exit codes as the evidence artefact. A swap that
+leaves a submodule at a SHA the fork lacks →
+<code>git submodule update</code> errors → that fork needs P3.4 sync
+first (see §3.3).</p>
+<h3 id="rollback-reversibility-11.4.101">3.6 Rollback (reversibility —
+§11.4.101)</h3>
+<p>The whole swap is one <code>.gitmodules</code> edit + config sync. To
+revert before commit:
+<code>git checkout .gitmodules &amp;&amp; git submodule sync --recursive &amp;&amp; git submodule update --init --recursive cli_agents/</code>.
+Keep a copy of pre-swap <code>git submodule status cli_agents/</code> as
+the known-good baseline.</p>
+<hr />
+<h2 id="gitlab-population-step-task-4-p3.4">4. GitLab-population step
+(Task 4) — P3.4</h2>
+<p>The 49 <code>caf-*</code> GitLab repos are
+<code>empty_repo=True</code>. Populate each by mirroring the
+<strong>fork content</strong> (the GitHub <code>caf-*</code> fork
+already holds full upstream history) into the GitLab repo —
+<strong>fast-forward only, NEVER force (§11.4.113)</strong>.</p>
+<p><strong>Reuse the existing machinery (CONST-074/§11.4.74 — extend,
+don’t reimplement):</strong>
+<code>scripts/caf/update_fork_from_upstream.sh</code> already: clones
+the GitHub fork (<code>origin</code>), adds <code>upstream</code>,
+fetches, merges upstream <code>main/master</code> (ff-preferred,
+conflicts parked, never <code>-s ours</code>), then pushes to
+<strong>all provider remotes</strong> via
+<code>caf_provider_remotes</code> → <code>caf_safe_push</code>.
+<code>caf_safe_push</code>/<code>caf_assert_no_force</code>
+<strong>refuse</strong>
+<code>--force</code>/<code>--force-with-lease</code>/<code>--mirror</code>/<code>+ref</code>
+(§11.4.113-safe by construction). Providers come from
+<code>CAF_PROVIDERS</code> csv (default includes
+<code>github,gitlab</code>), so a single run also seeds GitLab.</p>
+<p>Because the GitLab side is <em>empty</em>, the first push to
+<code>gitlab</code> is a fresh-branch push (still a fast-forward against
+an empty ref — no history to overwrite, no force needed):</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># DRY-RUN (default, mutate nothing) — plan the merges + pushes:</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/caf/update_fork_from_upstream.sh <span class="at">--map-file</span> /tmp/map_uniq.tsv</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># OPERATOR-CONFIRM execute (G-1-push gate, §11.4.101): seeds GitHub fork (idempotent ff)</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   AND populates the empty GitLab mirror, fast-forward only:</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/caf/update_fork_from_upstream.sh <span class="at">--map-file</span> /tmp/map_uniq.tsv <span class="at">--execute</span></span></code></pre></div>
+<p>Notes: - The script’s <code>caf_detect_default_branch</code> resolves
+<code>main</code>/<code>master</code> from the upstream symref per fork
+(handles mixed default branches). - Conflicts are parked to
+<code>docs/caf/conflicts/&lt;fork&gt;_&lt;ts&gt;.md</code> and the loop
+continues (zero-idle); none expected for an initial seed. - For forks
+whose pinned submodule SHA was missing (see §3.3), this run brings the
+fork current first, unblocking §3.3 <code>git submodule update</code>. -
+If a leaner “seed only” is preferred over merge-from-upstream, an
+equivalent is a per-fork
+<code>git push gitlab --all &amp;&amp; git push gitlab --tags</code>
+from a fork clone — still ff-only, no <code>--mirror</code> (mirror is
+force-class and is blocked). The existing script is preferred (already
+anti-bluff + §11.4.113-guarded + has a Challenge).</p>
+<hr />
+<h2 id="dry-run-.gitmodules-rewrite-diff-sample-task-5">5. Dry-run
+<code>.gitmodules</code> rewrite diff sample (Task 5)</h2>
+<p>Performed against a <strong>TEMP copy</strong>
+(<code>/tmp/gitmodules.swap</code>), live <code>.gitmodules</code>
+untouched, then the temp was deleted.</p>
+<pre><code>$ cp .gitmodules /tmp/gitmodules.swap
+$ while IFS=$&#39;\t&#39; read -r name up gh gl; do
+    git config -f /tmp/gitmodules.swap &quot;submodule.cli_agents/$name.url&quot; &quot;$gh&quot;
+  done &lt; &lt;(awk -F&#39;\t&#39; &#39;!seen[$0]++&#39; docs/caf/map.tsv)</code></pre>
+<p><strong>Results:</strong> - Changed <code>url =</code> lines:
+<strong>49</strong> (exactly the 49 swappable submodules). -
+<code>claude-code-source</code> url AFTER rewrite:
+<code>git@gitlab.com:milos85vasic/ccode-private.git</code> —
+<strong>unchanged</strong> (correctly excluded). - Symmetry:
+<code>49</code> removed (<code>&lt;</code>) ↔︎ <code>49</code> added
+(<code>&gt;</code>); <strong>every</strong> added line is a
+<code>caf-*</code> fork (<code>grep -v &#39;caf-&#39;</code> on
+<code>&gt;</code> lines → none). - Safety: no changed line outside
+<code>cli_agents/</code> (no Go-app / HelixAgent / qa submodule
+touched).</p>
+<p><strong>Diff sample (unified, first rows):</strong></p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">--- .gitmodules</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="dt">+++ /tmp/gitmodules.swap</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="dt">@@ -63,154 +63,154 @@</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a> [submodule &quot;cli_agents/agent-deck&quot;]</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    path = cli_agents/agent-deck</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="st">-   url = git@github.com:asheshgoplani/agent-deck.git</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="va">+   url = git@github.com:vasic-digital/caf-agent-deck.git</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a> [submodule &quot;cli_agents/aiagent&quot;]</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    path = cli_agents/aiagent</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="st">-   url = git@github.com:Xiaoccer/AIAgent.git</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="va">+   url = git@github.com:vasic-digital/caf-aiagent.git</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a> [submodule &quot;cli_agents/aichat&quot;]</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    path = cli_agents/aichat</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="st">-   url = git@github.com:sigoden/aichat.git</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="va">+   url = git@github.com:vasic-digital/caf-aichat.git</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a> [submodule &quot;cli_agents/aider&quot;]</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    path = cli_agents/aider</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="st">-   url = git@github.com:Aider-AI/aider.git</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="va">+   url = git@github.com:vasic-digital/caf-aider.git</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a> [submodule &quot;cli_agents/amazon-q&quot;]</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    path = cli_agents/amazon-q</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="st">-   url = git@github.com:aws/amazon-q-developer-cli.git</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="va">+   url = git@github.com:vasic-digital/caf-amazon-q.git</span></span></code></pre></div>
+<p>Temp file removed after capture. The rewrite is
+<strong>correct</strong>: 49 url lines, scoped to
+<code>cli_agents/</code>, fork URLs only,
+<code>claude-code-source</code> preserved.</p>
+<hr />
+<h2 id="nested-cline-cline-bench-handled">6. Nested
+<code>cline → cline-bench</code> (handled)</h2>
+<p><code>cli_agents/cline/.gitmodules</code> declares a
+<strong>nested</strong> submodule:</p>
+<pre><code>[submodule &quot;evals/cline-bench&quot;]
+    path = evals/cline-bench
+    url = https://github.com/cline/cline-bench.git</code></pre>
+<p>Two facts: 1. It is <strong>NOT</strong> a top-level
+<code>cli_agents/</code> entry, so it is <strong>correctly
+absent</strong> from <code>map.tsv</code> (the map only forks the 49
+top-level reference agents). 2. Its URL is <strong>HTTPS</strong> — a
+<strong>Rule 3 violation</strong> if/when initialized, and a
+CONST-051(C) <strong>nested-own-org-chain</strong> concern <em>only
+if</em> it pointed at an own-org repo (it points at third-party
+<code>cline/cline-bench</code>, so the nested-chain ban does not apply —
+third-party nested submodules are exempt per CONST-051(C)).</p>
+<p><strong>Recommendation for P3.3/P3.4 (own scope, not blocking the
+49-swap):</strong> - Do <strong>not</strong> recursively init
+<code>evals/cline-bench</code> during the swap
+(<code>git submodule update</code> for <code>cli_agents/cline</code>
+should NOT pass <code>--recursive</code> into cline’s own nested tree,
+or should skip it) to avoid pulling an HTTPS submodule into the tree. -
+If <code>cline-bench</code> is needed, fork it to
+<code>vasic-digital/caf-cline-bench</code> and add it to the map as a
+<strong>50th row</strong> + place it at the project root per
+CONST-051(C) (flat <code>&lt;root&gt;/caf-cline-bench</code> or
+grouped), then have cline reference it via config injection — but this
+is a <strong>separate, operator-gated work item</strong>, NOT part of
+the 49-swap. Track it as its own ticket.</p>
+<hr />
+<h2 id="summary">7. Summary</h2>
+<p><strong>Map validation:</strong> <code>docs/caf/map.tsv</code> has 80
+rows but <strong>49 unique</strong> (31 byte-identical duplicates — a
+hygiene defect to clean to 49 rows). The 49 unique names map
+<strong>1:1</strong> with the 49 swappable <code>cli_agents/*</code>
+submodules; <code>claude-code-source</code> excluded; <code>cline</code>
+present, <code>cline-bench</code> correctly absent (nested-in-cline, not
+top-level); all 49 fork/mirror URLs well-formed; map
+<code>upstream</code> col == live <code>.gitmodules</code> url (0
+mismatch). ✅</p>
+<p><strong>Swap procedure:</strong> fetch-first → dedup map to 49 →
+<code>git config -f .gitmodules submodule.cli_agents/&lt;name&gt;.url &lt;github-fork&gt;</code>
+per row → <code>git submodule sync --recursive</code> →
+<code>git submodule update --init --recursive cli_agents/</code> → add
+<code>upstream</code>+<code>gitlab</code> named remotes per submodule
+(for §11.4.71 merges; per-clone, document in README) → buildability
+spot-check (Rust/Go/Python) with captured evidence → rollback =
+<code>git checkout .gitmodules</code> + re-sync.
+<strong>OPERATOR-CONFIRM</strong> at execution (49 URLs = high blast
+radius).</p>
+<p><strong>GitLab population:</strong> reuse
+<code>scripts/caf/update_fork_from_upstream.sh --map-file &lt;49-row map&gt; --execute</code>
+— it merges upstream into the fork (ff-preferred, conflicts parked,
+never <code>-s ours</code>) and pushes to all providers
+(<code>github,gitlab</code>) via <code>caf_safe_push</code> which
+<strong>refuses force-class args (§11.4.113)</strong>; the empty GitLab
+mirror seeds as a fast-forward fresh-branch push (no force, no
+<code>--mirror</code>). Default is dry-run; the first mutating push is
+operator-gated.</p>
+<p><strong>Dry-run diff (proof):</strong> TEMP-copy rewrite changed
+<strong>exactly 49</strong> url lines, all <code>cli_agents/*</code>,
+all → <code>caf-*</code> forks, <code>claude-code-source</code>
+untouched, 49↔︎49 symmetric, nothing outside <code>cli_agents/</code>
+changed. Temp deleted. The rewrite is correct.</p>
+<p><strong>Open items (separate tickets):</strong> (a) clean map.tsv to
+49 unique rows; (b) decide <code>cline-bench</code> fork/exclude policy
+(HTTPS + nested).</p>
+</body>
+</html>

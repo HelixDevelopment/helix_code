@@ -122,6 +122,27 @@ mkdir -p docs/guides; printf 'x\n' > docs/guides/guide.md
 git add docs/guides/guide.md
 assert_block "working-spec-guides-md-only" ALLOW "$(try_commit 'guide md-only')"
 
+# 9a. §11.4.65/CONST-066 reconciliation — working-spec md that ALREADY ships
+#     a sibling (export-opted-in) but is missing the OTHER sibling -> BLOCK.
+#     This is the widened scope: an export-opted-in doc updated without
+#     regenerating both siblings is a sync regression and must be caught.
+mkdir -p docs/research/sub
+printf 'x\n' > docs/research/sub/opted.md
+printf '<html>' > docs/research/sub/opted.html   # has .html, missing .pdf
+git add docs/research/sub/opted.md docs/research/sub/opted.html
+assert_block "export-optin-working-spec-missing-pdf" BLOCK "$(try_commit 'opted research missing pdf')"
+git reset -q HEAD docs/research/sub/opted.md docs/research/sub/opted.html
+rm -rf docs/research/sub
+
+# 9b. §11.4.65/CONST-066 reconciliation — export-opted-in working-spec md
+#     WITH BOTH siblings present -> ALLOW.
+mkdir -p docs/research/sub2
+printf 'x\n' > docs/research/sub2/full.md
+printf '<html>' > docs/research/sub2/full.html
+printf '%%PDF' > docs/research/sub2/full.pdf
+git add docs/research/sub2/full.md docs/research/sub2/full.html docs/research/sub2/full.pdf
+assert_block "export-optin-working-spec-with-both" ALLOW "$(try_commit 'opted research with both')"
+
 # 10. ordinary source file (.go) -> ALLOW
 printf 'package main\n' > main.go
 git add main.go

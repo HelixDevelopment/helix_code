@@ -55,26 +55,65 @@ if [ -z "$staged" ]; then
 fi
 
 # ---------------------------------------------------------------------------
-# 1. §11.4.75 — GOVERNANCE-doc sibling check (scoped, NOT every .md).
+# 1. §11.4.65 / CONST-066 — markdown-sibling check (reconciled scope).
 #
-#    A staged `.md` is GOVERNED iff:
-#      - it is a root manual: CLAUDE.md / AGENTS.md / CONSTITUTION.md /
-#        CRUSH.md / QWEN.md (repo-root only), OR
-#      - it is one of the 5 tracker docs at docs/ root
-#        (Issues / Issues_Summary / Fixed / Fixed_Summary / CONTINUATION), OR
-#      - it is a Status.md / Status_Summary.md anywhere under docs/.
+#    CONST-066 / §11.4.65 INCLUDE the whole `docs/**/*.md` tree (guides,
+#    research, plans, specs, Status docs, trackers, root manuals). Full
+#    enforcement of that scope is BLOCKED today only because ~270 pre-
+#    existing docs still lack siblings (a tracked backfill task generates
+#    them via scripts/testing/sync_all_markdown_exports.sh --regenerate-all).
 #
-#    Working specs (docs/superpowers/**, docs/research/**, docs/guides/**,
-#    docs/testing/**) are md-only by convention and are EXCLUDED — there
-#    are ~117 such files with no siblings; demanding siblings for them
-#    would be a §11.4.6 over-reach (guessing scope wider than the mandate).
+#    To advance toward CONST-066 without blocking every doc commit while
+#    the backfill is in flight, a staged `.md` is sibling-CHECKED iff:
+#      (a) it is in the CORE GOVERNED set — root manual / tracker doc /
+#          Status{,_Summary}.md — ALWAYS checked (unchanged behaviour), OR
+#      (b) it ALREADY has at least one sibling (.html or .pdf) in the tree
+#          or the index — i.e. it has opted into the export regime, so an
+#          update that forgets to regenerate its siblings is caught.
+#
+#    A brand-new md-only working spec (no sibling yet) is NOT blocked — it
+#    is part of the backfill scope, not a regression. This is the §11.4.120
+#    reconciliation: the gate widens to the export-opted-in superset while
+#    the §11.4.6 "don't guess wider than the mandate" guard is preserved
+#    for not-yet-backfilled new docs.
+#
+#    TODO(CONST-066 full activation): once the 270-doc backfill lands and
+#    `sync_all_markdown_exports.sh --check-only` exits 0 over the whole
+#    tree, replace clause (b) with an unconditional `docs/**/*.md` check
+#    (is_export_optin_md -> always-return-0 for docs/*.md), and update
+#    test_hooks.sh cases 7-9 to expect BLOCK for sibling-less working specs.
 # ---------------------------------------------------------------------------
-is_governed_md() {
-  # $1 = repo-relative path ending in .md
+is_core_governed_md() {
+  # $1 = repo-relative path ending in .md — ALWAYS sibling-checked.
   case "$1" in
     CLAUDE.md|AGENTS.md|CONSTITUTION.md|CRUSH.md|QWEN.md) return 0 ;;
     docs/Issues.md|docs/Issues_Summary.md|docs/Fixed.md|docs/Fixed_Summary.md|docs/CONTINUATION.md) return 0 ;;
     docs/*/Status.md|docs/*/Status_Summary.md|docs/*/*/Status.md|docs/*/*/Status_Summary.md) return 0 ;;
+  esac
+  return 1
+}
+
+# A docs/**/*.md has "opted into" the export regime if it already ships
+# at least one sibling (.html or .pdf) — staged or tracked. Updating such
+# a doc without regenerating its siblings is a §11.4.65 sync regression.
+has_existing_sibling() {
+  # $1 = base path (no extension). True if .html or .pdf is staged or
+  #      currently tracked (and not staged-for-deletion).
+  local base="$1" ext
+  for ext in html pdf; do
+    if sibling_present "${base}.${ext}"; then return 0; fi
+  done
+  return 1
+}
+
+is_governed_md() {
+  # $1 = repo-relative path ending in .md. Checked iff core-governed OR
+  #      (under docs/ AND already export-opted-in).
+  is_core_governed_md "$1" && return 0
+  case "$1" in
+    docs/*.md)
+      if has_existing_sibling "${1%.md}"; then return 0; fi
+      ;;
   esac
   return 1
 }
@@ -119,17 +158,18 @@ if [ -n "$missing_siblings" ]; then
   {
     echo ""
     echo "============================================================"
-    echo "BLOCKED by pre-commit hook (§11.4.75 governance-doc siblings)"
+    echo "BLOCKED by pre-commit hook (§11.4.65 / CONST-066 md siblings)"
     echo "============================================================"
-    echo "A staged GOVERNED .md is missing its .html and/or .pdf sibling."
-    echo "Governed set: root manuals (CLAUDE/AGENTS/CONSTITUTION/CRUSH/QWEN),"
-    echo "docs/{Issues,Issues_Summary,Fixed,Fixed_Summary,CONTINUATION}.md,"
-    echo "and every docs/**/Status{,_Summary}.md."
+    echo "A staged sibling-CHECKED .md is missing its .html and/or .pdf sibling."
+    echo "Checked set: core-governed docs (root manuals CLAUDE/AGENTS/"
+    echo "CONSTITUTION/CRUSH/QWEN, docs/{Issues,Issues_Summary,Fixed,"
+    echo "Fixed_Summary,CONTINUATION}.md, every docs/**/Status{,_Summary}.md)"
+    echo "PLUS any docs/**/*.md that already ships a sibling (export-opted-in)."
     printf '%b\n' "$missing_siblings"
     echo ""
     echo "Regenerate siblings, then re-stage:"
-    echo "  bash scripts/testing/sync_all_markdown_exports.sh   # if present"
-    echo "  # or your project's pandoc+weasyprint export pipeline"
+    echo "  bash scripts/testing/sync_all_markdown_exports.sh --file <path.md>"
+    echo "  # (renders both .html + .pdf via pandoc + weasyprint)"
     echo "============================================================"
   } >&2
   block=1
