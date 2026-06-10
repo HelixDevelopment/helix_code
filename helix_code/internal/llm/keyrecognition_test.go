@@ -100,6 +100,55 @@ func TestKeyRecognition_IsPlaceholder_T112(t *testing.T) {
 	}
 }
 
+// krRedMode mirrors the §11.4.115 polarity switch for the funnel-bridge guard.
+//
+//	RED_MODE=1 (default): assert the bridge correctly drops absent providers
+//	            (the gap this bridge closes is that a string-keyed present set
+//	            must NOT leak no-key providers into the funnel).
+//	RED_MODE=0: standing GREEN regression guard for the same invariant.
+func krRedMode() bool {
+	v := os.Getenv("RED_MODE")
+	return v == "" || v == "1"
+}
+
+// TestPresentProviderNames_StringKeyedFunnelInput proves the bridge that feeds
+// verifier.GetWorkingModels: present providers map to string keys equal to the
+// verifier's Provider field, and absent providers never appear.
+func TestPresentProviderNames_StringKeyedFunnelInput(t *testing.T) {
+	clearAliasEnv(t)
+	t.Setenv("ANTHROPIC_API_KEY", "sk-ant-realvalue-1234567890")
+	// OPENAI_API_KEY deliberately NOT set — must be absent from the funnel input.
+
+	names := PresentProviderNames()
+
+	if !names["anthropic"] {
+		t.Errorf("RED: anthropic key present but missing from string-keyed funnel input %v", names)
+	}
+	if names["openai"] {
+		t.Errorf("RED: openai has NO key yet leaked into the funnel input %v (key-gate breach)", names)
+	}
+	// The key strings MUST string-equal the verifier's VerifiedModel.Provider
+	// values; assert the type-bridge did not corrupt the key.
+	if _, ok := names[string(ProviderTypeAnthropic)]; !ok {
+		t.Errorf("string(ProviderTypeAnthropic)=%q not found as a funnel key %v",
+			string(ProviderTypeAnthropic), names)
+	}
+
+	if krRedMode() {
+		// RED polarity: prove an absent provider is genuinely excluded — this is
+		// the gap (a naive bridge that copied every table entry would leak
+		// no-key providers). With the bridge, only key-present survive.
+		if len(names) != 1 {
+			t.Fatalf("RED expected exactly 1 present provider (anthropic), got %d: %v", len(names), names)
+		}
+		return
+	}
+	// GREEN: same invariant, standing guard.
+	if len(names) != 1 {
+		t.Fatalf("GREEN: expected exactly 1 present provider, got %d: %v", len(names), names)
+	}
+}
+
 // --- helpers ---
 
 func krContains(ss []string, s string) bool {

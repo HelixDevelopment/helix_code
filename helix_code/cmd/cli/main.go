@@ -1364,7 +1364,13 @@ func (c *CLI) handleListModels(ctx context.Context) error {
 	// no-key models as available is a §11.4 / CONST-035 PASS-bluff (the user
 	// cannot actually use them).
 	if c.verifierAdapter != nil && c.verifierAdapter.IsEnabled() {
-		models, err := c.verifierAdapter.GetWorkingModels(ctx, presentProviders(os.Getenv))
+		// Key-presence gate sourced from the committed, multi-alias
+		// llm.PresentProviderNames() — the SAME funnel input the server's
+		// model-listing path consumes (handlers.go listLLMModels). This
+		// retires the CLI-local single-alias presentProviders table at the
+		// production call site so both surfaces recognize keys identically
+		// (e.g. CLAUDE_API_KEY / DASHSCOPE_API_KEY secondary aliases).
+		models, err := c.verifierAdapter.GetWorkingModels(ctx, llm.PresentProviderNames())
 		if err == nil && len(models) > 0 {
 			c.printVerifiedModels(models)
 			return nil

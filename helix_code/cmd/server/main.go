@@ -14,6 +14,7 @@ import (
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/database"
 	"dev.helix.code/internal/redis"
+	"dev.helix.code/internal/secrets"
 	"dev.helix.code/internal/server"
 )
 
@@ -63,6 +64,23 @@ func tr(ctx context.Context, msgID string, data map[string]any) string {
 	return out
 }
 
+// loadAPIKeysAtStartup wires secrets.LoadAPIKeys into the server bootstrap
+// (D-3 extension / SP1). It recognizes provider API keys from
+// $HOME/api_keys.sh or a walked-up .env and applies them to the process env
+// via gap-fill precedence (already-exported vars win — DECISION-1), exactly
+// like the CLI startup path. This MUST run BEFORE config.Get() so a key
+// supplied only via those files becomes visible to config.Load() (viper
+// AutomaticEnv) AND to the working-model funnel's key-presence gate
+// (llm.PresentProviderNames) on the server side.
+//
+// A missing source is non-fatal (the operator may export keys directly).
+// Values are never logged (CONST-042). The boolean is returned so tests can
+// assert the wiring is live (anti-bluff: proves the loader is invoked on the
+// server path, not just the CLI path).
+func loadAPIKeysAtStartup() bool {
+	return secrets.LoadAPIKeys() == nil
+}
+
 func main() {
 	ctx := context.Background()
 
@@ -70,6 +88,14 @@ func main() {
 	fmt.Println(tr(ctx, "server_startup_banner_build", map[string]any{"BuildTime": buildTime}))
 	fmt.Println(tr(ctx, "server_startup_banner_commit", map[string]any{"GitCommit": gitCommit}))
 	fmt.Println()
+
+	// D-3 extension: recognize provider API keys from $HOME/api_keys.sh or a
+	// walked-up .env BEFORE config.Get() reads anything, so a key supplied only
+	// via those files is visible to config (viper AutomaticEnv) and the
+	// server-side working-model funnel. Gap-fill precedence (DECISION-1):
+	// already-exported shell vars are never overwritten. Missing source is
+	// non-fatal; values are never logged (CONST-042).
+	loadAPIKeysAtStartup()
 
 	// Load configuration.
 	// Speed programme P2-T07: config.Get() loads + caches the config once

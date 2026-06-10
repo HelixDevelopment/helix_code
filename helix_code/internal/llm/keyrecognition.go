@@ -69,6 +69,28 @@ func PresentProviders() map[ProviderType]bool {
 	return present
 }
 
+// PresentProviderNames is the string-keyed view of PresentProviders, suitable
+// for direct use as the `present` argument of
+// verifier.(*Adapter).GetWorkingModels (whose signature is
+// map[string]bool keyed by provider name, e.g. "anthropic", "openai").
+//
+// ProviderType's underlying type is string with values that string-equal the
+// verifier's VerifiedModel.Provider field, so this is a faithful, lossless
+// key conversion — it is the single bridge both the CLI model-listing path and
+// the server model-listing path consume so the working-model funnel
+// (key-present ∧ Verified ∧ status=="verified" ∧ score>=min) is exercised
+// identically across both surfaces (no duplicated provider→env table).
+func PresentProviderNames() map[string]bool {
+	src := PresentProviders()
+	out := make(map[string]bool, len(src))
+	for pt, ok := range src {
+		if ok {
+			out[string(pt)] = true
+		}
+	}
+	return out
+}
+
 // IsProviderKeyPresent reports whether a single provider's key is recognised.
 func IsProviderKeyPresent(pt ProviderType) bool {
 	aliases, ok := ProviderEnvAliases()[pt]

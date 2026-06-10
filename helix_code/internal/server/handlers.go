@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"dev.helix.code/internal/auth"
+	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/project"
 	"dev.helix.code/internal/session"
 	"dev.helix.code/internal/task"
@@ -1044,9 +1045,15 @@ func (s *Server) listLLMProviders(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
-	// Priority 1: LLMsVerifier (CONST-036)
+	// Priority 1: LLMsVerifier (CONST-036) — providers backed by WORKING models
+	// only (D-2/D-4 funnel). A provider whose key is absent has zero working
+	// models and therefore MUST NOT be listed as an available provider; listing
+	// it would be a §11.4 / CONST-035 PASS-bluff (the user has no key, so the
+	// provider is not usable). llm.PresentProviderNames() is the shared
+	// key-presence gate.
 	if s.verifierResult != nil && s.verifierResult.Adapter.IsEnabled() {
-		models, err := s.verifierResult.Adapter.GetVerifiedModels(ctx)
+		present := llm.PresentProviderNames()
+		models, err := s.verifierResult.Adapter.GetWorkingModels(ctx, present)
 		if err == nil && len(models) > 0 {
 			providers := buildProvidersFromVerifiedModels(models)
 			c.JSON(http.StatusOK, gin.H{
@@ -1201,9 +1208,17 @@ func (s *Server) listLLMModels(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
-	// Priority 1: LLMsVerifier (CONST-036)
+	// Priority 1: LLMsVerifier (CONST-036) — WORKING models only (D-2/D-4 funnel).
+	//
+	// The server's model listing MUST show only models the end user can actually
+	// use: key-present provider ∧ Verified ∧ status=="verified" ∧ score>=min.
+	// Presenting failed / pending / sub-threshold / no-key models as available is
+	// a §11.4 / CONST-035 PASS-bluff at the model-listing layer — identical to
+	// the CLI handleListModels path. llm.PresentProviderNames() is the shared
+	// key-presence gate input (populated by the startup secrets.LoadAPIKeys wire).
 	if s.verifierResult != nil && s.verifierResult.Adapter.IsEnabled() {
-		models, err := s.verifierResult.Adapter.GetVerifiedModels(ctx)
+		present := llm.PresentProviderNames()
+		models, err := s.verifierResult.Adapter.GetWorkingModels(ctx, present)
 		if err == nil && len(models) > 0 {
 			var result []gin.H
 			for _, m := range models {
