@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CONSOLIDATED_UNFINISHED_WORK_AND_PLAN.2026-06-04</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">CONSOLIDATED_UNFINISHED_WORK_AND_PLAN.2026-06-04</h1>
+</header>
+<!-- AUTHORITATIVE — generated 2026-06-04 from read-only discovery sweep wf_7b65d077-64a (4/16 modules verified). -->
+<!-- Supersedes the ~95 stale root planning docs (Phase 2 consolidates/retires them). Anti-bluff: every claim is evidence-cited; unverified items are labelled. -->
+<p>I’ll synthesize the available evidence into the consolidated report.
+Note: only 4 of 16 assessments returned data (the rest were
+rate-limited), so I’ll be explicit about coverage gaps rather than
+inventing findings.</p>
+<h1 id="helixcode-consolidated-unfinished-work-report-phased-implementation-plan">HelixCode
+— Consolidated Unfinished-Work Report &amp; Phased Implementation
+Plan</h1>
+<blockquote>
+<p><strong>Coverage honesty notice:</strong> Of the 16 commissioned
+assessments, <strong>only 4 returned evidence</strong> (helix_code inner
+app, root meta-repo, helix_qa, containers). Assessments 4, 6–16 returned
+<code>API Error … Rate limited</code> and produced <strong>no
+data</strong>. Modules NOT covered by any returning assessment —
+<code>challenges</code>, <code>security</code>, <code>assets</code>,
+<code>github_pages_website</code>, <code>dependencies/*</code>
+(LLama_CPP, Ollama, HuggingFace_Hub), <code>cli_agents</code>,
+<code>cli_agents_resources</code> — are marked <strong>NOT
+ASSESSED</strong> below and must not be assumed clean or broken. Every
+“unverified” label from the source assessments is preserved
+verbatim.</p>
+</blockquote>
+<hr />
+<h2 id="executive-summary">1. Executive summary</h2>
+<p>Of the four assessed Go modules, <strong>all four build
+cleanly</strong>: <code>helix_code</code> (inner app,
+<code>go build ./...</code> exit 0, only cosmetic <code>-lobjc</code>
+cgo linker warnings), the root meta-repo
+(<code>go build ./internal/... ./cmd/... ./tests/...</code> exit 0),
+<code>helix_qa</code> (first-party <code>cmd/pkg/internal</code> exit
+0), and <code>containers</code> (<code>go build ./...</code> exit 0).
+<code>go vet</code> was clean across all four. The most serious
+<em>functional</em> defects are concentrated, not pervasive: the
+<strong>root meta-repo’s only binary is a disabled stub</strong>
+(<code>cmd/security-test/main.go</code> prints “SECURITY TESTING
+TEMPORARILY DISABLED”), and <strong>helix_qa’s
+<code>list --banks banks</code> command hard-fails</strong> on a
+data-consistency bug (a stray <code>title:</code> instead of
+<code>name:</code> in <code>banks/atmosphere.yaml</code> aborts loading
+the whole directory). The biggest <strong>anti-bluff (CONST-035)
+risks</strong> are documentation-vs-reality gaps: the root meta-repo
+carries <strong>106 root <code>.md</code> files</strong> (~95 stale
+planning/“COMPLETION”/“CERTIFICATE” docs that contradict each other) and
+<code>helix_code</code> carries <strong>84 root <code>.md</code>
+“COMPLETION” docs</strong> asserting completeness that directly
+conflicts with live stubs (FAISS simulation, single-node-only consensus,
+six error-stub providers, Windows/macOS capture stubs). Real functional
+gaps in the inner app include
+<code>internal/memory/providers/faiss_provider.go</code> (a FAISS
+provider that loads no FAISS — brute-force “simulation”),
+<code>internal/worker/consensus.go:212</code> (multi-peer vote transport
+unimplemented — consensus non-functional past one node), and
+<code>internal/providers/ai_integration.go:1771+</code>
+(Cohere/HuggingFace/Mistral-cloud/CharacterAI/Replika/Anima are error
+stubs — though beyond the CONST-039 required set). Test coverage is
+<strong>structurally hollow in the root meta-repo</strong> (2
+no-assertion <code>t.Log</code> stubs guarding ~2900 LOC, a stale
+<code>coverage.out</code> referencing a deleted
+<code>Example_Projects/Plandex</code> tree) while the inner app and
+helix_qa have large test corpora (767 and 359 test files respectively)
+that <em>compile</em> but were <strong>not executed</strong> here
+(infra-bound; <code>-race</code> not run). Tooling is uneven:
+<code>helix_code</code> has <code>.snyk</code> + SonarQube config (with
+a name mismatch: config expects <code>coverage.out</code>, repo commits
+<code>unit_coverage.out</code>), while <strong>helix_qa and the root
+meta-repo have no <code>.snyk</code>/SonarQube/govulncheck wiring at
+all</strong>, and <code>containers</code> lacks Snyk/Sonar/govulncheck.
+Concurrency was statically clean (<code>go vet</code> reported no race
+diagnostics) but <strong><code>-race</code> was not executed in any
+module — race status is unverified across the board</strong>. Net: the
+codebase compiles and is far from “broken,” but it is
+<strong>over-documented as finished</strong> relative to several live
+simulation/stub paths, has two concrete user-facing breakages to fix
+first, and has not been dynamically test-verified in this pass.</p>
+<hr />
+<h2 id="broken-failing-disabled-fix-first">2. Broken / failing /
+disabled (FIX-FIRST)</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Module</th>
+<th>What</th>
+<th>Evidence</th>
+<th>Suggested owning stream</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>root meta-repo</td>
+<td>Sole binary is a disabled stub — does no work</td>
+<td><code>cmd/security-test/main.go:11</code> prints “⚠️ SECURITY
+TESTING TEMPORARILY DISABLED”; line 18
+<code>// Placeholder for future security testing</code> (Assessment
+2)</td>
+<td>S1-Root-Binary</td>
+</tr>
+<tr>
+<td>helix_qa</td>
+<td><code>list --banks banks</code> hard-fails, aborting load of entire
+bank directory</td>
+<td><code>./helixqa list --banks banks</code> →
+<code>error: bank file banks/atmosphere.yaml: test case 167: CME-KA-AUDIO-MATRIX-001 missing name</code>;
+root cause: 7 cases use <code>title:</code> not <code>name:</code> (file
+has 169 <code>name:</code> vs 7 <code>title:</code>); a single valid
+bank loads fine (Assessment 3)</td>
+<td>S2-QA-BankLoader</td>
+</tr>
+<tr>
+<td>root meta-repo</td>
+<td>Makefile <code>scan-*</code>/<code>verify-foundation</code> target
+<code>-C HelixCode</code> (uppercase) — breaks on case-sensitive Linux
+hosts</td>
+<td>Makefile uses <code>$(MAKE) -C HelixCode</code>; actual dir is
+<code>helix_code</code>; resolves on macOS
+<code>core.ignorecase=true</code> only (Assessment 2)</td>
+<td>S1-Root-Binary</td>
+</tr>
+<tr>
+<td>root meta-repo</td>
+<td><code>verify-foundation</code> references a missing
+<code>bluff-detector.sh</code> and is documented as known-failing</td>
+<td><code>scripts/bluff-detector.sh</code> missing (Makefile skips with
+“Phase 4 deliverable”); Makefile comment: <code>verify-foundation</code>
+“exits 1 because verify-llmsverifier-pin-parity reports the known
+LLMsVerifier dual-pin divergence” (Assessment 2)</td>
+<td>S1-Root-Binary</td>
+</tr>
+<tr>
+<td>root meta-repo</td>
+<td><code>tests/e2e/core/{simple,auth_simple}_test.go</code> are
+no-assertion <code>t.Log</code> stubs masquerading as e2e tests (§11.4
+PASS-bluff)</td>
+<td><code>TestSimple</code> body = <code>t.Log(&quot;Simple test&quot;)</code>;
+<code>TestAuthSimple</code> body =
+<code>t.Log(&quot;Auth simple test&quot;)</code> (Assessment 2)</td>
+<td>S1-Root-Binary</td>
+</tr>
+<tr>
+<td>helix_code</td>
+<td>i18n command tests convert likely-real failures into silent SKIPs
+(anti-bluff smell)</td>
+<td><code>cmd/helix_config/main_i18n_test.go:159,314,451</code>
+<code>t.Skipf(&quot;... short-circuited before printing — config.SaveHelixConfig likely failed&quot;)</code>
+— 48 total non-SKIP-OK, non-<code>Short()</code> skips (Assessment
+1)</td>
+<td>S3-Inner-AntiBluff</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="dead-code-whole-features-unconnected">3. Dead code (whole
+features unconnected)</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Module</th>
+<th>Suspect (path)</th>
+<th>Why suspected</th>
+<th>Verification needed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>root meta-repo</td>
+<td><code>internal/security</code> (913+613 LOC),
+<code>internal/fix</code> (885 LOC), <code>internal/testing</code> (567
+LOC), <code>internal/theme/theme.go</code></td>
+<td>~2965 LOC reachable from no runnable binary;
+<code>cmd/security-test/main.go</code> (only <code>main</code>) imports
+none; only intra-cluster imports exist (Assessment 2)</td>
+<td>Decide: wire to the (re-enabled) security-test binary, or
+delete</td>
+</tr>
+<tr>
+<td>root meta-repo</td>
+<td><code>coverage.out</code></td>
+<td>Stale: 60/61 lines reference deleted
+<code>dev.helix.code/Example_Projects/Plandex/...</code> tree; also
+CONST-053 build-artifact-in-VCS concern (Assessment 2)</td>
+<td>Regenerate or remove + gitignore</td>
+</tr>
+<tr>
+<td>helix_code</td>
+<td><code>demo_cross_provider_sharing.go</code>,
+<code>demo_model_management.go</code>,
+<code>simple_test_runner.go</code>,
+<code>test_model_management.go</code> (root
+<code>package main</code>)</td>
+<td>Dead <code>package main</code> funcs, 0 callers, wired to no
+entrypoint (only <code>main.go</code> has <code>func main</code>)
+(Assessment 1)</td>
+<td>Delete or wire to a real command</td>
+</tr>
+<tr>
+<td>helix_code</td>
+<td><code>internal/server</code> <code>notImplemented</code>
+handler</td>
+<td>Referenced only in <code>handlers_test.go:941</code>; 0
+production-route refs — dead helper (Assessment 1)</td>
+<td>Confirm no route intends to use it; delete</td>
+</tr>
+<tr>
+<td>helix_code</td>
+<td><code>internal/tools/lsp_fakeserver/main.go</code></td>
+<td>“fake server” in production <code>internal/</code> tree, returns
+<code>&quot;method not implemented by fake server&quot;</code> (line 155) —
+placement violates no-mocks-in-prod unless test-only infra (Assessment
+1)</td>
+<td>Confirm test-only; relocate out of <code>internal/</code> or
+document</td>
+</tr>
+<tr>
+<td>containers</td>
+<td><code>pkg/lazyservice/orchestrator.go</code></td>
+<td>Strongest suspect: <strong>0 importers AND 0 test files</strong>;
+unwired and untested (Assessment 5)</td>
+<td>Wire a consumer + add tests, or remove</td>
+</tr>
+<tr>
+<td>containers</td>
+<td><code>pkg/orchestrator</code>, <code>pkg/policy</code>,
+<code>pkg/serviceregistry</code>, <code>pkg/crossbuild</code>,
+<code>pkg/brokertest</code></td>
+<td>0 internal/cmd/helix_code/challenges importers; tested-only library
+surface awaiting consumers; <code>crossbuild</code> “may be exercised
+only via challenges scripts — unverified” (Assessment 5)</td>
+<td>Trace challenges-script usage; wire or document as public API</td>
+</tr>
+<tr>
+<td>helix_qa</td>
+<td><code>cmd/helixqa-*</code> capture/vision binaries
+(<code>helixqa-lpips</code>, <code>helixqa-omniparser</code>, etc.)</td>
+<td>“<strong>unverified</strong> whether every binary is invoked by the
+orchestrator vs operator-run standalone” (Assessment 3)</td>
+<td>Full import-graph trace to classify standalone vs wired</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="test-coverage-gaps-by-module-test-type">4. Test-coverage gaps by
+module &amp; test-type</h2>
+<p>Legend: present (P) / missing or not-evidenced (—) /
+unverified-present (?). “Present” means test files exist and compile;
+<strong>none were executed in this pass.</strong></p>
+<p><strong>helix_code (inner app)</strong> — 767 test files;
+<code>go vet</code> clean. - unit: P (compile-clean) · integration: ?
+(<code>-tags=integration</code>, not run) · e2e: ?
+(<code>tests/e2e/challenges/cmd/runner</code>, not run) · security: ?
+(<code>tests/security/</code>, not run) · stress: ? (Makefile
+<code>stress-chaos</code> targets exist) · chaos: ? ·
+performance/benchmark: ? (<code>tests/performance/</code>) · UI/UX: —
+(Fyne/tview apps present, no evidenced UI test) · Challenges: ? ·
+helix_qa: ? — <strong>Gap: dynamic execution + <code>-race</code> never
+run; UI/UX automation unevidenced.</strong></p>
+<p><strong>root meta-repo</strong> — only 2 test files, both
+no-assertion stubs. - unit: — (zero real unit tests over ~2900 LOC of
+<code>internal/</code>) · integration: — · e2e: —
+(<code>tests/e2e/core/*</code> are <code>t.Log</code> stubs) · all other
+types: — · Challenges: P (shell challenges with proper SKIP-OK markers,
+<code>tests/e2e/challenges/*.sh</code>) — <strong>Gap: near-total — the
+dead security/fix/testing cluster has no real tests of any
+type.</strong></p>
+<p><strong>helix_qa</strong> — 359 first-party test files;
+<code>go vet</code> clean; 0 bare skips. - unit: P · integration: ? ·
+e2e: ? · security/stress/chaos/perf/benchmark: ? (not run) · UI/UX: ?
+(vision/capture binaries) · Challenges/helix_qa: P (this IS the QA
+platform) — <strong>Gap: Windows/macOS capture paths are stubs (see
+§2/§8), so any “complete” claim on those platforms is unevidenced;
+<code>-race</code> not run.</strong></p>
+<p><strong>containers</strong> — 161 test files; test packages compile.
+- unit: P · integration: ? · e2e: ? · security: — (no evidenced suite) ·
+stress/chaos: ? (Makefile <code>anti-bluff-mutation</code>,
+<code>test-race</code>) · performance/benchmark: — · UI/UX: n/a ·
+Challenges/helix_qa: ? — <strong>Gaps: <code>pkg/lazyservice</code> has
+zero tests; orphan packages tested-only; no security/perf suites
+evidenced.</strong></p>
+<p><strong>NOT ASSESSED (no test-coverage data):</strong> challenges,
+security, assets, github_pages_website, dependencies/*, cli_agents,
+cli_agents_resources.</p>
+<hr />
+<h2 id="tooling-gaps-snyk-sonarqube-govulncheck-race-profiling">5.
+Tooling gaps (Snyk / SonarQube / govulncheck / race / profiling)</h2>
+<p>Project bans hosted CI (Rule 1). Close each gap with a containerized
+run via the <code>./helix</code> facade / <code>containers</code>
+submodule <code>pkg/boot</code>+<code>pkg/compose</code> (§11.4.76),
+invoked from Makefile/script targets — never hosted pipelines, never
+hand-run <code>docker</code>/<code>podman</code>.</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>Module</th>
+<th>Snyk</th>
+<th>SonarQube</th>
+<th>govulncheck</th>
+<th><code>-race</code></th>
+<th>profiling</th>
+<th>How to close (containerized)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>helix_code</td>
+<td>P (<code>.snyk</code>)</td>
+<td>P (<code>sonar-project.properties</code>) but
+<strong><code>coverage.out</code> vs committed
+<code>unit_coverage.out</code> name mismatch — scan success
+unverified</strong></td>
+<td>referenced in Makefile + <code>scripts/run-all-tests.sh</code></td>
+<td>referenced (run_all_tests.sh:127, Makefile stress/chaos) but
+<strong>not executed here</strong></td>
+<td><code>internal/pprofutil</code> pkg exists</td>
+<td>Fix coverage-path mismatch; add Compose service running
+<code>govulncheck ./...</code> + <code>go test -race</code> in
+container; capture output as evidence</td>
+</tr>
+<tr>
+<td>root meta-repo</td>
+<td>— (none at root)</td>
+<td>— (none at root)</td>
+<td>only in <code>scripts/release-gate-test.sh</code></td>
+<td>only in release-gate/summary scripts</td>
+<td>—</td>
+<td>Add root <code>.snyk</code> + <code>sonar-project.properties</code>
+(or document that root inherits inner-app scans); add containerized
+govulncheck/race targets to root Makefile</td>
+</tr>
+<tr>
+<td>helix_qa</td>
+<td>—</td>
+<td>—</td>
+<td>— (not in Makefile/scripts)</td>
+<td>P (<code>Makefile test-race</code>) but not run</td>
+<td>—</td>
+<td>Add <code>.snyk</code> + SonarQube config; add containerized
+<code>govulncheck</code> target; wire <code>.go-mutesting.yml</code>
+(present) into a gate</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>P (<code>Makefile test-race</code>,
+<code>scripts/anti-bluff/lib/go.sh</code>)</td>
+<td>—</td>
+<td>Add <code>.snyk</code> + SonarQube + containerized
+<code>govulncheck</code>; run existing <code>anti-bluff-mutation</code>
+target as evidence</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cross-cutting:</strong> <code>-race</code> and
+<code>govulncheck</code> were <strong>not executed in any
+module</strong> during assessment — every “race-clean” statement is
+static-vet-only and <strong>unverified</strong>. NOT ASSESSED modules
+have no tooling data.</p>
+<hr />
+<h2 id="concurrency-safety-risks">6. Concurrency-safety risks</h2>
+<p>All entries are <strong>static suspicions; none
+runtime-confirmed</strong> (<code>-race</code> not run anywhere).</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Module</th>
+<th>Area/file:func</th>
+<th>Suspected issue</th>
+<th>Fix direction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>helix_code</td>
+<td><code>internal/worker/consensus.go:212</code> (election path)</td>
+<td>Candidate state never resolves when vote-request transport “is NOT
+implemented” — logic dead-loop, not a data race</td>
+<td>Implement multi-peer vote transport; add bounded election timeout +
+non-blocking state machine</td>
+</tr>
+<tr>
+<td>helix_code</td>
+<td><code>internal/tools/lsp_fakeserver/main.go</code></td>
+<td>Long-lived jsonrpc2 server living in production tree</td>
+<td>Relocate to test-only infra; bound lifecycle</td>
+</tr>
+<tr>
+<td>helix_code</td>
+<td>31 <code>time.Sleep</code> in prod
+<code>internal</code>/<code>cmd</code>; 40 <code>go func()</code>
+launches</td>
+<td>Sleeps in prod paths = timing/blocking suspects; 1044
+<code>.Lock()</code> calls not audited for missing
+<code>defer Unlock()</code></td>
+<td>Replace fixed sleeps with context-cancellable waits; audit each
+<code>Lock</code> for paired <code>defer Unlock</code></td>
+</tr>
+<tr>
+<td>containers</td>
+<td><code>pkg/monitor/system.go:51</code> (<code>Sleep 50ms</code>),
+<code>pkg/health/helix_infra.go:72</code> (<code>Sleep 1s</code>) in
+poll/wait loops</td>
+<td>Potential blocking if not context-cancellable</td>
+<td>Make poll loops context-aware; non-blocking select on
+ctx.Done()</td>
+</tr>
+<tr>
+<td>containers</td>
+<td><code>cmd/distributed-test/main.go:341</code>
+(<code>Sleep 5s</code>)</td>
+<td>Fixed sleep in CLI flow → flakiness/timing dependence</td>
+<td>Replace with readiness probe / poll-until-ready</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>21 <code>context.Background()</code> in lib/cmd</td>
+<td>Ungoverned cancellation — caller cannot time out</td>
+<td>Thread caller-supplied <code>ctx</code> with deadlines</td>
+</tr>
+<tr>
+<td>containers</td>
+<td><code>pkg/lazyservice</code> <code>sync</code>-based on-demand
+start</td>
+<td>Locking unproven — exercised by no caller</td>
+<td>Add integration test exercising lazy-init under contention</td>
+</tr>
+<tr>
+<td>helix_qa</td>
+<td><code>pkg/capture/windows_capture.go:readFrames</code></td>
+<td>No-op goroutine → silent hang / missing output on Windows (not a
+race)</td>
+<td>Implement frame reading; or fail-fast with honest error</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="docs-user-manuals-video-courses-website-diagrams-sql-gaps">7.
+Docs / user manuals / video courses / website / diagrams / SQL gaps</h2>
+<ul>
+<li><strong>Severe doc bloat + anti-bluff contradiction (root
+meta-repo):</strong> <strong>106 root <code>.md</code> files</strong> —
+the cascaded governance set (<code>CLAUDE.md</code> 193KB,
+<code>AGENTS.md</code> 205KB, <code>CRUSH.md</code>,
+<code>QWEN.md</code>, <code>CONSTITUTION.md</code>) plus <strong>~95
+stale planning docs</strong> all timestamped <code>Jun 3 14:40</code>
+(single bulk import). Multiple competing
+“FINAL”/“COMPLETION”/“COMPREHENSIVE” reports contradict each other.
+<code>README.md</code> claims “Version 1.0.0 / Phase 1 Completed” with
+feature lists (DB schema, JWT auth) that <strong>live in the inner
+submodule, not this meta-repo</strong> — README does not describe the
+meta-repo’s actual content (the dead security cluster). Committed binary
+exports <code>README.html</code> (157KB), <code>README.pdf</code>
+(211KB). <strong>Action: consolidate the ~95 planning docs into one
+authoritative doc; rewrite root README to describe the meta-repo’s real
+contents.</strong> (Assessment 2)</li>
+<li><strong>Completion docs overstate state (helix_code):</strong>
+<strong>84 root <code>.md</code></strong> “COMPLETION”/“CERTIFICATE”
+docs (<code>PROJECT_COMPLETION_CERTIFICATE.md</code>,
+<code>FINAL_COMPLETION_*</code>, <code>EXECUTIVE_TEST_SUMMARY.md</code>)
+assert completeness that conflicts with live stubs (FAISS sim, consensus
+stub, six error-stub providers). CONST-035 / Rule 9 risk. Committed
+<code>README.pdf</code>. <strong>Action: reconcile docs to actual
+capability; demote false-finished claims.</strong> (Assessment 1)</li>
+<li><strong>Completion docs vs live stubs (helix_qa):</strong> many
+<code>*_COMPLETE.md</code> / <code>PROJECT_COMPLETE.md</code> “do not
+match” the live Windows-capture/screenshot stubs and the bank-loader bug
+— “completion docs overstate state (unverified beyond the specific stubs
+cited).” (Assessment 3)</li>
+<li><strong>Diagrams/SQL/video courses:</strong> root meta-repo carries
+<code>VIDEO_COURSE_CURRICULUM.md</code> and
+<code>WEBSITE_UPDATE_SUMMARY.md</code> among the stale set;
+<code>github_pages_website</code> and <code>assets</code> submodules are
+<strong>NOT ASSESSED</strong>. SQL schema docs were not separately
+evidenced. <strong>No evidence either way — do not claim complete or
+missing.</strong></li>
+<li><strong>containers docs appear matched</strong> for the consumed
+core (<code>pkg/boot</code>/<code>compose</code>/<code>health</code>),
+with full governance triplets
+(<code>.md</code>+<code>.html</code>+<code>.pdf</code>); doc coverage
+for orphan packages (lazyservice/orchestrator/policy) “not individually
+verified.” (Assessment 5)</li>
+</ul>
+<hr />
+<h2 id="phased-implementation-plan">8. Phased implementation plan</h2>
+<p>Dependency-ordered. Phase 1 fixes what §2 <em>proves</em> broken.
+Every exit criterion requires captured terminal output (Rule 8/9,
+§11.4.5/§11.4.69). All long runs background per §11.4.89;
+subagent-driven per §11.4.70.</p>
+<h3 id="phase-1-fix-first-proven-brokendisabled">Phase 1 — Fix-first
+(proven broken/disabled)</h3>
+<ul>
+<li><strong>Stream 1A — Root security-test binary</strong> — re-enable
+or honestly retire <code>cmd/security-test/main.go</code> (currently a
+disabled stub); decide fate of the unwired
+<code>internal/{security,fix,testing}</code> cluster (wire-or-delete). —
+<em>owned:</em> root meta-repo. — <em>tests:</em> unit (real assertions)
++ a Challenge exercising the re-enabled binary. — <em>exit:</em>
+<code>./bin/security-test</code> runs and produces real output (pasted);
+no “DISABLED/placeholder” string remains; §11.4.115
+RED-on-broken-then-GREEN captured.</li>
+<li><strong>Stream 1B — helix_qa bank-loader</strong> — fix the 7
+<code>title:</code>→<code>name:</code> cases in
+<code>banks/atmosphere.yaml</code> (and any siblings); make the loader
+resilient (report all bad cases, don’t abort whole dir on one). —
+<em>owned:</em> helix_qa. — <em>tests:</em> unit (loader rejects/reports
+per-case) + integration (<code>list --banks banks</code> lists all). —
+<em>exit:</em> <code>./helixqa list --banks banks</code> exits 0 listing
+every bank (pasted); RED test reproduces the abort on pre-fix data.</li>
+<li><strong>Stream 1C — Root Makefile portability + gates</strong> — fix
+<code>-C HelixCode</code>→<code>helix_code</code>; supply or remove
+<code>scripts/bluff-detector.sh</code>; resolve the known-failing
+<code>verify-foundation</code> LLMsVerifier dual-pin divergence. —
+<em>owned:</em> root meta-repo. — <em>tests:</em> a containerized run of
+each <code>scan-*</code>/<code>verify-foundation</code> target on a
+case-sensitive filesystem. — <em>exit:</em>
+<code>make verify-foundation</code> exits 0 with bluff-detector gate
+active (pasted).</li>
+<li><strong>Stream 1D — Real e2e tests (root)</strong> — replace
+<code>tests/e2e/core/{simple,auth_simple}_test.go</code>
+<code>t.Log</code> stubs with asserting tests. — <em>owned:</em> root
+meta-repo. — <em>tests:</em> e2e with real assertions. — <em>exit:</em>
+tests assert observable behavior and FAIL when the behavior is broken
+(mutation-proven, §1.1).</li>
+</ul>
+<h3 id="phase-2-anti-bluff-reconciliation-docs-code-silent-skip-removal">Phase
+2 — Anti-bluff reconciliation (docs ↔︎ code) + silent-skip removal</h3>
+<ul>
+<li><strong>Stream 2A — Doc consolidation (root)</strong> — collapse ~95
+stale planning <code>.md</code> into one authoritative doc; rewrite root
+README to describe the meta-repo’s true contents; regenerate/remove
+stale exports. — <em>owned:</em> root. — <em>tests:</em> a sync gate
+(Docs Chain §11.4.106). — <em>exit:</em> one tracked authoritative doc;
+README matches <code>internal/</code> reality; CM-SUMMARY-CLARITY gate
+passes.</li>
+<li><strong>Stream 2B — Completion-doc reconciliation (helix_code +
+helix_qa)</strong> — demote false-finished claims in the 84 + N
+“COMPLETION”/“CERTIFICATE” docs to match live stubs. — <em>owned:</em>
+helix_code, helix_qa. — <em>tests:</em> anti-bluff grep gate. —
+<em>exit:</em> no doc claims a stubbed feature complete (pasted
+grep).</li>
+<li><strong>Stream 2C — Silent-skip removal (helix_code)</strong> —
+convert the 48 non-SKIP-OK skips
+(esp. <code>cmd/helix_config/main_i18n_test.go:159/314/451</code>) into
+real failures or SKIP-OK-tagged honest skips. — <em>owned:</em>
+helix_code. — <em>tests:</em> the skips become assertions. —
+<em>exit:</em> <code>make no-silent-skips</code> exits 0 (pasted).</li>
+<li><strong>Stream 2D — Hygiene (root)</strong> — remove stale
+<code>coverage.out</code> (deleted-Plandex refs) + gitignore it; fix
+helix_code <code>coverage.out</code>↔︎<code>unit_coverage.out</code>
+SonarQube name mismatch. — <em>owned:</em> root, helix_code. —
+<em>exit:</em> CONST-053 audit clean; SonarQube scan runs (pasted).</li>
+</ul>
+<h3 id="phase-3-functional-stub-completion">Phase 3 — Functional stub
+completion</h3>
+<ul>
+<li><strong>Stream 3A — Memory/FAISS</strong> — implement real
+FAISS/IVF/GPU indexing in
+<code>internal/memory/providers/faiss_provider.go</code> (or rename +
+document as brute-force, removing “simulation”). — <em>owned:</em>
+helix_code. — <em>tests:</em> integration vs real index. —
+<em>exit:</em> config fields
+(<code>IndexType</code>/<code>NList</code>/<code>NProbe</code>) actually
+used; benchmark captured.</li>
+<li><strong>Stream 3B — Worker consensus</strong> — implement multi-peer
+vote-request transport (<code>internal/worker/consensus.go:212</code>).
+— <em>owned:</em> helix_code. — <em>tests:</em> integration (3+ node
+election) + chaos (process-death). — <em>exit:</em> leader elected
+across peers with captured evidence.</li>
+<li><strong>Stream 3C — Capture stubs (helix_qa)</strong> — implement
+<code>pkg/capture/windows_capture.go:108</code> frame reading,
+<code>pkg/screenshot/windows_engine.go:46</code> real read-back,
+<code>pkg/capture/macos_capture.go:313</code> ScreenCaptureKit (or
+honest SKIP per §11.4.81). — <em>owned:</em> helix_qa. — <em>tests:</em>
+per-OS captured-evidence (§11.4.81/§11.4.107 liveness). — <em>exit:</em>
+real frames captured per platform OR honest gap-cited SKIP.</li>
+<li><strong>Stream 3D — Provider stubs (helix_code)</strong> — implement
+or explicitly classify the six error-stub providers in
+<code>internal/providers/ai_integration.go:1771+</code> (note: beyond
+CONST-039 required set — may be legitimately deferred). —
+<em>owned:</em> helix_code. — <em>exit:</em> each provider either makes
+real calls or is documented as won’t-fix/deferred per §11.4.112.</li>
+</ul>
+<h3 id="phase-4-tooling-dead-code-resolution-dynamic-verification">Phase
+4 — Tooling, dead-code resolution, dynamic verification</h3>
+<ul>
+<li><strong>Stream 4A — Containerized scans</strong> — add
+<code>.snyk</code> + SonarQube + <code>govulncheck</code> +
+<code>-race</code> containerized targets to helix_qa, containers, and
+root (§11.4.76). — <em>owned:</em> all four. — <em>exit:</em> each scan
+runs in-container with output captured.</li>
+<li><strong>Stream 4B — Dead-code disposition</strong> — wire-or-delete
+<code>containers/pkg/lazyservice</code> (+ orphan pkgs), helix_code root
+demo orphans, <code>internal/server</code> <code>notImplemented</code>,
+<code>lsp_fakeserver</code>. — <em>owned:</em> containers, helix_code. —
+<em>exit:</em> import-graph proof no orphan remains, or each documented
+as public API.</li>
+<li><strong>Stream 4C — Dynamic test execution</strong> — actually run
+unit + integration + e2e + <code>-race</code> across all four modules
+via <code>make test-infra-up</code>. — <em>owned:</em> all four. —
+<em>exit:</em> pasted pass/fail with <code>-race</code>; current
+“compile-only/unverified” labels resolved.</li>
+<li><strong>Stream 4D — NOT-ASSESSED module sweep</strong> — commission
+fresh assessments for challenges, security, assets,
+github_pages_website, dependencies/<em>, cli_agents (rate-limited this
+round). — </em>owned:* orchestrator. — <em>exit:</em> evidence-backed
+report per module.</li>
+</ul>
+<hr />
+<h2 id="prioritized-first-actions-top-10">9. Prioritized first actions
+(top 10)</h2>
+<ol type="1">
+<li><strong>Fix <code>banks/atmosphere.yaml</code>
+<code>title:</code>→<code>name:</code> (7 cases) + make loader
+non-fatal</strong> — helix_qa — a core QA command
+(<code>list --banks banks</code>) is hard-broken today, blocking
+bank-driven QA. (Assessment 3)</li>
+<li><strong>Re-enable or honestly retire
+<code>cmd/security-test/main.go</code></strong> — root meta-repo — the
+meta-repo’s only binary currently does nothing; pure §11.4 PASS-bluff
+surface. (Assessment 2)</li>
+<li><strong>Fix Makefile
+<code>-C HelixCode</code>→<code>helix_code</code></strong> — root
+meta-repo — <code>scan-*</code>/<code>verify-foundation</code> silently
+break on any case-sensitive (Linux) host. (Assessment 2)</li>
+<li><strong>Replace <code>tests/e2e/core/*</code> <code>t.Log</code>
+stubs with asserting tests</strong> — root meta-repo — these PASS while
+asserting nothing; canonical anti-bluff defect. (Assessment 2)</li>
+<li><strong>Convert 48 silent skips
+(esp. <code>main_i18n_test.go:159/314/451</code>)</strong> — helix_code
+— they hide likely-real failures behind SKIP. (Assessment 1)</li>
+<li><strong>Remove stale <code>coverage.out</code> + fix
+<code>coverage.out</code>/<code>unit_coverage.out</code> Sonar
+mismatch</strong> — root + helix_code — stale artifact references a
+deleted tree; Sonar scan success is unverified. (Assessments 1, 2)</li>
+<li><strong>Decide fate of root
+<code>internal/{security,fix,testing}</code> cluster (~2965
+LOC)</strong> — root meta-repo — dead-or-feature; either wire to the
+re-enabled binary or delete. (Assessment 2)</li>
+<li><strong>Run <code>-race</code> + <code>govulncheck</code>
+containerized across the 4 assessed modules</strong> — all — race/vuln
+status is currently <em>unverified</em> everywhere. (Assessments 1–3,
+5)</li>
+<li><strong>Resolve <code>containers/pkg/lazyservice</code> (unwired AND
+untested)</strong> — containers — strongest dead-code suspect; wire+test
+or delete. (Assessment 5)</li>
+<li><strong>Reconcile root + helix_code completion docs to live
+stubs</strong> — root, helix_code — 106 + 84 <code>.md</code> over-claim
+“complete” against real simulation/stub paths (CONST-035 / Rule 9).
+(Assessments 1, 2)</li>
+</ol>
+<blockquote>
+<p><strong>Reminder for the next wave:</strong> before acting,
+re-commission the 12 rate-limited assessments (§8 Stream 4D) —
+<code>challenges</code>, <code>security</code>, <code>assets</code>,
+<code>github_pages_website</code>, <code>dependencies/*</code>,
+<code>cli_agents*</code> have <strong>zero evidence</strong> in this
+report and must not be treated as either clean or broken. ## Sources
+verified Sources verified 2026-06-09: internal HelixCode
+consolidation/planning document — no third-party-service instructions;
+cross-referenced against project state (docs/Issues.md, docs/Fixed.md,
+.gitmodules, docs/CONTINUATION.md) as of 2026-06-09.</p>
+</blockquote>
+</body>
+</html>

@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>COMPLETE_SECURITY_GUIDE</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">COMPLETE_SECURITY_GUIDE</h1>
+</header>
+<h1 id="helixcode-security-guide">HelixCode Security Guide</h1>
+<h2 id="overview">Overview</h2>
+<p>HelixCode implements a comprehensive, zero-tolerance security policy
+designed for enterprise-grade distributed AI development platforms. This
+guide covers all security aspects including authentication,
+authorization, input validation, network security, and automated
+security scanning.</p>
+<h2 id="security-principles">Security Principles</h2>
+<h3 id="zero-tolerance-policy">Zero-Tolerance Policy</h3>
+<p>HelixCode enforces a <strong>zero-tolerance security policy</strong>
+where: - <strong>Critical vulnerabilities</strong>: 0 acceptable -
+<strong>High-severity vulnerabilities</strong>: 0 acceptable -
+<strong>Security hotspots</strong>: Must be addressed - <strong>Code
+quality issues</strong>: Must be fixed before production</p>
+<h3 id="defense-in-depth">Defense in Depth</h3>
+<p>Security is implemented at multiple layers: 1. <strong>Network
+Layer</strong>: TLS, rate limiting, firewall rules 2.
+<strong>Application Layer</strong>: Input validation, authentication,
+authorization 3. <strong>Data Layer</strong>: Encryption, access
+controls, audit logging 4. <strong>Infrastructure Layer</strong>:
+Container security, orchestration policies</p>
+<h2 id="authentication-authorization">Authentication &amp;
+Authorization</h2>
+<h3 id="jwt-based-authentication">JWT-Based Authentication</h3>
+<p>HelixCode uses JSON Web Tokens (JWT) for stateless
+authentication:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">auth</span><span class="kw">:</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">jwt_secret</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${HELIX_AUTH_JWT_SECRET}&quot;</span><span class="co">  # 32+ byte secret required</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">token_expiry</span><span class="kw">:</span><span class="at"> 24h</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">session_expiry</span><span class="kw">:</span><span class="at"> </span><span class="dv">604800</span><span class="co">  # 7 days</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">bcrypt_cost</span><span class="kw">:</span><span class="at"> </span><span class="dv">12</span></span></code></pre></div>
+<p><strong>Security Requirements:</strong> - JWT secrets must be at
+least 32 bytes - Secrets stored in environment variables only - Tokens
+expire within 24 hours - Bcrypt cost factor of 12 for password
+hashing</p>
+<h3 id="session-management">Session Management</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Session <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    ID        <span class="dt">string</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    UserID    <span class="dt">string</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    Token     <span class="dt">string</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    ExpiresAt time<span class="op">.</span>Time</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    CreatedAt time<span class="op">.</span>Time</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Features:</strong> - Automatic session cleanup - Concurrent
+session limits per user - Session invalidation on logout - Redis-backed
+session storage</p>
+<h3 id="role-based-access-control-rbac">Role-Based Access Control
+(RBAC)</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Claims <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    UserID   <span class="dt">string</span>   <span class="st">`json:&quot;user_id&quot;`</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    Username <span class="dt">string</span>   <span class="st">`json:&quot;username&quot;`</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    Roles    <span class="op">[]</span><span class="dt">string</span> <span class="st">`json:&quot;roles&quot;`</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    jwt<span class="op">.</span>RegisteredClaims</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Built-in Roles:</strong> - <code>admin</code>: Full system
+access - <code>developer</code>: Code execution and project management -
+<code>user</code>: Basic platform access - <code>worker</code>:
+Distributed task execution</p>
+<h2 id="input-validation-sanitization">Input Validation &amp;
+Sanitization</h2>
+<h3 id="security-manager">Security Manager</h3>
+<p>The <code>SecurityManager</code> provides comprehensive input
+validation:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SecurityManager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    logger         <span class="op">*</span>logging<span class="op">.</span>Logger</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    scanResults    <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>FeatureScanResult</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    securityScore  <span class="dt">int</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    criticalIssues <span class="dt">int</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    highIssues     <span class="dt">int</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    mutex          sync<span class="op">.</span>RWMutex</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="input-validation-rules">Input Validation Rules</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Email validation</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>err <span class="op">:=</span> manager<span class="op">.</span>ValidateEmail<span class="op">(</span>email<span class="op">)</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">// URL validation</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>err <span class="op">:=</span> manager<span class="op">.</span>ValidateURL<span class="op">(</span>url<span class="op">)</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">// UUID validation</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>err <span class="op">:=</span> manager<span class="op">.</span>ValidateUUID<span class="op">(</span>id<span class="op">)</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">// JSON validation</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>err <span class="op">:=</span> manager<span class="op">.</span>ValidateJSON<span class="op">(</span>data<span class="op">)</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">// Custom validation rules</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>rule <span class="op">:=</span> <span class="op">&amp;</span>ValidationRule<span class="op">{</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    Pattern<span class="op">:</span>   <span class="st">`^[a-z][a-z0-9-]{2,30}$`</span><span class="op">,</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    Message<span class="op">:</span>   <span class="st">&quot;Invalid project name format&quot;</span><span class="op">,</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    MaxLength<span class="op">:</span> <span class="dv">31</span><span class="op">,</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="path-traversal-prevention">Path Traversal Prevention</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Validate file path (prevent traversal)</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>err <span class="op">:=</span> manager<span class="op">.</span>ValidatePath<span class="op">(</span>path<span class="op">,</span> basePath<span class="op">)</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Path contains traversal attempt</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Safe path joining</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>safePath <span class="op">:=</span> manager<span class="op">.</span>SafeJoinPath<span class="op">(</span>basePath<span class="op">,</span> userPath<span class="op">)</span></span></code></pre></div>
+<h3 id="command-injection-prevention">Command Injection Prevention</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Validate shell command</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>err <span class="op">:=</span> manager<span class="op">.</span>ValidateCommand<span class="op">(</span>cmd<span class="op">,</span> <span class="op">&amp;</span>CommandRules<span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    AllowedCommands<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;git&quot;</span><span class="op">,</span> <span class="st">&quot;go&quot;</span><span class="op">,</span> <span class="st">&quot;npm&quot;</span><span class="op">},</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    BlockedPatterns<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;;&quot;</span><span class="op">,</span> <span class="st">&quot;&amp;&amp;&quot;</span><span class="op">,</span> <span class="st">&quot;||&quot;</span><span class="op">,</span> <span class="st">&quot;|&quot;</span><span class="op">,</span> <span class="st">&quot;`&quot;</span><span class="op">},</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="op">})</span></span></code></pre></div>
+<h3 id="input-sanitization">Input Sanitization</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Sanitize HTML</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>clean <span class="op">:=</span> manager<span class="op">.</span>SanitizeHTML<span class="op">(</span>input<span class="op">)</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">// Sanitize for SQL (use prepared statements instead)</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>clean <span class="op">:=</span> manager<span class="op">.</span>SanitizeSQL<span class="op">(</span>input<span class="op">)</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Sanitize for shell</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>clean <span class="op">:=</span> manager<span class="op">.</span>SanitizeShell<span class="op">(</span>input<span class="op">)</span></span></code></pre></div>
+<h2 id="network-security">Network Security</h2>
+<h3 id="tls-configuration">TLS Configuration</h3>
+<p><strong>Production Requirements:</strong> - TLS 1.3 minimum - Strong
+cipher suites only - Certificate pinning for APIs - HSTS headers
+enabled</p>
+<h3 id="security-headers">Security Headers</h3>
+<p>Applied to all HTTP responses:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Security headers applied:</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">// - Content-Security-Policy</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">// - X-Content-Type-Options: nosniff</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">// - X-Frame-Options: DENY</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">// - X-XSS-Protection: 1; mode=block</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">// - Strict-Transport-Security: max-age=31536000</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">// - X-Permitted-Cross-Domain-Policies: none</span></span></code></pre></div>
+<h3 id="rate-limiting">Rate Limiting</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>limiter <span class="op">:=</span> security<span class="op">.</span>NewRateLimiter<span class="op">(&amp;</span>RateLimitConfig<span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    RequestsPerMinute<span class="op">:</span> <span class="dv">60</span><span class="op">,</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    BurstSize<span class="op">:</span>        <span class="dv">10</span><span class="op">,</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="op">})</span></span></code></pre></div>
+<p><strong>Rate Limits:</strong> - API endpoints: 60 requests/minute -
+Authentication: 5 attempts/minute - File uploads: 10 MB/hour - LLM
+requests: Provider-specific limits</p>
+<h3 id="cors-configuration">CORS Configuration</h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">server</span><span class="kw">:</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cors</span><span class="kw">:</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">allowed_origins</span><span class="kw">:</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;https://app.helixcode.dev&quot;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;https://*.helixcode.dev&quot;</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">allowed_methods</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;GET&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;POST&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;PUT&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;DELETE&quot;</span><span class="kw">]</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">allowed_headers</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;Authorization&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;Content-Type&quot;</span><span class="kw">]</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">allow_credentials</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">max_age</span><span class="kw">:</span><span class="at"> </span><span class="dv">86400</span></span></code></pre></div>
+<h2 id="api-key-management">API Key Management</h2>
+<h3 id="secure-key-generation">Secure Key Generation</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Generate API key</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>key<span class="op">,</span> err <span class="op">:=</span> manager<span class="op">.</span>GenerateAPIKey<span class="op">()</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co">// Hash API key for storage</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>hash <span class="op">:=</span> manager<span class="op">.</span>HashAPIKey<span class="op">(</span>key<span class="op">)</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Verify API key</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>valid <span class="op">:=</span> manager<span class="op">.</span>VerifyAPIKey<span class="op">(</span>key<span class="op">,</span> hash<span class="op">)</span></span></code></pre></div>
+<p><strong>Key Security:</strong> - 32-byte cryptographically secure
+keys - Argon2id hashing for storage - Automatic key rotation - Audit
+logging of key usage</p>
+<h3 id="provider-specific-keys">Provider-Specific Keys</h3>
+<p><strong>Required Environment Variables:</strong></p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Authentication</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_AUTH_JWT_SECRET</span><span class="op">=</span>your-super-secure-jwt-secret</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Database</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_DATABASE_PASSWORD</span><span class="op">=</span>your-secure-database-password</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Redis</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_REDIS_PASSWORD</span><span class="op">=</span>your-secure-redis-password</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># LLM Providers (premium)</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="va">ANTHROPIC_API_KEY</span><span class="op">=</span>sk-ant-your-key</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="va">OPENAI_API_KEY</span><span class="op">=</span>sk-your-openai-key</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="va">GEMINI_API_KEY</span><span class="op">=</span>your-gemini-key</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Free providers (optional)</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="va">GITHUB_TOKEN</span><span class="op">=</span>ghp_your_github_token</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="va">OPENROUTER_API_KEY</span><span class="op">=</span>sk-or-your-key</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="va">XAI_API_KEY</span><span class="op">=</span>xai-your-key</span></code></pre></div>
+<h2 id="automated-security-scanning">Automated Security Scanning</h2>
+<h3 id="security-infrastructure">Security Infrastructure</h3>
+<p>HelixCode includes comprehensive security scanning:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run complete security scan</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="ex">docker-compose</span> <span class="at">-f</span> scripts/security_scan/docker-compose.security.yml up</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Execute security scan</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> exec helixcode-security-scanner /security-scripts/scan-all.sh</span></code></pre></div>
+<h3 id="sonarqube-integration">SonarQube Integration</h3>
+<p><strong>Code Quality Analysis:</strong> - Security hotspots detection
+- Code coverage analysis - Technical debt assessment - Vulnerability
+scanning</p>
+<p><strong>Configuration:</strong></p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sonarqube</span><span class="kw">:</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">host</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;http://sonarqube:9000&quot;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">project_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;helixcode&quot;</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">exclusions</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;**/vendor/**,**/test/**,**/mock/**&quot;</span></span></code></pre></div>
+<h3 id="snyk-integration">Snyk Integration</h3>
+<p><strong>Vulnerability Scanning:</strong> - Dependency vulnerability
+detection - License compliance checking - Container security scanning -
+Code vulnerability analysis</p>
+<p><strong>Zero-Tolerance Enforcement:</strong> - Critical
+vulnerabilities: 0 allowed - High vulnerabilities: 0 allowed -
+Medium/low: Must be reviewed</p>
+<h3 id="security-scan-results">Security Scan Results</h3>
+<div class="sourceCode" id="cb16"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="st">&quot;2024-01-01T00:00:00Z&quot;</span><span class="fu">,</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;project&quot;</span><span class="fu">:</span> <span class="st">&quot;HelixCode&quot;</span><span class="fu">,</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;version&quot;</span><span class="fu">:</span> <span class="st">&quot;1.0.0&quot;</span><span class="fu">,</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;sonarqube&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;status&quot;</span><span class="fu">:</span> <span class="st">&quot;scanned&quot;</span><span class="fu">,</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;security_hotspots&quot;</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;code_quality_score&quot;</span><span class="fu">:</span> <span class="dv">95</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;snyk&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;vulnerabilities&quot;</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;critical&quot;</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;high&quot;</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;status&quot;</span><span class="fu">:</span> <span class="st">&quot;scanned&quot;</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h2 id="container-security">Container Security</h2>
+<h3 id="docker-security-best-practices">Docker Security Best
+Practices</h3>
+<p><strong>Security Scanner Dockerfile:</strong></p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> golang:1.21-alpine <span class="kw">AS</span> builder</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Multi-stage build with minimal attack surface</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> alpine:3.18</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Production stage with runtime dependencies only</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">addgroup</span> <span class="at">-S</span> security <span class="kw">&amp;&amp;</span> <span class="ex">adduser</span> <span class="at">-S</span> <span class="at">-G</span> security security</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="kw">USER</span> security</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Non-root user execution</span></span></code></pre></div>
+<p><strong>Security Features:</strong> - Non-root user execution -
+Minimal base images - No unnecessary packages - Read-only filesystems
+where possible</p>
+<h3 id="container-orchestration">Container Orchestration</h3>
+<p><strong>Kubernetes Security:</strong></p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">apiVersion</span><span class="kw">:</span><span class="at"> v1</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">kind</span><span class="kw">:</span><span class="at"> Pod</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">metadata</span><span class="kw">:</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">name</span><span class="kw">:</span><span class="at"> helixcode-secure</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="fu">spec</span><span class="kw">:</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">securityContext</span><span class="kw">:</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">runAsNonRoot</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">runAsUser</span><span class="kw">:</span><span class="at"> </span><span class="dv">1001</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">fsGroup</span><span class="kw">:</span><span class="at"> </span><span class="dv">2000</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">containers</span><span class="kw">:</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> helixcode</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">securityContext</span><span class="kw">:</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">allowPrivilegeEscalation</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">readOnlyRootFilesystem</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">capabilities</span><span class="kw">:</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">drop</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;ALL&quot;</span><span class="kw">]</span></span></code></pre></div>
+<h2 id="data-protection">Data Protection</h2>
+<h3 id="database-security">Database Security</h3>
+<p><strong>PostgreSQL Configuration:</strong></p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">database</span><span class="kw">:</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">sslmode</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;require&quot;</span><span class="co">  # TLS required</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">host</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;postgres&quot;</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">user</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;helix&quot;</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">password</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${HELIX_DATABASE_PASSWORD}&quot;</span></span></code></pre></div>
+<p><strong>Security Features:</strong> - TLS encryption in transit -
+Row-level security (RLS) - Prepared statements only - Connection pooling
+limits</p>
+<h3 id="encryption-at-rest">Encryption at Rest</h3>
+<p><strong>Data Encryption:</strong> - Database: Transparent Data
+Encryption (TDE) - Files: AES-256 encryption - Backups: Encrypted
+storage - Secrets: HashiCorp Vault integration</p>
+<h3 id="audit-logging">Audit Logging</h3>
+<p><strong>Comprehensive Audit Trail:</strong></p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> AuditEvent <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    ID          <span class="dt">string</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    UserID      <span class="dt">string</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    Action      <span class="dt">string</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    Resource    <span class="dt">string</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    Timestamp   time<span class="op">.</span>Time</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    IPAddress   <span class="dt">string</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    UserAgent   <span class="dt">string</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    Success     <span class="dt">bool</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    Details     <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Logged Events:</strong> - Authentication attempts - API key
+usage - File operations - LLM requests - Administrative actions</p>
+<h2 id="llm-provider-security">LLM Provider Security</h2>
+<h3 id="provider-authentication">Provider Authentication</h3>
+<p><strong>Secure API Key Management:</strong> - Keys stored in
+environment variables - Never logged or exposed in responses - Automatic
+key rotation - Provider-specific rate limiting</p>
+<h3 id="request-security">Request Security</h3>
+<p><strong>LLM Request Validation:</strong> - Input sanitization before
+LLM processing - Output filtering for sensitive data - Request/response
+logging (without keys) - Provider failover security</p>
+<h3 id="free-vs-premium-providers">Free vs Premium Providers</h3>
+<p><strong>Free Providers (No Keys Required):</strong> - XAI (Grok): up
+to 1M context per xAI’s official model docs (the prior “2M” figure was
+stale), fast inference - OpenRouter: Multiple models, free tiers -
+GitHub Copilot: With subscription - Qwen: 2K requests/day</p>
+<p><strong>Premium Providers (API Keys Required):</strong> - Anthropic
+Claude: 200K context, advanced reasoning - Google Gemini: 2M context,
+multimodal - OpenAI: GPT-4, enterprise features - Azure OpenAI:
+Microsoft infrastructure</p>
+<h2 id="worker-security">Worker Security</h2>
+<h3 id="ssh-based-worker-authentication">SSH-Based Worker
+Authentication</h3>
+<p><strong>Secure Worker Connection:</strong></p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">workers</span><span class="kw">:</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">health_check_interval</span><span class="kw">:</span><span class="at"> </span><span class="dv">30</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">health_ttl</span><span class="kw">:</span><span class="at"> </span><span class="dv">120</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">max_concurrent_tasks</span><span class="kw">:</span><span class="at"> </span><span class="dv">10</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">ssh_key_path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/etc/helix/ssh_keys&quot;</span></span></code></pre></div>
+<p><strong>Security Features:</strong> - SSH key-based authentication
+only - No password authentication - Key rotation policies - Connection
+encryption</p>
+<h3 id="worker-auto-installation">Worker Auto-Installation</h3>
+<p><strong>Automated Secure Setup:</strong> - Automatic Helix CLI
+installation - Secure configuration deployment - Health monitoring and
+auto-recovery - Isolated execution environments</p>
+<h2 id="monitoring-alerting">Monitoring &amp; Alerting</h2>
+<h3 id="security-metrics">Security Metrics</h3>
+<p><strong>Real-time Monitoring:</strong></p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SecurityMetrics <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    CriticalIssues    <span class="dt">int</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    HighIssues        <span class="dt">int</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    SecurityScore     <span class="dt">int</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    FailedLogins      <span class="dt">int</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    BlockedRequests   <span class="dt">int</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    ActiveSessions    <span class="dt">int</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="alert-configuration">Alert Configuration</h3>
+<p><strong>Security Alerts:</strong> - Critical vulnerability detection
+- Authentication failures (brute force) - Unauthorized access attempts -
+Configuration changes - Security policy violations</p>
+<p><strong>Notification Channels:</strong></p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">notifications</span><span class="kw">:</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">slack</span><span class="kw">:</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">webhook_url</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${HELIX_SLACK_WEBHOOK_URL}&quot;</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">email</span><span class="kw">:</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">smtp_server</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;smtp.gmail.com&quot;</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">username</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${HELIX_EMAIL_USERNAME}&quot;</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">password</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${HELIX_EMAIL_PASSWORD}&quot;</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">telegram</span><span class="kw">:</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">bot_token</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${HELIX_TELEGRAM_BOT_TOKEN}&quot;</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">chat_id</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${HELIX_TELEGRAM_CHAT_ID}&quot;</span></span></code></pre></div>
+<h2 id="incident-response">Incident Response</h2>
+<h3 id="security-incident-process">Security Incident Process</h3>
+<ol type="1">
+<li><strong>Detection</strong>: Automated monitoring alerts</li>
+<li><strong>Assessment</strong>: Security team evaluation</li>
+<li><strong>Containment</strong>: Isolate affected systems</li>
+<li><strong>Eradication</strong>: Remove security threats</li>
+<li><strong>Recovery</strong>: Restore normal operations</li>
+<li><strong>Lessons Learned</strong>: Update security measures</li>
+</ol>
+<h3 id="breach-notification">Breach Notification</h3>
+<p><strong>Regulatory Compliance:</strong> - GDPR: 72-hour breach
+notification - CCPA: 45-day breach notification - Industry-specific
+requirements</p>
+<h2 id="compliance-standards">Compliance &amp; Standards</h2>
+<h3 id="security-standards">Security Standards</h3>
+<p><strong>Implemented Standards:</strong> - OWASP Top 10 protection -
+NIST Cybersecurity Framework - ISO 27001 controls - SOC 2 Type II
+requirements</p>
+<h3 id="compliance-features">Compliance Features</h3>
+<p><strong>Audit Controls:</strong> - Complete audit trails - Access
+logging - Change management - Security assessments</p>
+<h2 id="development-security">Development Security</h2>
+<h3 id="secure-development-practices">Secure Development Practices</h3>
+<p><strong>Code Review Requirements:</strong> - Security review for all
+code changes - Automated security scanning in CI/CD - Dependency
+vulnerability checks - Static application security testing (SAST)</p>
+<h3 id="cicd-security">CI/CD Security</h3>
+<p><strong>Security Gates:</strong></p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># .github/workflows/security.yml</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Security Scan</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="fu">  run</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    make security-scan</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    if [ $? -ne 0 ]; then</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>      echo &quot;Security scan failed - blocking deployment&quot;</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>      exit 1</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    fi</span></code></pre></div>
+<h2 id="production-deployment-security">Production Deployment
+Security</h2>
+<h3 id="infrastructure-security">Infrastructure Security</h3>
+<p><strong>Production Requirements:</strong> - Network segmentation -
+Zero-trust architecture - Multi-factor authentication - Regular security
+assessments</p>
+<h3 id="backup-security">Backup Security</h3>
+<p><strong>Secure Backups:</strong> - Encrypted backup storage - Access
+controls on backups - Backup integrity verification - Disaster recovery
+testing</p>
+<h2 id="security-testing">Security Testing</h2>
+<h3 id="automated-security-tests">Automated Security Tests</h3>
+<div class="sourceCode" id="cb25"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run security test suite</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> security-test</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Run vulnerability scans</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> vuln-scan</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Run penetration tests</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> pen-test</span></code></pre></div>
+<h3 id="security-test-categories">Security Test Categories</h3>
+<ul>
+<li><strong>Unit Tests</strong>: Security function validation</li>
+<li><strong>Integration Tests</strong>: Authentication flows</li>
+<li><strong>E2E Tests</strong>: Complete security scenarios</li>
+<li><strong>Penetration Tests</strong>: External attack simulation</li>
+</ul>
+<h2 id="emergency-procedures">Emergency Procedures</h2>
+<h3 id="security-emergency-contacts">Security Emergency Contacts</h3>
+<p><strong>Emergency Response Team:</strong> - Security Lead:
+security@helixcode.dev - DevOps Lead: devops@helixcode.dev -
+Legal/Compliance: legal@helixcode.dev</p>
+<h3 id="emergency-runbooks">Emergency Runbooks</h3>
+<p><strong>Available Runbooks:</strong> - Data breach response - DDoS
+mitigation - Ransomware response - System compromise recovery</p>
+<h2 id="security-updates-maintenance">Security Updates &amp;
+Maintenance</h2>
+<h3 id="regular-security-activities">Regular Security Activities</h3>
+<p><strong>Monthly:</strong> - Security patch deployment - Vulnerability
+scans - Access review - Security training</p>
+<p><strong>Quarterly:</strong> - Penetration testing - Security
+assessments - Compliance audits - Incident response drills</p>
+<p><strong>Annually:</strong> - Security architecture review -
+Third-party risk assessments - Business continuity testing</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>HelixCode’s comprehensive security implementation ensures
+enterprise-grade protection for distributed AI development. The
+zero-tolerance policy, defense-in-depth approach, and automated security
+scanning provide robust protection against modern threats while
+maintaining development productivity.</p>
+<p><strong>Key Security Strengths:</strong> - Zero-tolerance
+vulnerability policy - Comprehensive automated scanning -
+Defense-in-depth architecture - Enterprise authentication and
+authorization - Secure container and orchestration practices - Complete
+audit and compliance capabilities</p>
+<p>For additional security information, see the <a href="../docs/COMPLETE_API_REFERENCE.md">API Reference</a> and <a href="../docs/COMPLETE_DEPLOYMENT_GUIDE.md">Deployment Guide</a>.</p>
+<h2 id="sources-verified">Sources verified</h2>
+<p>Sources verified 2026-05-29:
+https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+; https://docs.x.ai/docs/models ;
+https://docs.podman.io/en/latest/markdown/podman-compose.1.html —
+Confirmed against official sources on 2026-05-29: (1) OWASP Password
+Storage Cheat Sheet recommends <strong>Argon2id</strong> (m=19 MiB, t=2,
+p=1) as the primary password-hashing algorithm and <strong>bcrypt work
+factor ≥10</strong> for legacy systems — this doc’s
+<code>bcrypt_cost: 12</code> and Argon2id API-key hashing both meet
+current OWASP guidance. (2) xAI Grok context window is <strong>up to 1M
+tokens</strong> per the official model docs — the prior “2M context”
+claim in the Free Providers section was stale and has been
+corrected.</p>
+<p><strong>Negative findings / caveats (§11.4.99(B)):</strong> -
+<strong>Tool-vendor pages not re-fetched this session</strong> —
+SonarQube and Snyk are referenced only as integration names with config
+snippets (no version-pinned install instructions), so no version claim
+required re-verification. If a future revision pins SonarQube/Snyk
+versions or quotes their CLI flags, those MUST be re-verified against
+<code>https://docs.sonarsource.com/</code> and
+<code>https://docs.snyk.io/</code> per §11.4.99. - <strong>Rule-1 (No
+CI/CD) inconsistency, not a doc-staleness issue:</strong> §“CI/CD
+Security” still shows a <code>.github/workflows/security.yml</code>
+example, which contradicts HelixCode Rule 1 (No CI/CD Pipelines).
+Flagged here for a follow-up edit; out of scope for the §11.4.99
+latest-source pass (this is an internal-policy contradiction, not an
+external-docs-staleness defect). - <strong>xAI prompt caching
+unaddressed</strong> in xAI’s official docs (absence of documentation,
+not a confirmed capability either way).</content>
+<parameter name="filePath">docs/COMPLETE_SECURITY_GUIDE.md</p>
+</body>
+</html>

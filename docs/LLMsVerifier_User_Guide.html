@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>LLMsVerifier_User_Guide</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">LLMsVerifier_User_Guide</h1>
+</header>
+<h1 id="llmsverifier-integration-user-guide">LLMsVerifier Integration
+User Guide</h1>
+<p><strong>Version</strong>: 1.0.0<br />
+<strong>Date</strong>: 2026-04-30<br />
+<strong>Authority</strong>: CONST-036 through CONST-041</p>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol type="1">
+<li><a href="#overview">Overview</a></li>
+<li><a href="#architecture">Architecture</a></li>
+<li><a href="#configuration">Configuration</a></li>
+<li><a href="#environment-variables">Environment Variables</a></li>
+<li><a href="#api-endpoints">API Endpoints</a></li>
+<li><a href="#cli-usage">CLI Usage</a></li>
+<li><a href="#provider-integration">Provider Integration</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+<li><a href="#challenge-verification">Challenge Verification</a></li>
+</ol>
+<hr />
+<h2 id="overview">Overview</h2>
+<p>LLMsVerifier is the <strong>single source of truth</strong> for all
+model and provider metadata in HelixCode. It provides:</p>
+<ul>
+<li><strong>Model Discovery</strong>: Live model listings from 15+
+providers</li>
+<li><strong>Verification Scores</strong>: Real-time quality scores
+across 5 dimensions</li>
+<li><strong>Provider Health</strong>: Circuit-breaker protected health
+monitoring</li>
+<li><strong>Capability Flags</strong>: Dynamic capability detection
+(vision, tools, streaming, reasoning)</li>
+<li><strong>Fallback Models</strong>: 7 constitutional fallback models
+when verifier is unavailable</li>
+</ul>
+<h3 id="why-this-matters-anti-bluff">Why This Matters (Anti-Bluff)</h3>
+<p>Before this integration, model lists were <strong>hardcoded</strong>
+in multiple places: - CLI showed 3 fake models - Server API returned
+static JSON - Provider adapters hardcoded
+<code>SupportsVision: true/false</code></p>
+<p>Now, every model displayed to users comes from the verifier (or its
+cached replica). If the verifier is down, the constitutional fallback
+list ensures the system remains functional.</p>
+<hr />
+<h2 id="architecture">Architecture</h2>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                    HelixCode Application                     │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
+│  │   CLI       │  │   Server    │  │   ModelManager      │ │
+│  │             │  │             │  │                     │ │
+│  │ --list-models│  │ /api/v1/llm │  │ SelectOptimalModel()│ │
+│  │             │  │ /models     │  │                     │ │
+│  └──────┬──────┘  └──────┬──────┘  └──────────┬──────────┘ │
+│         │                │                     │            │
+│         └────────────────┼─────────────────────┘            │
+│                          │                                  │
+│              ┌───────────▼────────────┐                     │
+│              │  verifier.Adapter      │                     │
+│              │  - Two-tier cache      │                     │
+│              │  - Circuit breaker     │                     │
+│              │  - Score blending      │                     │
+│              └───────────┬────────────┘                     │
+│                          │                                  │
+│              ┌───────────▼────────────┐                     │
+│              │  verifier.Client       │                     │
+│              │  - REST API client     │                     │
+│              │  - Timeout: 30s        │                     │
+│              └───────────┬────────────┘                     │
+│                          │ HTTP                            │
+└──────────────────────────┼─────────────────────────────────┘
+                           │
+              ┌────────────▼─────────────┐
+              │   LLMsVerifier Service   │
+              │   http://localhost:8081  │
+              │                          │
+              │  /api/health             │
+              │  /api/models             │
+              │  /api/models/{id}        │
+              │  /api/scores             │
+              └──────────────────────────┘</code></pre>
+<h3 id="components">Components</h3>
+<table>
+<colgroup>
+<col style="width: 42%" />
+<col style="width: 23%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>REST Client</td>
+<td><code>internal/verifier/client.go</code></td>
+<td>HTTP client for verifier API</td>
+</tr>
+<tr>
+<td>Adapter</td>
+<td><code>internal/verifier/adapter.go</code></td>
+<td>Score bridge + cache interface</td>
+</tr>
+<tr>
+<td>Cache</td>
+<td><code>internal/verifier/cache.go</code></td>
+<td>Two-tier in-memory cache</td>
+</tr>
+<tr>
+<td>Health Monitor</td>
+<td><code>internal/verifier/health.go</code></td>
+<td>Circuit breaker</td>
+</tr>
+<tr>
+<td>Poller</td>
+<td><code>internal/verifier/poller.go</code></td>
+<td>Background update goroutine</td>
+</tr>
+<tr>
+<td>Bootstrap</td>
+<td><code>internal/verifier/bootstrap.go</code></td>
+<td>Application startup helper</td>
+</tr>
+<tr>
+<td>Bridge</td>
+<td><code>internal/llm/verifier_bridge.go</code></td>
+<td>Provider enrichment</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="configuration">Configuration</h2>
+<h3 id="minimal-config-configsverifier.yaml">Minimal Config
+(<code>configs/verifier.yaml</code>)</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">verifier</span><span class="kw">:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">mode</span><span class="kw">:</span><span class="at"> remote</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">endpoint</span><span class="kw">:</span><span class="at"> http://localhost:8081</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> 30s</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cache_ttl</span><span class="kw">:</span><span class="at"> 5m</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">polling_interval</span><span class="kw">:</span><span class="at"> 60s</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">scoring</span><span class="kw">:</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">weights</span><span class="kw">:</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">code_capability</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.40</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">responsiveness</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.20</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">reliability</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.20</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">feature_richness</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.15</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">value_proposition</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.05</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">min_acceptable_score</span><span class="kw">:</span><span class="at"> </span><span class="fl">6.0</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">health</span><span class="kw">:</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">failure_threshold</span><span class="kw">:</span><span class="at"> </span><span class="dv">5</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">recovery_threshold</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">circuit_breaker</span><span class="kw">:</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">half_open_timeout</span><span class="kw">:</span><span class="at"> 60s</span></span></code></pre></div>
+<h3 id="provider-specific-config">Provider-Specific Config</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">providers</span><span class="kw">:</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">openai</span><span class="kw">:</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">endpoint</span><span class="kw">:</span><span class="at"> https://api.openai.com/v1</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">models</span><span class="kw">:</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> gpt-4o</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> gpt-4o-mini</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">ollama</span><span class="kw">:</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">endpoint</span><span class="kw">:</span><span class="at"> http://localhost:11434</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">models</span><span class="kw">:</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> llama-3.2-3b</span></span></code></pre></div>
+<hr />
+<h2 id="environment-variables">Environment Variables</h2>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 28%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HELIX_VERIFIER_ENABLED</code></td>
+<td><code>false</code></td>
+<td>Master enable/disable</td>
+</tr>
+<tr>
+<td><code>HELIX_VERIFIER_ENDPOINT</code></td>
+<td><code>http://localhost:8081</code></td>
+<td>Verifier REST API URL</td>
+</tr>
+<tr>
+<td><code>HELIX_VERIFIER_API_KEY</code></td>
+<td><code>&quot;&quot;</code></td>
+<td>Optional auth key</td>
+</tr>
+<tr>
+<td><code>HELIX_VERIFIER_TIMEOUT</code></td>
+<td><code>30s</code></td>
+<td>Request timeout</td>
+</tr>
+<tr>
+<td><code>HELIX_VERIFIER_CACHE_TTL</code></td>
+<td><code>5m</code></td>
+<td>Cache TTL</td>
+</tr>
+<tr>
+<td><code>HELIX_VERIFIER_POLLING_INTERVAL</code></td>
+<td><code>60s</code></td>
+<td>Background poll interval</td>
+</tr>
+<tr>
+<td><code>HELIX_VERIFIER_MIN_SCORE</code></td>
+<td><code>6.0</code></td>
+<td>Minimum acceptable score</td>
+</tr>
+<tr>
+<td><code>OPENAI_API_KEY</code></td>
+<td><code>&quot;&quot;</code></td>
+<td>OpenAI provider key</td>
+</tr>
+<tr>
+<td><code>ANTHROPIC_API_KEY</code></td>
+<td><code>&quot;&quot;</code></td>
+<td>Anthropic provider key</td>
+</tr>
+<tr>
+<td><code>GEMINI_API_KEY</code></td>
+<td><code>&quot;&quot;</code></td>
+<td>Gemini provider key</td>
+</tr>
+<tr>
+<td><code>DEEPSEEK_API_KEY</code></td>
+<td><code>&quot;&quot;</code></td>
+<td>DeepSeek provider key</td>
+</tr>
+<tr>
+<td><code>GROQ_API_KEY</code></td>
+<td><code>&quot;&quot;</code></td>
+<td>Groq provider key</td>
+</tr>
+<tr>
+<td><code>MISTRAL_API_KEY</code></td>
+<td><code>&quot;&quot;</code></td>
+<td>Mistral provider key</td>
+</tr>
+<tr>
+<td><code>XAI_API_KEY</code></td>
+<td><code>&quot;&quot;</code></td>
+<td>xAI provider key</td>
+</tr>
+<tr>
+<td><code>OPENROUTER_API_KEY</code></td>
+<td><code>&quot;&quot;</code></td>
+<td>OpenRouter provider key</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="api-endpoints">API Endpoints</h2>
+<h3 id="list-models-verifier-aware">List Models (Verifier-Aware)</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://localhost:8080/api/v1/llm/models</span></code></pre></div>
+<p><strong>Response (verifier available)</strong>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;status&quot;</span><span class="fu">:</span> <span class="st">&quot;success&quot;</span><span class="fu">,</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;models&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;gpt-4o&quot;</span><span class="fu">,</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;GPT-4o&quot;</span><span class="fu">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;provider&quot;</span><span class="fu">:</span> <span class="st">&quot;openai&quot;</span><span class="fu">,</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;context_length&quot;</span><span class="fu">:</span> <span class="dv">128000</span><span class="fu">,</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;score&quot;</span><span class="fu">:</span> <span class="fl">9.1</span><span class="fu">,</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;tier&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;verified&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;status&quot;</span><span class="fu">:</span> <span class="st">&quot;available&quot;</span><span class="fu">,</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;supports_vision&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;supports_tools&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;source&quot;</span><span class="fu">:</span> <span class="st">&quot;verifier&quot;</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;count&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;source&quot;</span><span class="fu">:</span> <span class="st">&quot;verifier&quot;</span><span class="fu">,</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;last_updated&quot;</span><span class="fu">:</span> <span class="st">&quot;2026-04-30T20:00:00Z&quot;</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p><strong>Response (verifier unavailable)</strong>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;status&quot;</span><span class="fu">:</span> <span class="st">&quot;success&quot;</span><span class="fu">,</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;models&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="er">...</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;source&quot;</span><span class="fu">:</span> <span class="st">&quot;fallback&quot;</span><span class="fu">,</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;last_updated&quot;</span><span class="fu">:</span> <span class="st">&quot;2026-04-30T20:00:00Z&quot;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="list-providers">List Providers</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://localhost:8080/api/v1/llm/providers</span></code></pre></div>
+<hr />
+<h2 id="cli-usage">CLI Usage</h2>
+<h3 id="list-models">List Models</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./helixcode</span> <span class="at">--list-models</span></span></code></pre></div>
+<p>Output uses verifier data with 3-tier fallback: 1.
+<strong>Verifier</strong> — live model list from LLMsVerifier 2.
+<strong>Provider</strong> — Ollama /api/tags or equivalent 3.
+<strong>Fallback</strong> — 7 constitutional fallback models</p>
+<h3 id="select-optimal-model-internal">Select Optimal Model
+(Internal)</h3>
+<p>The <code>ModelManager.SelectOptimalModel()</code> blends: -
+<strong>60%</strong> verifier score (normalized 0-10) -
+<strong>40%</strong> local heuristic (capability, context, task,
+hardware)</p>
+<p>Task-specific boosts: - Code generation: +15% from verifier
+code_capability score - Planning/Analysis: +10% from verifier
+reliability score</p>
+<hr />
+<h2 id="provider-integration">Provider Integration</h2>
+<h3 id="supported-providers-minimum-set">Supported Providers (Minimum
+Set)</h3>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Type</th>
+<th>Auth Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenAI</td>
+<td>Cloud</td>
+<td>API Key</td>
+</tr>
+<tr>
+<td>Anthropic</td>
+<td>Cloud</td>
+<td>API Key</td>
+</tr>
+<tr>
+<td>Gemini</td>
+<td>Cloud</td>
+<td>API Key</td>
+</tr>
+<tr>
+<td>DeepSeek</td>
+<td>Cloud</td>
+<td>API Key</td>
+</tr>
+<tr>
+<td>Groq</td>
+<td>Cloud</td>
+<td>API Key</td>
+</tr>
+<tr>
+<td>Mistral</td>
+<td>Cloud</td>
+<td>API Key</td>
+</tr>
+<tr>
+<td>xAI</td>
+<td>Cloud</td>
+<td>API Key</td>
+</tr>
+<tr>
+<td>OpenRouter</td>
+<td>Cloud</td>
+<td>API Key</td>
+</tr>
+<tr>
+<td>Ollama</td>
+<td>Local</td>
+<td>None</td>
+</tr>
+<tr>
+<td>Llama.cpp</td>
+<td>Local</td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
+<h3 id="adding-a-new-provider">Adding a New Provider</h3>
+<ol type="1">
+<li>Create <code>internal/llm/&lt;name&gt;_provider.go</code></li>
+<li>Implement the <code>Provider</code> interface</li>
+<li>Do NOT hardcode <code>SupportsVision</code> or
+<code>Capabilities</code></li>
+<li>Call <code>EnrichModelInfo(&amp;model)</code> after building model
+list</li>
+<li>Add config to <code>configs/verifier.yaml</code></li>
+<li>Add env var binding to <code>internal/config/config.go</code></li>
+<li>Write integration test</li>
+</ol>
+<hr />
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="verifier-unavailable-warning">“Verifier unavailable”
+Warning</h3>
+<pre><code>⚠️  Verifier unavailable (connection refused), using fallback...</code></pre>
+<p><strong>Cause</strong>: LLMsVerifier service is not running at the
+configured endpoint.</p>
+<p><strong>Fix</strong>:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Start the verifier service (see LLMsVerifier repository)</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> LLMsVerifier <span class="kw">&amp;&amp;</span> <span class="ex">go</span> run ./cmd/server</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Or disable verifier in config</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">HELIX_VERIFIER_ENABLED</span><span class="op">=</span>false</span></code></pre></div>
+<h3 id="empty-model-list">Empty Model List</h3>
+<p><strong>Cause</strong>: All providers disabled or no API keys
+configured.</p>
+<p><strong>Fix</strong>:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">OPENAI_API_KEY</span><span class="op">=</span>sk-...</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">ANTHROPIC_API_KEY</span><span class="op">=</span>sk-ant-...</span></code></pre></div>
+<h3 id="circuit-breaker-open">Circuit Breaker Open</h3>
+<pre><code>⚠️  Verifier circuit breaker OPEN — too many failures</code></pre>
+<p><strong>Cause</strong>: 5+ consecutive failures to the verifier.</p>
+<p><strong>Fix</strong>: Check verifier health. The circuit will
+auto-recover after <code>half_open_timeout</code>.</p>
+<hr />
+<h2 id="challenge-verification">Challenge Verification</h2>
+<p>Run all verifier challenges:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Unit tests (mocks OK)</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-v</span> ./internal/verifier/...</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Integration tests (real HTTP server)</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-tags</span><span class="op">=</span>integration <span class="at">-v</span> ./internal/verifier/...</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Hardcode check (CONST-037)</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/anti_bluff/verifier_hardcode_check.sh</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Capability check (CONST-041)</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/anti_bluff/verifier_capability_check.sh</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Full E2E challenge</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/anti_bluff/verifier_e2e_challenge.sh</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Makefile targets</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-verifier-unit</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-verifier-integration</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-verifier-challenges</span></code></pre></div>
+<hr />
+<h2 id="references">References</h2>
+<ul>
+<li><a href="../CONSTITUTION.md">Constitution</a> — CONST-036 through
+CONST-041</li>
+<li><a href="../AGENTS.md">AGENTS.md</a> — Agent guidelines for verifier
+work</li>
+<li><a href="../CLAUDE.md">CLAUDE.md</a> — Constitutional mandates</li>
+<li>Integration Plan:
+<code>docs/llms_verifier/LLMsVerifier_HelixCode_Integration_Plan.md</code></li>
+</ul>
+<h2 id="sources-verified">Sources verified</h2>
+<p>Sources verified 2026-05-29:
+https://github.com/ollama/ollama/blob/main/docs/api.md (Ollama default
+endpoint http://localhost:11434 confirmed — matches the guide’s example)
+; https://go.dev/doc/devel/release (Go 1.26.3 latest stable; matches
+inner go.mod go 1.26) — the provider roster (OpenAI, Anthropic, Gemini,
+DeepSeek, Groq, Mistral, xAI, OpenRouter, Ollama, Llama.cpp) and the
+per-provider <code>*_API_KEY</code> env vars are sourced at runtime from
+LLMsVerifier per CONST-036/039 and are NOT hardcoded version-bearing
+instructions, so no static endpoint pins required correction. Project
+version authority is go.mod + CLAUDE.md §3.1. Negative findings:
+OpenAI’s hosted API-reference page (platform.openai.com) returned HTTP
+403 to automated fetch and the openai-openapi spec file on GitHub is too
+large to render via fetch, so the <code>https://api.openai.com/v1</code>
+base URL shown in the guide could not be machine-confirmed this run (it
+is a long-stable, widely-used endpoint; flagged here for honesty, not
+corrected).</p>
+</body>
+</html>

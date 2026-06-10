@@ -6,174 +6,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>DOC_RECONCILIATION_PLAN.2026-06-04</title>
   <style>
-    /* Default styles provided by pandoc.
-    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-    */
-    html {
-      color: #1a1a1a;
-      background-color: #fdfdfd;
-    }
-    body {
-      margin: 0 auto;
-      max-width: 36em;
-      padding-left: 50px;
-      padding-right: 50px;
-      padding-top: 50px;
-      padding-bottom: 50px;
-      hyphens: auto;
-      overflow-wrap: break-word;
-      text-rendering: optimizeLegibility;
-      font-kerning: normal;
-    }
-    @media (max-width: 600px) {
-      body {
-        font-size: 0.9em;
-        padding: 12px;
-      }
-      h1 {
-        font-size: 1.8em;
-      }
-    }
-    @media print {
-      html {
-        background-color: white;
-      }
-      body {
-        background-color: transparent;
-        color: black;
-        font-size: 12pt;
-      }
-      p, h2, h3 {
-        orphans: 3;
-        widows: 3;
-      }
-      h2, h3, h4 {
-        page-break-after: avoid;
-      }
-    }
-    p {
-      margin: 1em 0;
-    }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
-    }
-    img {
-      max-width: 100%;
-    }
-    svg {
-      height: auto;
-      max-width: 100%;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      margin-top: 1.4em;
-    }
-    h5, h6 {
-      font-size: 1em;
-      font-style: italic;
-    }
-    h6 {
-      font-weight: normal;
-    }
-    ol, ul {
-      padding-left: 1.7em;
-      margin-top: 1em;
-    }
-    li > ol, li > ul {
-      margin-top: 0;
-    }
-    blockquote {
-      margin: 1em 0 1em 1.7em;
-      padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
-      color: #606060;
-    }
-    code {
-      white-space: pre-wrap;
-      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
-      font-size: 85%;
-      margin: 0;
-      hyphens: manual;
-    }
-    pre {
-      margin: 1em 0;
-      overflow: auto;
-    }
-    pre code {
-      padding: 0;
-      overflow: visible;
-      overflow-wrap: normal;
-    }
-    .sourceCode {
-     background-color: transparent;
-     overflow: visible;
-    }
-    hr {
-      border: none;
-      border-top: 1px solid #1a1a1a;
-      height: 1px;
-      margin: 1em 0;
-    }
-    table {
-      margin: 1em 0;
-      border-collapse: collapse;
-      width: 100%;
-      overflow-x: auto;
-      display: block;
-      font-variant-numeric: lining-nums tabular-nums;
-    }
-    table caption {
-      margin-bottom: 0.75em;
-    }
-    tbody {
-      margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    th {
-      border-top: 1px solid #1a1a1a;
-      padding: 0.25em 0.5em 0.25em 0.5em;
-    }
-    td {
-      padding: 0.125em 0.5em 0.25em 0.5em;
-    }
-    header {
-      margin-bottom: 4em;
-      text-align: center;
-    }
-    #TOC li {
-      list-style: none;
-    }
-    #TOC ul {
-      padding-left: 1.3em;
-    }
-    #TOC > ul {
-      padding-left: 0;
-    }
-    #TOC a:not(:hover) {
-      text-decoration: none;
-    }
-    span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    /* The extra [class] is a hack that increases specificity enough to
-       override a similar rule in reveal.js */
-    ul.task-list[class]{list-style: none;}
-    ul.task-list li input[type="checkbox"] {
-      font-size: inherit;
-      width: 0.8em;
-      margin: 0 0.8em 0.2em -1.6em;
-      vertical-align: middle;
-    }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
-  </style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
 </head>
 <body>
-<h1
-id="documentation-reconciliation-plan-root-.md-sprawl-rule-9-over-claims">Documentation
+<header id="title-block-header">
+<h1 class="title">DOC_RECONCILIATION_PLAN.2026-06-04</h1>
+</header>
+<h1 id="documentation-reconciliation-plan-root-.md-sprawl-rule-9-over-claims">Documentation
 Reconciliation Plan — Root <code>*.md</code> Sprawl &amp; Rule-9
 Over-Claims</h1>
 <p><strong>Date:</strong> 2026-06-04 <strong>Author:</strong>
@@ -287,10 +160,9 @@ reports already produced</td>
 </tr>
 </tbody>
 </table>
-<h3
-id="f2-rule-9-article-xi-11.9-false-success-artifacts-high-severity">F2
+<h3 id="f2-rule-9-article-xi-11.9-false-success-artifacts-high-severity">F2
 — Rule-9 / Article XI §11.9 false-success artifacts (HIGH severity)</h3>
-<p><code>grep -icE "100% complete|all tests pass|fully working|production[- ]ready|fully functional|all.*passing|mission accomplished"</code>:</p>
+<p><code>grep -icE &quot;100% complete|all tests pass|fully working|production[- ]ready|fully functional|all.*passing|mission accomplished&quot;</code>:</p>
 <table>
 <thead>
 <tr>
@@ -337,8 +209,7 @@ and rounds 468b–468d were fixing <strong>broken-build</strong> modules
 (doc_processor conflict markers, challenges missing-dep, llms_verifier
 go.sum) and a committed <strong>secret leak</strong>. They are textbook
 false-success surface (Rule 9 / §11.4.1).</p>
-<h3
-id="f3-tracker-docs-superseded-by-the-sqlite-single-source-of-truth">F3
+<h3 id="f3-tracker-docs-superseded-by-the-sqlite-single-source-of-truth">F3
 — Tracker docs superseded by the SQLite single-source-of-truth</h3>
 <p><code>docs/workable_items.db</code> <strong>exists</strong> (356 KB)
 — the §11.4.93/§11.4.95 mandated single source of truth — alongside its
@@ -361,7 +232,7 @@ a <em>report</em>, not the architecture doc. <strong>Action: author
 of CLAUDE.md and verified against the live tree).</p>
 <h3 id="f5-diagram-sources-do-exist-corrects-stale-handoff">F5 — Diagram
 sources DO exist (corrects stale handoff)</h3>
-<p><code>find … -name '*.mmd' -o -name '*.puml' -o -name '*.drawio'</code>
+<p><code>find … -name &#39;*.mmd&#39; -o -name &#39;*.puml&#39; -o -name &#39;*.drawio&#39;</code>
 = <strong>128</strong> (excluding cli_agents/resources/deps).
 Distribution: <code>helix_agent</code> 40, <code>helix_llm</code> 14,
 <code>llms_verifier</code> 6, <code>helix_qa</code> 6, plus 3–4 each
@@ -432,5 +303,10 @@ verify the <em>content accuracy</em> of the KEEP-bucket design/spec docs
 sprawl (helix_code 84, llms_verifier 159 per handoff) is
 <strong>not</strong> re-counted here and remains a separate per-module
 sweep.</p>
+<h2 id="sources-verified">Sources verified</h2>
+<p>Sources verified 2026-06-09: internal HelixCode
+consolidation/planning document — no third-party-service instructions;
+cross-referenced against project state (docs/Issues.md, docs/Fixed.md,
+.gitmodules, docs/CONTINUATION.md) as of 2026-06-09.</p>
 </body>
 </html>

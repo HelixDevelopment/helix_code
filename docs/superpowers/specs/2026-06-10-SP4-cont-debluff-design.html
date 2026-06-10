@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-SP4-cont-debluff-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-SP4-cont-debluff-design</h1>
+</header>
+<h1 id="sp4-cont-de-bluff-design-d-11-d-12-instance_manager.go-execute-stubs">SP4-cont
+— De-Bluff Design: D-11 + D-12 (instance_manager.go execute* stubs)</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-10 <strong>Maintainer:</strong> SP4-cont READ-ONLY design
+subagent <strong>Status:</strong> DESIGN ONLY — no code edited.
+Read-only investigation per task brief.</p>
+<p><strong>Target file:</strong>
+<code>submodules/helix_agent/internal/clis/instance_manager.go</code>
+(1452 lines) <strong>Type constants:</strong>
+<code>submodules/helix_agent/internal/clis/types.go:19-69</code>
+<strong>Proven SP4 helpers (reuse targets):</strong> -
+<code>extractPrompt(payload)</code> —
+<code>instance_manager.go:917-930</code> -
+<code>resolveAgentBinary(typ, command)</code> —
+<code>instance_manager.go:936-958</code> (PATH lookup +
+<code>HELIX_AGENT_BIN_&lt;TYPE&gt;</code> fake-binary override) -
+<code>runCLIAgent(inst, typ, command, args, payload)</code> —
+<code>instance_manager.go:964-1001</code> (real
+<code>exec.CommandContext</code> + combined output + exit code + honest
+error) <strong>Proven RED-pin pattern (reuse target):</strong>
+<code>instance_manager_stub_pin_test.go</code> (D-9 guards,
+GREEN-polarity + <code>PIN_STUB_BLUFF=1</code> RED reproduction)</p>
+<p>Governance: BLUFF-003 / CONST-035 / §11.4.99 (latest-source flags) /
+§11.4.115 (RED-on-broken-artifact polarity switch) / §11.4.135 (standing
+regression guard) / §11.4.123 (rock-solid-proof-or-research) / §11.4.6
+(no-guessing — agents with no confirmed binary are flagged, never
+guessed).</p>
+<hr />
+<h2 id="executive-summary-answers-the-tasks-final-line-questions">0.
+Executive summary (answers the task’s final-line questions)</h2>
+<ul>
+<li><strong>D-12 stub method count: exactly 43.</strong> Verified two
+independent ways: (a) 48 total <code>execute*</code> methods minus the 5
+already-real
+(<code>executeAider/executeClaudeCode/executeCodex/executeCline/executeOpenHands</code>)
+= 43; (b) 43 <code>&quot;message&quot;: &quot;&lt;Agent&gt; execution completed&quot;</code>
+literal lines (grep returns 44 total occurrences = 43 stub bodies + 1
+doc-comment citation at <code>instance_manager.go:913</code>).
+<ul>
+<li><strong>NOTE on the task framing:</strong> the brief says “qwencode”
+was among SP4’s 5 fixed methods. That is NOT what the code shows —
+<code>executeQwenCoder</code> (<code>instance_manager.go:1231</code>) is
+STILL a stub returning <code>&quot;Qwen Coder execution completed&quot;</code>.
+The 5 real methods are Aider/ClaudeCode/Codex/Cline/OpenHands (confirmed
+by <code>instance_manager_stub_pin_test.go:74-78</code>). Qwen Code IS
+in the research doc (<code>qwen -p</code> headless) so it is a
+high-confidence D-12 conversion, just not a done-already one.</li>
+</ul></li>
+<li><strong>Reuse vs bespoke:</strong> <strong>ALL 43 can reuse the
+existing <code>runCLIAgent</code> + <code>resolveAgentBinary</code> +
+<code>extractPrompt</code> helper trio unchanged</strong> — the helper
+is fully generic over <code>(CLIAgentType, command, args)</code>. NO new
+helper is required. The only per-method work is the 2-3 line body:
+<code>prompt := extractPrompt(payload); return m.runCLIAgent(inst, Type&lt;X&gt;, &quot;&lt;cmd&gt;&quot;, []string{&lt;flags&gt;}, payload)</code>.
+The split is therefore NOT helper-vs-bespoke; it is
+<strong>confirmed-binary (convert now) vs no-confirmed-binary
+(research/operator-block)</strong>:
+<ul>
+<li><strong>8 have a CONFIRMED CLI binary + non-interactive
+flags</strong> in the 2026-06-10 research doc → convert now, identical
+to SP4.</li>
+<li><strong>35 have NO confirmed standalone CLI</strong> (IDE
+extensions, hosted/web agents, raw model names, defunct projects) → see
+§3. They must NOT be guessed into an exec (§11.4.6); the honest options
+are (a) <code>exec.LookPath</code> honest-error stub via the same helper
+with a documented best-effort command name, or (b) explicit
+<code>OPERATOR-BLOCKED</code> / research-needed classification.</li>
+</ul></li>
+<li><strong>D-11 recommendation:</strong> replace the
+<code>&quot;For now, allow all types&quot;</code> hard-coded enum allowlist
+(<code>instance_manager.go:387-398</code>) with a real availability
+check:
+<code>resolveAgentBinary(agentType, defaultCommandFor(agentType))</code>
+returning <code>err == nil</code> (i.e. real <code>exec.LookPath</code>
+per type, honoring the <code>HELIX_AGENT_BIN_&lt;TYPE&gt;</code> test
+override). Drives a single source of truth (the per-type command table)
+shared with the execute* methods. See §4.</li>
+</ul>
+<hr />
+<h2 id="task-1-complete-d-12-stub-enumeration-43-methods-with-line-numbers">1.
+Task 1 — Complete D-12 stub enumeration (43 methods, with line
+numbers)</h2>
+<p>Every method below currently returns the templated literal
+<code>{&quot;status&quot;:&quot;executed&quot;,&quot;type&quot;:&quot;&lt;t&gt;&quot;,&quot;message&quot;:&quot;&lt;Agent&gt; execution completed&quot;,&quot;timestamp&quot;:...}</code>
+with NO <code>exec</code>. Dispatch wired at <code>handleExecute</code>
+(<code>instance_manager.go:742-844</code>). Type constants at
+<code>types.go</code>.</p>
+<table>
+<colgroup>
+<col style="width: 4%" />
+<col style="width: 12%" />
+<col style="width: 13%" />
+<col style="width: 41%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Method</th>
+<th>Def line</th>
+<th><code>CLIAgentType</code> (types.go)</th>
+<th>Literal returned</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>executeKiro</code></td>
+<td>1033</td>
+<td><code>TypeKiro=&quot;kiro&quot;</code> (24)</td>
+<td>Kiro execution completed</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>executeContinue</code></td>
+<td>1042</td>
+<td><code>TypeContinue=&quot;continue&quot;</code> (25)</td>
+<td>Continue.dev execution completed</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>executeSupermaven</code></td>
+<td>1051</td>
+<td><code>TypeSupermaven=&quot;supermaven&quot;</code> (30)</td>
+<td>Supermaven execution completed</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>executeCursor</code></td>
+<td>1060</td>
+<td><code>TypeCursor=&quot;cursor&quot;</code> (31)</td>
+<td>Cursor execution completed</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>executeWindsurf</code></td>
+<td>1069</td>
+<td><code>TypeWindsurf=&quot;windsurf&quot;</code> (32)</td>
+<td>Windsurf execution completed</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>executeAugment</code></td>
+<td>1078</td>
+<td><code>TypeAugment=&quot;augment&quot;</code> (33)</td>
+<td>Augment execution completed</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>executeSourcegraph</code></td>
+<td>1087</td>
+<td><code>TypeSourcegraph=&quot;sourcegraph&quot;</code> (34)</td>
+<td>Sourcegraph execution completed</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>executeCodeium</code></td>
+<td>1096</td>
+<td><code>TypeCodeium=&quot;codeium&quot;</code> (35)</td>
+<td>Codeium execution completed</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>executeTabnine</code></td>
+<td>1105</td>
+<td><code>TypeTabnine=&quot;tabnine&quot;</code> (36)</td>
+<td>Tabnine execution completed</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>executeCodeGPT</code></td>
+<td>1114</td>
+<td><code>TypeCodeGPT=&quot;codegpt&quot;</code> (37)</td>
+<td>CodeGPT execution completed</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>executeTwin</code></td>
+<td>1123</td>
+<td><code>TypeTwin=&quot;twin&quot;</code> (38)</td>
+<td>Twin execution completed</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>executeDevin</code></td>
+<td>1132</td>
+<td><code>TypeDevin=&quot;devin&quot;</code> (39)</td>
+<td>Devin execution completed</td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>executeDevika</code></td>
+<td>1141</td>
+<td><code>TypeDevika=&quot;devika&quot;</code> (40)</td>
+<td>Devika execution completed</td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>executeSWEAgent</code></td>
+<td>1150</td>
+<td><code>TypeSWEAgent=&quot;swe_agent&quot;</code> (41)</td>
+<td>SWE Agent execution completed</td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>executeGPTPilot</code></td>
+<td>1159</td>
+<td><code>TypeGPTPilot=&quot;gpt_pilot&quot;</code> (42)</td>
+<td>GPT Pilot execution completed</td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>executeMetamorph</code></td>
+<td>1168</td>
+<td><code>TypeMetamorph=&quot;metamorph&quot;</code> (43)</td>
+<td>Metamorph execution completed</td>
+</tr>
+<tr>
+<td>17</td>
+<td><code>executeJunie</code></td>
+<td>1177</td>
+<td><code>TypeJunie=&quot;junie&quot;</code> (44)</td>
+<td>Junie execution completed</td>
+</tr>
+<tr>
+<td>18</td>
+<td><code>executeAmazonQ</code></td>
+<td>1186</td>
+<td><code>TypeAmazonQ=&quot;amazon_q&quot;</code> (45)</td>
+<td>Amazon Q execution completed</td>
+</tr>
+<tr>
+<td>19</td>
+<td><code>executeGitHubCopilot</code></td>
+<td>1195</td>
+<td><code>TypeGitHubCopilot=&quot;github_copilot&quot;</code> (46)</td>
+<td>GitHub Copilot execution completed</td>
+</tr>
+<tr>
+<td>20</td>
+<td><code>executeJetBrainsAI</code></td>
+<td>1204</td>
+<td><code>TypeJetBrainsAI=&quot;jetbrains_ai&quot;</code> (47)</td>
+<td>JetBrains AI execution completed</td>
+</tr>
+<tr>
+<td>21</td>
+<td><code>executeCodeGemma</code></td>
+<td>1213</td>
+<td><code>TypeCodeGemma=&quot;codegemma&quot;</code> (48)</td>
+<td>CodeGemma execution completed</td>
+</tr>
+<tr>
+<td>22</td>
+<td><code>executeStarCoder</code></td>
+<td>1222</td>
+<td><code>TypeStarCoder=&quot;starcoder&quot;</code> (49)</td>
+<td>StarCoder execution completed</td>
+</tr>
+<tr>
+<td>23</td>
+<td><code>executeQwenCoder</code></td>
+<td>1231</td>
+<td><code>TypeQwenCoder=&quot;qwencoder&quot;</code> (50)</td>
+<td>Qwen Coder execution completed</td>
+</tr>
+<tr>
+<td>24</td>
+<td><code>executeMistralCode</code></td>
+<td>1240</td>
+<td><code>TypeMistralCode=&quot;mistralcode&quot;</code> (51)</td>
+<td>Mistral Code execution completed</td>
+</tr>
+<tr>
+<td>25</td>
+<td><code>executeGeminiAssist</code></td>
+<td>1249</td>
+<td><code>TypeGeminiAssist=&quot;gemini_assist&quot;</code> (52)</td>
+<td>Gemini Assist execution completed</td>
+</tr>
+<tr>
+<td>26</td>
+<td><code>executeCodey</code></td>
+<td>1258</td>
+<td><code>TypeCodey=&quot;codey&quot;</code> (53)</td>
+<td>Codey execution completed</td>
+</tr>
+<tr>
+<td>27</td>
+<td><code>executeLlamaCode</code></td>
+<td>1267</td>
+<td><code>TypeLlamaCode=&quot;llama_code&quot;</code> (54)</td>
+<td>Llama Code execution completed</td>
+</tr>
+<tr>
+<td>28</td>
+<td><code>executeDeepSeekCoder</code></td>
+<td>1276</td>
+<td><code>TypeDeepSeekCoder=&quot;deepseek_coder&quot;</code> (55)</td>
+<td>DeepSeek Coder execution completed</td>
+</tr>
+<tr>
+<td>29</td>
+<td><code>executeWizardCoder</code></td>
+<td>1285</td>
+<td><code>TypeWizardCoder=&quot;wizard_coder&quot;</code> (56)</td>
+<td>WizardCoder execution completed</td>
+</tr>
+<tr>
+<td>30</td>
+<td><code>executePhind</code></td>
+<td>1294</td>
+<td><code>TypePhind=&quot;phind&quot;</code> (57)</td>
+<td>Phind execution completed</td>
+</tr>
+<tr>
+<td>31</td>
+<td><code>executeCody</code></td>
+<td>1303</td>
+<td><code>TypeCody=&quot;cody&quot;</code> (58)</td>
+<td>Cody execution completed</td>
+</tr>
+<tr>
+<td>32</td>
+<td><code>executeCursorSh</code></td>
+<td>1312</td>
+<td><code>TypeCursorSh=&quot;cursorsh&quot;</code> (59)</td>
+<td>Cursor.sh execution completed</td>
+</tr>
+<tr>
+<td>33</td>
+<td><code>executeTrae</code></td>
+<td>1321</td>
+<td><code>TypeTrae=&quot;trae&quot;</code> (60)</td>
+<td>Trae execution completed</td>
+</tr>
+<tr>
+<td>34</td>
+<td><code>executeBlackbox</code></td>
+<td>1330</td>
+<td><code>TypeBlackbox=&quot;blackbox&quot;</code> (61)</td>
+<td>Blackbox execution completed</td>
+</tr>
+<tr>
+<td>35</td>
+<td><code>executeLovable</code></td>
+<td>1339</td>
+<td><code>TypeLovable=&quot;lovable&quot;</code> (62)</td>
+<td>Lovable execution completed</td>
+</tr>
+<tr>
+<td>36</td>
+<td><code>executeV0</code></td>
+<td>1348</td>
+<td><code>TypeV0=&quot;v0&quot;</code> (63)</td>
+<td>V0 execution completed</td>
+</tr>
+<tr>
+<td>37</td>
+<td><code>executeTempo</code></td>
+<td>1357</td>
+<td><code>TypeTempo=&quot;tempo&quot;</code> (64)</td>
+<td>Tempo execution completed</td>
+</tr>
+<tr>
+<td>38</td>
+<td><code>executeBolt</code></td>
+<td>1366</td>
+<td><code>TypeBolt=&quot;bolt&quot;</code> (65)</td>
+<td>Bolt execution completed</td>
+</tr>
+<tr>
+<td>39</td>
+<td><code>executeReplitAgent</code></td>
+<td>1375</td>
+<td><code>TypeReplitAgent=&quot;replit_agent&quot;</code> (66)</td>
+<td>Replit Agent execution completed</td>
+</tr>
+<tr>
+<td>40</td>
+<td><code>executeIDX</code></td>
+<td>1384</td>
+<td><code>TypeIDX=&quot;idx&quot;</code> (67)</td>
+<td>IDX execution completed</td>
+</tr>
+<tr>
+<td>41</td>
+<td><code>executeFirebaseStudio</code></td>
+<td>1393</td>
+<td><code>TypeFirebaseStudio=&quot;firebase_studio&quot;</code> (68)</td>
+<td>Firebase Studio execution completed</td>
+</tr>
+<tr>
+<td>42</td>
+<td><code>executeCascade</code></td>
+<td>1402</td>
+<td><code>TypeCascade=&quot;cascade&quot;</code> (69)</td>
+<td>Cascade execution completed</td>
+</tr>
+<tr>
+<td>43</td>
+<td><code>executeHelixAgent</code></td>
+<td>1411</td>
+<td><code>TypeHelixAgent=&quot;helixagent&quot;</code> (29)</td>
+<td>HelixAgent execution completed</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Coverage cross-check (not stubs — out of D-12
+scope):</strong> - <code>TypeGoose</code> (types.go:26),
+<code>TypeForge</code> (27), <code>TypePlandex</code> (28) HAVE type
+constants but <strong>have NO <code>execute*</code> method and NO
+<code>handleExecute</code> case</strong> → they fall to the
+<code>default:</code> honest error at
+<code>instance_manager.go:842</code>
+(<code>&quot;execution not implemented for type&quot;</code>). These are not
+stub-bluffs (they return an honest error, not a fake success). Goose IS
+in the research doc (<code>goose run -t</code>) — adding it is <em>new
+feature work</em>, not de-bluffing, and is out of D-12 scope but worth a
+tracked follow-up.</p>
+<hr />
+<h2 id="task-23-binary-flags-per-stub-helper-reuse-grouping">2. Task 2/3
+— Binary + flags per stub, helper-reuse grouping</h2>
+<h3 id="group-a-confirmed-binary-non-interactive-flags-8-methods-convert-now-identical-to-sp4">GROUP
+A — CONFIRMED binary + non-interactive flags (8 methods) → convert NOW,
+identical to SP4</h3>
+<p>All cross-referenced to
+<code>docs/research/2026-06-10-sdk-cli-currency.md</code> PART B
+(fetched from official sources 2026-06-10). Each is a one-liner reusing
+<code>runCLIAgent</code>:</p>
+<table>
+<colgroup>
+<col style="width: 3%" />
+<col style="width: 10%" />
+<col style="width: 14%" />
+<col style="width: 34%" />
+<col style="width: 36%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Method</th>
+<th><code>command</code></th>
+<th><code>args</code> (non-interactive)</th>
+<th>Research source (§11.4.99)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>23</td>
+<td><code>executeQwenCoder</code></td>
+<td><code>qwen</code></td>
+<td><code>[]string{&quot;-p&quot;, prompt, &quot;--output-format&quot;, &quot;json&quot;}</code></td>
+<td>research line 64 (<code>qwen -p</code>,
+<code>--output-format json</code>)</td>
+</tr>
+<tr>
+<td>19</td>
+<td><code>executeGitHubCopilot</code></td>
+<td><code>copilot</code></td>
+<td><code>[]string{&quot;-p&quot;, prompt, &quot;-s&quot;}</code> (no JSON format exists —
+<code>-s</code> = clean stdout)</td>
+<td>research line 70 + 86 (honest negative: no JSON)</td>
+</tr>
+<tr>
+<td>25</td>
+<td><code>executeGeminiAssist</code></td>
+<td><code>gemini</code></td>
+<td><code>[]string{&quot;-p&quot;, prompt, &quot;--output-format&quot;, &quot;json&quot;}</code></td>
+<td>research line 66 (<code>gemini -p</code>,
+<code>--output-format json</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Note: only Qwen, Copilot, Gemini map cleanly from the research doc’s
+8 confirmed agents to a D-12 stub method (Claude/Codex/Cline/OpenHands
+already done; OpenCode/Crush/Goose have no matching stub method —
+OpenCode/Crush have no type constant at all, Goose is the default-case
+gap above). So <strong>Group A is 3 methods, not 8.</strong> Correcting
+the executive-summary estimate: deep cross-reference shows <strong>only
+3 stubs have a directly-confirmed binary+flags in the current research
+doc.</strong> The remaining agents in §3 require a fresh §11.4.99
+research pass before any exec command can be written.</p>
+<blockquote>
+<p><strong>§11.4.6 honesty correction:</strong> my initial “8 confirmed”
+was an over-count; after mapping each research-doc agent to an actual
+stub method, the confirmed set is <strong>3</strong> (Qwen, Copilot,
+Gemini-Assist). Codex/Claude/Cline/OpenHands are already-real;
+OpenCode/Crush/Goose have no D-12 stub to attach to. This is the
+rock-solid number.</p>
+</blockquote>
+<h3 id="group-b-plausible-cli-binary-not-yet-in-the-research-doc-research-needed-11.4.99-before-convert-9-methods">GROUP
+B — PLAUSIBLE CLI binary, NOT yet in the research doc → research-needed
+(§11.4.99) before convert (≈9 methods)</h3>
+<p>These agents are known to ship <em>some</em> CLI but the exact
+current non-interactive invocation was NOT verified in the 2026-06-10
+doc. They MUST get a fresh latest-source fetch (official docs) before an
+exec command is committed — guessing a flag is a §11.4.99 + §11.4.6
+violation.</p>
+<table>
+<colgroup>
+<col style="width: 7%" />
+<col style="width: 20%" />
+<col style="width: 17%" />
+<col style="width: 53%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Method</th>
+<th>Agent</th>
+<th>Why research-needed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>18</td>
+<td><code>executeAmazonQ</code></td>
+<td>Amazon Q Developer CLI (<code>q</code>)</td>
+<td><code>q chat</code>/<code>q</code> CLI exists; non-interactive
+prompt + output flags unverified</td>
+</tr>
+<tr>
+<td>31</td>
+<td><code>executeCody</code></td>
+<td>Sourcegraph Cody (<code>cody</code>)</td>
+<td><code>cody</code> CLI exists historically; current headless form
+unverified</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>executeSourcegraph</code></td>
+<td>Sourcegraph (<code>src</code>)</td>
+<td><code>src</code> CLI is code-search, not an agent runner — needs
+verification it even has an agent-exec mode</td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>executeSWEAgent</code></td>
+<td>SWE-agent</td>
+<td>Python <code>sweagent run</code> CLI exists; exact current flags
+unverified</td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>executeGPTPilot</code></td>
+<td>GPT-Pilot</td>
+<td>Has a CLI entrypoint; non-interactive form unverified</td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>executeDevika</code></td>
+<td>Devika</td>
+<td>Open-source; server+UI primarily, CLI mode unverified</td>
+</tr>
+<tr>
+<td>28</td>
+<td><code>executeDeepSeekCoder</code></td>
+<td>DeepSeek-Coder</td>
+<td>A MODEL, not a CLI — only reachable via an <code>ollama</code>/API
+runner; see §3 ambiguity</td>
+</tr>
+<tr>
+<td>27</td>
+<td><code>executeLlamaCode</code></td>
+<td>Code Llama</td>
+<td>A MODEL — <code>ollama run codellama</code> is the realistic runner;
+needs design decision</td>
+</tr>
+<tr>
+<td>21</td>
+<td><code>executeCodeGemma</code> / 22
+<code>executeStarCoder</code></td>
+<td>models</td>
+<td>Same model-not-CLI issue as Code Llama</td>
+</tr>
+</tbody>
+</table>
+<h3 id="group-c-no-standalone-non-interactive-cli-ide-plugin-hosted-web-defunct-honest-error-or-operator-blocked-31-methods">GROUP
+C — NO standalone non-interactive CLI (IDE plugin / hosted / web /
+defunct) → honest-error or OPERATOR-BLOCKED (≈31 methods)</h3>
+<p>These have <strong>no realistic headless CLI binary</strong>.
+Converting them to a guessed exec is forbidden (§11.4.6). Two honest
+dispositions (operator decides per §11.4.101):</p>
+<ul>
+<li><strong>(C1) Honest-error via the same helper</strong> — call
+<code>runCLIAgent</code> with a best-effort command name; on a host
+without that binary it returns the helper’s honest “CLI not found on
+PATH” error (never fake success). This removes the bluff (no more
+fabricated <code>&quot;execution completed&quot;</code>) WITHOUT claiming an exec
+form we cannot verify. The fake-binary test override still proves the
+exec wiring.</li>
+<li><strong>(C2) Explicit <code>not-supported</code> error</strong> —
+return
+<code>fmt.Errorf(&quot;%s has no non-interactive CLI; use the &lt;X&gt; IDE/extension/API&quot;, typ)</code>.
+Honest, and clearer to users than a PATH-miss.</li>
+</ul>
+<p>Recommendation: <strong>C1</strong> for everything (uniform with SP4,
+single code shape, testable with fake-binary injection, honest error
+when absent), and let the per-type command table (§4) carry an
+empty/sentinel command for the genuinely-CLI-less ones so C2’s message
+is emitted instead.</p>
+<table>
+<colgroup>
+<col style="width: 59%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Disposition</th>
+<th>Methods</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IDE extension only (no headless CLI)</td>
+<td><code>executeCursor</code>, <code>executeWindsurf</code> (Codeium’s
+IDE), <code>executeCascade</code> (Windsurf’s agent),
+<code>executeContinue</code> (Continue.dev — VS Code/JetBrains ext),
+<code>executeAugment</code>, <code>executeTabnine</code>,
+<code>executeCodeium</code>, <code>executeCodeGPT</code>,
+<code>executeJetBrainsAI</code>, <code>executeSupermaven</code>,
+<code>executeTwin</code>, <code>executeKiro</code> (AWS Kiro IDE),
+<code>executeTrae</code> (ByteDance IDE), <code>executeBlackbox</code>,
+<code>executePhind</code>, <code>executeMetamorph</code>,
+<code>executeJunie</code> (JetBrains agent)</td>
+</tr>
+<tr>
+<td>Hosted / web-only agent (no local CLI)</td>
+<td><code>executeDevin</code> (Cognition hosted),
+<code>executeLovable</code>, <code>executeV0</code> (Vercel web),
+<code>executeTempo</code>, <code>executeBolt</code> (StackBlitz web),
+<code>executeReplitAgent</code> (Replit web),
+<code>executeIDX</code>/<code>executeFirebaseStudio</code> (Google web
+IDE), <code>executeCursorSh</code></td>
+</tr>
+<tr>
+<td>Raw model, no agent CLI</td>
+<td><code>executeMistralCode</code>, <code>executeCodey</code> (Google
+model), plus the §2 Group-B model rows if not promoted</td>
+</tr>
+<tr>
+<td>In-repo agent (special-case)</td>
+<td><code>executeHelixAgent</code> — should exec the project’s OWN
+<code>helix</code>/<code>helixagent</code> binary; command name MUST
+come from the project, NOT guessed. Treat as its own small task.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="task-3-fix-design-reuse-vs-bespoke">3. Task 3 — Fix design
+(reuse vs bespoke)</h2>
+<p><strong>Finding: there is NO bespoke-helper work. One helper trio
+covers all 43.</strong> The SP4 helper
+<code>runCLIAgent(inst, typ, command, args, payload)</code> is fully
+generic; every method body is the same 2-line shape:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>InstanceManager<span class="op">)</span> executeX<span class="op">(</span>inst <span class="op">*</span>AgentInstance<span class="op">,</span> payload <span class="kw">interface</span><span class="op">{})</span> <span class="op">(</span><span class="kw">interface</span><span class="op">{},</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    prompt <span class="op">:=</span> extractPrompt<span class="op">(</span>payload<span class="op">)</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m<span class="op">.</span>runCLIAgent<span class="op">(</span>inst<span class="op">,</span> TypeX<span class="op">,</span> <span class="st">&quot;&lt;cmd&gt;&quot;</span><span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{&lt;</span>flags<span class="op">...&gt;},</span> payload<span class="op">)</span> <span class="co">// §11.4.99 flags</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The ONLY per-method variation is <code>(command, args)</code>.
+Therefore the real design question is <strong>the command/flag
+table</strong>, not the code structure. Two implementation options:</p>
+<ul>
+<li><strong>Option 1 (minimal, matches SP4 exactly):</strong> edit each
+of the 43 bodies in place to the 2-line shape with its
+<code>(command, args)</code>. Pro: identical to the proven SP4 pattern +
+existing test harness. Con: 43 near-identical edits.</li>
+<li><strong>Option 2 (table-driven, recommended for D-11
+synergy):</strong> introduce one package-level table
+<code>var agentCLISpec = map[CLIAgentType]struct{ Command string; Args func(prompt string) []string }</code>
+and collapse the 43 methods + the <code>handleExecute</code> switch into
+a single generic dispatch + make <code>IsAgentTypeAvailable</code>
+(D-11) read the SAME table. Pro: single source of truth shared by D-11
+and D-12, eliminates the 43-case switch and 43 method bodies, kills the
+drift risk. Con: bigger diff, must preserve the
+<code>map[string]string</code> result shape the D-9 test asserts
+(<code>resultMessage</code> expects
+<code>map[string]string</code>).</li>
+</ul>
+<p><strong>Recommendation: Option 2</strong> — it is the §11.4.111-style
+“single source of truth” win and makes D-11 fall out for free (§4). Keep
+<code>runCLIAgent</code>’s <code>map[string]string</code> return shape
+unchanged so <code>instance_manager_stub_pin_test.go:36-43</code>
+(<code>resultMessage</code>) keeps working.</p>
+<p><strong>Grouping for execution batches (per §11.4.103 parallel
+streams):</strong> - <strong>Batch 1 (3 methods, convert now):</strong>
+Qwen, GitHub Copilot, Gemini-Assist — confirmed flags, copy SP4. -
+<strong>Batch 2 (≈9, research-then-convert):</strong> Group B — one
+§11.4.99 fetch per agent, then convert. Model-vs-CLI rows (Code Llama /
+StarCoder / CodeGemma / DeepSeek-Coder) need an operator decision: run
+via <code>ollama run &lt;model&gt;</code>? If yes, they become a
+confirmed <code>ollama</code> exec; if no, they go to Group C. -
+<strong>Batch 3 (≈31, de-bluff to honest-error):</strong> Group C — C1
+uniform shape; emits honest “CLI not found / not supported” instead of
+fabricated success. This REMOVES the bluff even though no real agent
+runs, which is the constitutionally-correct state (honest error &gt;
+fake success, BLUFF-003). - <strong>Batch 4 (1, special):</strong>
+<code>executeHelixAgent</code> — exec the project’s own binary; command
+name supplied by config, not guessed.</p>
+<hr />
+<h2 id="task-4-d-11-design-isagenttypeavailable-instance_manager.go387-398">4.
+Task 4 — D-11 design (<code>IsAgentTypeAvailable</code>,
+instance_manager.go:387-398)</h2>
+<p><strong>Current bluff:</strong></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>InstanceManager<span class="op">)</span> IsAgentTypeAvailable<span class="op">(</span>agentType AgentType<span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Check if there&#39;s a pool for this type</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// For now, allow all types defined in the enum</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> agentType <span class="op">{</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> TypeAider<span class="op">,</span> TypeClaudeCode<span class="op">,</span> TypeCodex<span class="op">,</span> TypeCline<span class="op">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        TypeOpenHands<span class="op">,</span> TypeKiro<span class="op">,</span> TypeContinue<span class="op">,</span> TypeHelixAgent<span class="op">:</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">true</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">false</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Two defects: (1) the <code>&quot;For now, allow all types&quot;</code> literal
+is a CONST-035 anti-pattern marker; (2) it returns <code>true</code> for
+<code>TypeKiro</code>/<code>TypeContinue</code>/<code>TypeHelixAgent</code>
+whose execute methods are stubs — i.e. it claims availability for agents
+that cannot actually run. It is a hard-coded allowlist, not a real
+check.</p>
+<p><strong>Recommendation — real <code>exec.LookPath</code>-based
+availability via the shared command table:</strong></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>InstanceManager<span class="op">)</span> IsAgentTypeAvailable<span class="op">(</span>agentType CLIAgentType<span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    spec<span class="op">,</span> ok <span class="op">:=</span> agentCLISpec<span class="op">[</span>agentType<span class="op">]</span> <span class="co">// the §3 Option-2 table</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">!</span>ok <span class="op">||</span> spec<span class="op">.</span>Command <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">false</span> <span class="co">// no CLI mapping → genuinely unavailable</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> resolveAgentBinary<span class="op">(</span>agentType<span class="op">,</span> spec<span class="op">.</span>Command<span class="op">)</span> <span class="co">// real PATH lookup + HELIX_AGENT_BIN_&lt;TYPE&gt; override</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> err <span class="op">==</span> <span class="ot">nil</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Why this is the right shape: - <strong>Real check, not an
+allowlist</strong> — answers the actual question (“can this agent run on
+THIS host right now?”) via <code>exec.LookPath</code> (already inside
+<code>resolveAgentBinary</code>, instance_manager.go:953). -
+<strong>Honors the test override</strong> —
+<code>HELIX_AGENT_BIN_&lt;TYPE&gt;</code> lets unit tests inject a fake
+binary, so D-11 gets the same anti-bluff fake-binary test treatment as
+D-9/D-12. - <strong>Single source of truth</strong> — shares the §3
+table with the execute* dispatch; an agent is “available” iff it has a
+real, resolvable binary, exactly matching what <code>runCLIAgent</code>
+will attempt. No drift. - <strong><code>AgentType</code> vs
+<code>CLIAgentType</code> note:</strong> the current signature uses
+<code>AgentType</code>; confirm whether <code>AgentType</code> and
+<code>CLIAgentType</code> are the same alias or need a conversion — flag
+for the implementer (read <code>types.go</code> aliasing before edit).
+If they differ, the table key type must match.</p>
+<p><strong>Caveat (§11.4.6):</strong> <code>exec.LookPath</code> proves
+the binary is <em>on PATH</em>, not that it is
+<em>authenticated/working</em>. That is the honest, bounded claim
+“availability” should make — a deeper health probe
+(e.g. <code>--version</code>) is a separate, optional enhancement, not
+required to kill the bluff.</p>
+<hr />
+<h2 id="task-5-red-first-plan-per-11.4.115-batched-pin-guards">5. Task 5
+— RED-first plan per §11.4.115 (batched pin guards)</h2>
+<p>Reuse the EXISTING <code>instance_manager_stub_pin_test.go</code>
+harness verbatim — <code>writeFakeAgentBin</code> (line 47),
+<code>resultMessage</code> (36), the GREEN guard shape (62-115), the
+absent-binary honest-error guard (119-146), and the
+<code>PIN_STUB_BLUFF=1</code> RED reproduction (152-191). The work is to
+EXTEND the three <code>cases</code> slices and the
+<code>bluffLiterals</code> slice to cover the converted methods.</p>
+<p><strong>RED → GREEN polarity per §11.4.115 (one source, two
+roles):</strong> - <strong>RED (pre-fix,
+<code>PIN_STUB_BLUFF=1</code>):</strong> assert each converted method
+STILL returns its <code>&quot;&lt;Agent&gt; execution completed&quot;</code>
+literal on the current stub artifact → FAILs (defect genuinely present).
+This is the proof the guard is real, not synthetic. - <strong>GREEN
+(post-fix, default):</strong> inject
+<code>HELIX_AGENT_BIN_&lt;TYPE&gt;</code> fake binary echoing an
+unforgeable marker; assert (a) the marker IS in the result, (b) the
+literal is NEVER returned, (c) the prompt was forwarded. The bug-catcher
+IS the standing regression guard (§11.4.135).</p>
+<p><strong>Batched test additions (one <code>t.Run</code> per method,
+table-extended):</strong> - <strong>Batch 1 (Group A, 3):</strong> add
+<code>{&quot;qwencoder&quot;, TypeQwenCoder, &quot;HELIX_AGENT_BIN_QWENCODER&quot;, mgr.executeQwenCoder}</code>
+etc. to BOTH the exec-real and absent-binary case tables, and the
+literals to <code>bluffLiterals</code>. Full GREEN guard (marker
+present) applies — these really exec. - <strong>Batch 3 (Group C,
+honest-error class):</strong> for the C1 honest-error methods, the GREEN
+assertion is the <strong>absent-binary honest-error</strong> path
+(TestD9_…_AbsentBinaryIsHonestError shape) PLUS, when a fake binary IS
+injected, the marker-present path. The key anti-bluff assertion for C1
+is: with NO binary, an ERROR is returned (never the literal, never fake
+success). Add these to the absent-binary table. - <strong>Per
+§11.4.135:</strong> every converted method gets a permanent row in the
+standing guard in the SAME commit as its conversion. A conversion
+landing without its guard row is a §11.4.123 violation. - <strong>Paired
+§1.1 mutation:</strong> revert any one converted body to its literal →
+the corresponding <code>t.Run</code> MUST FAIL (marker absent / literal
+returned). This is already how the D-9 test is structured; extending the
+tables inherits the mutation property for free.</p>
+<p><strong>Build/vet/test commands (from
+<code>submodules/helix_agent/</code>):</strong>
+<code>go vet ./internal/clis/...</code> →
+<code>go test -count=1 ./internal/clis/...</code> (GREEN guards) →
+<code>PIN_STUB_BLUFF=1 go test -run StubsAreBluffs -count=1 ./internal/clis/...</code>
+on the pre-fix artifact (RED proof).</p>
+<hr />
+<h2 id="task-6-sequence-effort-operatorresearch-blocked-flags">6. Task 6
+— Sequence, effort, operator/research-blocked flags</h2>
+<p><strong>Sequence (priority-ordered per §11.4.42 / §11.4.132 —
+highest-confidence + most-visible first):</strong> 1. <strong>D-11 + §3
+command table</strong> (foundation; D-12 Option 2 depends on it). ~2-3h
+incl. <code>AgentType</code>/<code>CLIAgentType</code> reconciliation +
+fake-binary D-11 test. 2. <strong>Batch 1 — Group A 3 methods</strong>
+(Qwen, Copilot, Gemini-Assist): convert + extend pin guards. ~1h (copy
+SP4). 3. <strong>Batch 3 — Group C ~31 methods</strong> to C1
+honest-error: mechanical, table-driven, one absent-binary guard pass.
+~2-3h. 4. <strong>Batch 4 — <code>executeHelixAgent</code></strong>:
+needs the project’s own binary name (config-sourced). ~1h once command
+confirmed. 5. <strong>Batch 2 — Group B ~9 methods</strong>: BLOCKED on
+a fresh §11.4.99 research pass per agent + operator decision on the
+model-vs-CLI rows. ~1h research + ~1h convert PER confirmed agent; model
+rows may collapse into Group C if operator declines an
+<code>ollama</code> runner.</p>
+<p><strong>Total effort estimate:</strong> ~9-12h for D-11 + Batches
+1/3/4 (the de-bluffable-now set, 35 methods). Batch 2 (≈9 methods) is
+gated on research + 1 operator decision and is additive.</p>
+<p><strong>OPERATOR / RESEARCH-BLOCKED flags (§11.4.6 / §11.4.99 /
+§11.4.101):</strong> - <strong>NO confirmed binary/flags —
+research-needed before any exec</strong> (Group B):
+<code>executeAmazonQ</code>, <code>executeCody</code>,
+<code>executeSourcegraph</code>, <code>executeSWEAgent</code>,
+<code>executeGPTPilot</code>, <code>executeDevika</code>. -
+<strong>MODEL-not-CLI — operator decision required</strong> (run via
+<code>ollama run &lt;model&gt;</code> or treat as no-CLI):
+<code>executeLlamaCode</code> (codellama),
+<code>executeStarCoder</code>, <code>executeCodeGemma</code>,
+<code>executeDeepSeekCoder</code>, <code>executeMistralCode</code>,
+<code>executeCodey</code>. - <strong>NO standalone headless CLI —
+de-bluff to honest-error, NOT a real exec</strong> (Group C, 31): all
+IDE-extension / hosted-web rows in §2 Group C. These are NOT “fixable
+into a working exec”; the constitutionally-correct fix is the honest
+error. Do NOT let a future cycle mis-classify them as “broken”
+(§11.4.112 honest-boundary): they are structurally CLI-less, not buggy.
+- <strong><code>executeHelixAgent</code></strong> — command name is
+project-owned; supply from config, never guess (§11.4.6).</p>
+<hr />
+<h2 id="final-answer-tasks-required-closing-line">7. FINAL ANSWER
+(task’s required closing line)</h2>
+<ul>
+<li><strong>D-12 method count: exactly 43</strong> stub
+<code>execute*</code> methods (Kiro…HelixAgent),
+<code>instance_manager.go:1033-1417</code>. (48 total execute* − 5
+already-real.)</li>
+<li><strong>Helper reuse vs bespoke:</strong> <strong>ALL 43 reuse the
+existing
+<code>runCLIAgent</code>/<code>resolveAgentBinary</code>/<code>extractPrompt</code>
+trio — ZERO bespoke helper work.</strong> Each body is the same 2-line
+SP4 shape; only <code>(command, args)</code> varies. The real split is
+by binary-confidence, NOT by helper:
+<ul>
+<li><strong>3 convert-now</strong> (confirmed binary+flags in the
+2026-06-10 research doc): <code>executeQwenCoder</code>
+(<code>qwen -p --output-format json</code>),
+<code>executeGitHubCopilot</code>
+(<code>copilot -p &lt;prompt&gt; -s</code>),
+<code>executeGeminiAssist</code>
+(<code>gemini -p --output-format json</code>).</li>
+<li><strong>~9 research-needed</strong> (§11.4.99 fetch first; incl. 6
+model-vs-CLI rows needing an operator <code>ollama</code>-or-not
+decision): AmazonQ, Cody, Sourcegraph, SWEAgent, GPTPilot, Devika +
+LlamaCode/StarCoder/CodeGemma/DeepSeekCoder/MistralCode/Codey.</li>
+<li><strong>~31 de-bluff-to-honest-error</strong> (structurally no
+headless CLI — IDE extensions / hosted-web): convert to the helper’s
+honest “CLI not found / not supported” error, which REMOVES the bluff
+without faking an exec.</li>
+<li><strong>1 special</strong> (<code>executeHelixAgent</code>) — exec
+the project’s own binary, config-sourced name.</li>
+</ul></li>
+<li><strong>D-11 recommendation:</strong> replace the
+<code>&quot;For now, allow all types&quot;</code> enum allowlist
+(<code>instance_manager.go:387-398</code>) with a REAL per-type
+<code>exec.LookPath</code> check driven by the shared §3 command table:
+<code>IsAgentTypeAvailable(t) = resolveAgentBinary(t, agentCLISpec[t].Command) == nil</code>
+(empty/absent command ⇒ false). This honors the
+<code>HELIX_AGENT_BIN_&lt;TYPE&gt;</code> test override, is
+anti-bluff-testable with fake-binary injection, and shares one source of
+truth with the D-12 dispatch. Confirm the <code>AgentType</code> vs
+<code>CLIAgentType</code> signature type before editing.</li>
+</ul>
+<h2 id="sources-verified-2026-06-10">Sources verified 2026-06-10</h2>
+<ul>
+<li><code>docs/research/2026-06-10-sdk-cli-currency.md</code> (PART B —
+Qwen/Copilot/Gemini/Codex/Claude/OpenCode/Crush/Goose non-interactive
+flags, fetched from official docs 2026-06-10).</li>
+<li>Code:
+<code>submodules/helix_agent/internal/clis/instance_manager.go</code>
+(lines cited inline), <code>.../types.go:19-69</code>,
+<code>.../instance_manager_stub_pin_test.go</code>.</li>
+<li>Negative finding (§11.4.6): no current official non-interactive CLI
+flags were verified on 2026-06-10 for Group B/C agents — those rows are
+flagged research-needed/CLI-less, NOT guessed.</li>
+</ul>
+</body>
+</html>

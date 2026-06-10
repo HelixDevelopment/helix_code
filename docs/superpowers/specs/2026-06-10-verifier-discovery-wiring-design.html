@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-verifier-discovery-wiring-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-verifier-discovery-wiring-design</h1>
+</header>
+<h1 id="verifier-discovery-catalog-wiring-design">Verifier Discovery →
+Catalog Wiring Design</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-10 <strong>Maintainer:</strong> design subagent (read-only)
+<strong>Status:</strong> DESIGN — no code changed; this doc only
+specifies the wiring.</p>
+<h2 id="scope-ground-truth">0. Scope &amp; ground truth</h2>
+<p>SP2 added the unified exposure catalog (<code>GET /v1/catalog</code>)
+joining the AI-debate ensemble (+presets), HelixLLM, every discovered
+provider, and every VERIFIED model. It is <strong>honest-empty of
+verified-model entries today</strong> because the
+<code>VerifiedModelSource</code> is constructed over a <code>nil</code>
+discovery service.</p>
+<p><strong>Exact wiring point (the prompt said line 1295 — that is
+wrong; 1295 is the discovery <em>handler</em>, a different thing). The
+real call is:</strong></p>
+<p><code>submodules/helix_agent/internal/router/router.go:779</code></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Verified<span class="op">:</span> catalog<span class="op">.</span>NewDiscoveryVerifiedSource<span class="op">(</span><span class="ot">nil</span><span class="op">),</span> <span class="co">// discovery svc not wired here → honest-empty</span></span></code></pre></div>
+<p>All <code>file:line</code> citations below are verified against the
+tree at the time of writing.</p>
+<hr />
+<h2 id="how-verifier.modeldiscoveryservice-is-built-populated-task-1">1.
+How <code>verifier.ModelDiscoveryService</code> is built + populated
+(Task 1)</h2>
+<h3 id="constructor-dependencies">1.1 Constructor &amp;
+dependencies</h3>
+<p><code>submodules/helix_agent/internal/verifier/discovery.go:82</code></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewModelDiscoveryService<span class="op">(</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    vs <span class="op">*</span>VerificationService<span class="op">,</span>   <span class="co">// discovery.go:24 field verificationService</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    ss <span class="op">*</span>ScoringService<span class="op">,</span>        <span class="co">// discovery.go:25 field scoringService</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    hs <span class="op">*</span>HealthService<span class="op">,</span>         <span class="co">// discovery.go:26 field healthService</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    cfg <span class="op">*</span>DiscoveryConfig<span class="op">,</span>      <span class="co">// discovery.go:27 field config</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="op">)</span> <span class="op">*</span>ModelDiscoveryService</span></code></pre></div>
+<ul>
+<li><code>cfg == nil</code> → <code>DefaultDiscoveryConfig()</code>
+(discovery.go:88-90).</li>
+<li>Builds an internal <code>http.Client{Timeout: 30s}</code>
+(discovery.go:99-101) and a <code>stopCh</code> (discovery.go:102).</li>
+</ul>
+<h3 id="what-it-needs-to-actually-populate">1.2 What it needs to
+actually populate</h3>
+<p>It is <strong>NOT</strong> a thin client of a central LLMsVerifier
+service. Its <code>runDiscoveryPipeline</code> (discovery.go:151) hits
+<strong>each provider’s own <code>/models</code> endpoint
+directly</strong>: - <code>getDiscoveryEndpoint</code>
+(discovery.go:241-266) hard-maps provider name → upstream URL
+(<code>openai → https://api.openai.com/v1/models</code>,
+<code>ollama →   http://localhost:11434/api/tags</code>, etc.) or
+<code>cred.BaseURL + &quot;/models&quot;</code>. - It therefore requires
+<strong><code>[]ProviderCredentials</code></strong> (discovery.go:75-79:
+<code>ProviderName</code>, <code>APIKey</code>, <code>BaseURL</code>)
+passed to <strong><code>Start(credentials)</code></strong>.</p>
+<h3 id="the-poll-loop">1.3 The poll loop</h3>
+<p><code>Start([]ProviderCredentials)</code> (discovery.go:107) launches
+<code>discoveryLoop</code> (discovery.go:131): an
+<strong>initial</strong> <code>runDiscoveryPipeline</code>, then a
+<code>time.NewTicker(s.config.DiscoveryInterval)</code> loop
+(discovery.go:137-147). - Pipeline = discover (discovery.go:155) →
+verify (discovery.go:158) → score → select. -
+<code>GetDiscoveredModels()</code> (discovery.go:452) returns
+<code>[]*DiscoveredModel</code>; the catalog adapter reads
+<code>Verified</code>, <code>Provider</code>, <code>ModelID</code>,
+<code>OverallScore</code> (registry_adapter.go:60-78).</p>
+<h3 id="config-interval-defaults-const-038-conflict-to-fix">1.4 Config /
+interval defaults — <strong>CONST-038 conflict to fix</strong></h3>
+<p><code>DefaultDiscoveryConfig()</code> sets
+<code>DiscoveryInterval: 24 * time.Hour</code> (discovery.go:510).
+<strong>CONST-038 requires ≤ 60 s poll</strong>. The wiring MUST
+override the interval to ≤ 60 s (env-driven, default 60 s) — see §4.3.
+(CONST-037’s “verified within 24h” is the <em>staleness budget</em> for
+a model, not the <em>poll</em> interval; the 24 h default conflates them
+and breaks CONST-038.)</p>
+<hr />
+<h2 id="where-the-router-builds-its-dependencies-task-2">2. Where the
+router builds its dependencies (Task 2)</h2>
+<p>Router build entry: <code>SetupRouterWithContext(cfg)</code>
+(<code>router.go:158</code>). Relevant in-scope objects at the
+<code>:779</code> catalog block:</p>
+<ul>
+<li><strong><code>providerRegistry := services.NewProviderRegistry(...)</code></strong>
+— router.go:263, stored on <code>rc.ProviderRegistry</code>
+(router.go:264) “Exposed for StartupVerifier integration”.</li>
+<li><code>providerRegistry.GetStartupVerifier()</code> —
+provider_registry.go:583, returns
+<code>*verifier.StartupVerifier</code>. Already consulted at
+router.go:907 / :927 for the debate team + intent router.</li>
+<li><code>providerRegistry.GetDiscovery()</code> —
+provider_registry.go:532, returns
+<code>*services.ProviderDiscovery</code> (a <em>provider</em> discovery,
+not the model-discovery service — do not confuse).</li>
+<li><code>logger</code>, <code>cfg</code>, <code>os.Getenv(...)</code>
+are all in scope at the catalog block (router.go:775-786).</li>
+</ul>
+<p>So the catalog block at <code>:773-786</code> already has
+<code>providerRegistry</code> (it uses it for
+<code>NewRegistryProviderSource</code>). <strong>Everything needed to
+obtain a real verified source is reachable here.</strong></p>
+<hr />
+<h2 id="why-its-nil-today-task-3">3. WHY it’s <code>nil</code> today
+(Task 3)</h2>
+<h3 id="mechanically">3.1 Mechanically</h3>
+<p><code>NewModelDiscoveryService</code> is <strong>never constructed in
+any production path</strong> — grep across the submodule finds it ONLY
+in test files (<code>internal/verifier/discovery_test.go</code>,
+<code>internal/handlers/discovery_handler_test.go</code>). Confirmed: no
+non-test caller exists. SP2 therefore had nothing populated to pass and
+correctly chose honest-empty (registry_adapter.go:50-58 returns
+<code>nil</code> source for <code>nil</code> disc → catalog.go:218 skips
+the verified-model section) rather than fabricating a list (anti-bluff
+§11.4 / CONST-036).</p>
+<h3 id="the-architectural-reason-two-parallel-discovery-pipelines">3.2
+The architectural reason — two parallel discovery pipelines</h3>
+<p>helix_agent has <strong>two</strong> independent
+verification/discovery mechanisms:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th></th>
+<th><code>ModelDiscoveryService</code> (discovery.go)</th>
+<th><code>StartupVerifier</code> (startup.go)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Constructed in prod?</td>
+<td><strong>No</strong> (tests only)</td>
+<td><strong>Yes</strong> — built inside
+<code>NewProviderRegistry</code>, reachable via
+<code>providerRegistry.GetStartupVerifier()</code>
+(provider_registry.go:583)</td>
+</tr>
+<tr>
+<td>Pipeline</td>
+<td>discover→verify→score→select, polled (discovery.go:131)</td>
+<td>discover→verify→subscriptions→score→rank→selectDebateTeam
+(startup.go:218-274)</td>
+</tr>
+<tr>
+<td>Output type</td>
+<td><code>[]*DiscoveredModel</code> w/
+<code>Verified/OverallScore</code> (discovery.go:452)</td>
+<td><code>[]*UnifiedProvider</code>, each w/ <code>Verified bool</code>,
+<code>Score</code>, <code>Models []UnifiedModel</code>
+(provider_types.go:74,76,89)</td>
+</tr>
+<tr>
+<td>Verified accessor</td>
+<td><code>GetDiscoveredModels()</code></td>
+<td><code>GetVerifiedProviders()</code> (startup.go:1638) /
+<code>GetRankedProviders()</code> (startup.go:1611)</td>
+</tr>
+</tbody>
+</table>
+<p><code>catalog.NewDiscoveryVerifiedSource</code> is typed to the
+<em>unconstructed</em> <code>ModelDiscoveryService</code>. The
+<strong>real, already-running, already-populated</strong> verified data
+lives in <code>StartupVerifier</code>. So today’s <code>nil</code> is
+not just “forgot to pass it” — it is “the type the catalog wants is the
+one nobody builds.”</p>
+<h3 id="is-a-constructed-discovery-service-available-elsewhere">3.3 Is a
+constructed discovery service available elsewhere?</h3>
+<p>No <code>ModelDiscoveryService</code> is. But a constructed,
+populated <strong>verified-model source</strong> IS available:
+<code>StartupVerifier</code> via <code>providerRegistry</code>. This
+drives the recommended wiring (§4, Option B).</p>
+<hr />
+<h2 id="wiring-design-task-4">4. Wiring design (Task 4)</h2>
+<p>Two options. <strong>Option B is recommended</strong> (reuses the
+real populated pipeline; no duplicate polling; satisfies
+CONST-036/037/038 with the data that already drives the debate team).
+Option A is documented for completeness / future use.</p>
+<h3 id="option-a-construct-a-real-modeldiscoveryservice-matches-the-existing-adapter-type">4.1
+Option A — construct a real <code>ModelDiscoveryService</code> (matches
+the existing adapter type)</h3>
+<ol type="1">
+<li><p>In <code>SetupRouterWithContext</code>, after
+<code>providerRegistry</code> is built, construct:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>vs <span class="op">:=</span> verifier<span class="op">.</span>NewVerificationService<span class="op">(</span>verifier<span class="op">.</span>DefaultConfig<span class="op">())</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>ss<span class="op">,</span> _ <span class="op">:=</span> verifier<span class="op">.</span>NewScoringService<span class="op">(</span>verifier<span class="op">.</span>DefaultConfig<span class="op">())</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>hs <span class="op">:=</span> verifier<span class="op">.</span>NewHealthService<span class="op">(...)</span>            <span class="co">// confirm constructor</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>dcfg <span class="op">:=</span> verifier<span class="op">.</span>DefaultDiscoveryConfig<span class="op">()</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>dcfg<span class="op">.</span>DiscoveryInterval <span class="op">=</span> pollInterval<span class="op">()</span>         <span class="co">// ≤ 60s, CONST-038</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>disc <span class="op">:=</span> verifier<span class="op">.</span>NewModelDiscoveryService<span class="op">(</span>vs<span class="op">,</span> ss<span class="op">,</span> hs<span class="op">,</span> dcfg<span class="op">)</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>disc<span class="op">.</span>Start<span class="op">(</span>buildCredentialsFromRegistry<span class="op">(</span>providerRegistry<span class="op">))</span> <span class="co">// []ProviderCredentials</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>rc<span class="op">.</span>modelDiscovery <span class="op">=</span> disc                         <span class="co">// for graceful Stop()</span></span></code></pre></div></li>
+<li><p>Pass it at router.go:779:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Verified<span class="op">:</span> catalog<span class="op">.</span>NewDiscoveryVerifiedSource<span class="op">(</span>disc<span class="op">),</span></span></code></pre></div></li>
+<li><p>Add <code>disc.Stop()</code> to
+<code>RouterContext.Shutdown()</code> (router.go:74).</p></li>
+</ol>
+<p><strong>Cost:</strong> a SECOND verify/score pipeline (the
+StartupVerifier already does this), double the upstream
+<code>/models</code> calls, and you must derive
+<code>[]ProviderCredentials</code> from the registry. Higher blast
+radius, duplicates work.</p>
+<h3 id="option-b-adapt-startupverifier-recommended">4.2 Option B — adapt
+<code>StartupVerifier</code> (RECOMMENDED)</h3>
+<p>Add a second <code>VerifiedModelSource</code> implementation in the
+catalog adapter that reads the already-populated
+<code>StartupVerifier</code>. No new poller; reuse the live one.</p>
+<p>New constructor + adapter in
+<code>internal/catalog/registry_adapter.go</code> (alongside the
+existing <code>discoveryVerifiedSource</code>):</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// NewStartupVerifierSource builds a VerifiedModelSource over the live</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">// StartupVerifier (the pipeline that already drives the debate team).</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewStartupVerifierSource<span class="op">(</span>sv <span class="op">*</span>verifier<span class="op">.</span>StartupVerifier<span class="op">)</span> VerifiedModelSource <span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> sv <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span> <span class="op">}</span> <span class="co">// honest-empty preserved</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>startupVerifierSource<span class="op">{</span>sv<span class="op">:</span> sv<span class="op">}</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>startupVerifierSource<span class="op">)</span> VerifiedModels<span class="op">()</span> <span class="op">[]</span>VerifiedModel <span class="op">{</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> s <span class="op">==</span> <span class="ot">nil</span> <span class="op">||</span> s<span class="op">.</span>sv <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> out <span class="op">[]</span>VerifiedModel</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> p <span class="op">:=</span> <span class="kw">range</span> s<span class="op">.</span>sv<span class="op">.</span>GetVerifiedProviders<span class="op">()</span> <span class="op">{</span>     <span class="co">// startup.go:1638</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">!</span>p<span class="op">.</span>Verified <span class="op">{</span> <span class="cf">continue</span> <span class="op">}</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _<span class="op">,</span> m <span class="op">:=</span> <span class="kw">range</span> p<span class="op">.</span>Models <span class="op">{</span>                    <span class="co">// provider_types.go:89</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">!</span>m<span class="op">.</span>Verified <span class="op">{</span> <span class="cf">continue</span> <span class="op">}</span>                 <span class="co">// model-level Verified, provider_types.go (UnifiedModel.Verified)</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>            <span class="co">// CONST-037 staleness gate: skip models whose VerifiedAt is older</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>            <span class="co">// than 24h (provider_types.go UnifiedModel.VerifiedAt).</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> time<span class="op">.</span>Since<span class="op">(</span>m<span class="op">.</span>VerifiedAt<span class="op">)</span> <span class="op">&gt;</span> <span class="dv">24</span><span class="op">*</span>time<span class="op">.</span>Hour <span class="op">{</span> <span class="cf">continue</span> <span class="op">}</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>            out <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>out<span class="op">,</span> VerifiedModel<span class="op">{</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>                Provider<span class="op">:</span>     p<span class="op">.</span>Type<span class="op">,</span>                    <span class="co">// normalize lower-case in catalog.Build (catalog.go:223)</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>                ModelID<span class="op">:</span>      m<span class="op">.</span>ID<span class="op">,</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>                Verified<span class="op">:</span>     <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>                OverallScore<span class="op">:</span> m<span class="op">.</span>Score<span class="op">,</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>            <span class="op">})</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Wire at router.go:779:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>Verified<span class="op">:</span> catalog<span class="op">.</span>NewStartupVerifierSource<span class="op">(</span>providerRegistry<span class="op">.</span>GetStartupVerifier<span class="op">()),</span></span></code></pre></div>
+<p><code>GetStartupVerifier()</code> may return <code>nil</code> before
+the verification pipeline has run (router.go:917/:936 already handle the
+nil case) → adapter returns <code>nil</code> source → catalog stays
+honest-empty until verification completes. This is correct: it never
+fabricates, and self-heals once <code>VerifyAllProviders</code> finishes
+(startup.go:218).</p>
+<h3 id="v1providers-path-task-4-providers-half">4.3
+<code>/v1/providers</code> path (Task 4, providers half)</h3>
+<p><code>/v1/providers</code> (router.go:792-) currently emits each
+provider’s <code>capabilities.SupportedModels</code> (self-declared
+display hint), NOT verifier-backed models. To show <strong>real Verified
+models</strong> there too, augment the handler to read
+<code>providerRegistry.GetStartupVerifier().GetVerifiedProviders()</code>
+and emit a <code>verified_models: []</code> field per provider (provider
+<code>Type</code> + each <code>m.ID/m.Score/m.VerifiedAt</code> where
+<code>m.Verified &amp;&amp; fresh</code>). Keep
+<code>supported_models</code> as the display hint; add
+<code>verified_models</code> as the verifier-authoritative list
+(CONST-036: verifier is the source of truth; the self-declared list must
+never be promoted to “verified”).</p>
+<h3 id="config-env-it-needs">4.4 Config / env it needs</h3>
+<ul>
+<li><code>pollInterval()</code> — env
+<code>HELIX_VERIFIER_DISCOVERY_INTERVAL</code> (default
+<code>60s</code>, clamp to ≤ 60 s per CONST-038). Option B reuses the
+StartupVerifier’s own re-verify cadence; if that cadence is &gt; 60 s,
+add a periodic re-verify trigger ≤ 60 s OR document that the
+StartupVerifier re-verify loop already satisfies it (verify before
+claiming — do not assume).</li>
+<li>Verified-staleness budget — fixed 24 h per CONST-037
+(<code>m.VerifiedAt</code>), applied in the adapter (§4.2).</li>
+<li>No central “LLMsVerifier URL” is needed for Option B (the
+StartupVerifier discovers from env-configured providers). For Option A,
+the per-provider URLs are hard-mapped in
+<code>getDiscoveryEndpoint</code> (discovery.go:244-259); only
+<code>cred.BaseURL</code> overrides apply.</li>
+</ul>
+<hr />
+<h2 id="red-first-test-plan-task-5">5. RED-first test plan (Task 5)</h2>
+<p>Goal: a test that proves <code>/v1/catalog</code> returns real
+verified models when a (test) verified source is wired, and
+<strong>FAILS today</strong> (nil → empty), per §11.4.115
+(RED-on-broken-artifact + <code>RED_MODE</code> polarity) and
+§11.4.43.</p>
+<h3 id="pure-unit-red-no-infra-the-primary-guard">5.1 Pure unit RED (no
+infra) — the primary guard</h3>
+<p>Catalog service is already unit-testable (catalog_test.go exists).
+Add a test in <code>internal/catalog/</code>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// fakeVerifiedSource returns one Verified model — anti-bluff: a concrete,</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co">// asserted value, not a mock that returns whatever the test wants.</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> fakeVerifiedSource <span class="kw">struct</span><span class="op">{}</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>fakeVerifiedSource<span class="op">)</span> VerifiedModels<span class="op">()</span> <span class="op">[]</span>catalog<span class="op">.</span>VerifiedModel <span class="op">{</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">[]</span>catalog<span class="op">.</span>VerifiedModel<span class="op">{{</span>Provider<span class="op">:</span> <span class="st">&quot;openai&quot;</span><span class="op">,</span> ModelID<span class="op">:</span> <span class="st">&quot;gpt-4o&quot;</span><span class="op">,</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        Verified<span class="op">:</span> <span class="ot">true</span><span class="op">,</span> OverallScore<span class="op">:</span> <span class="fl">0.91</span><span class="op">}}</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestCatalog_VerifiedModelsFlow_RED<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    redMode <span class="op">:=</span> os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;RED_MODE&quot;</span><span class="op">)</span> <span class="op">!=</span> <span class="st">&quot;0&quot;</span> <span class="co">// default 1 = reproduce defect</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> verified catalog<span class="op">.</span>VerifiedModelSource</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> redMode <span class="op">{</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        verified <span class="op">=</span> catalog<span class="op">.</span>NewDiscoveryVerifiedSource<span class="op">(</span><span class="ot">nil</span><span class="op">)</span> <span class="co">// TODAY&#39;s wiring → nil</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        verified <span class="op">=</span> fakeVerifiedSource<span class="op">{}</span>                     <span class="co">// POST-fix wiring</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    svc <span class="op">:=</span> catalog<span class="op">.</span>New<span class="op">(</span>catalog<span class="op">.</span>Options<span class="op">{</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        Providers<span class="op">:</span> catalog<span class="op">.</span>NewRegistryProviderSource<span class="op">(</span>reg<span class="op">),</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>        Verified<span class="op">:</span>  verified<span class="op">,</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    entries <span class="op">:=</span> svc<span class="op">.</span>Build<span class="op">()</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    got <span class="op">:=</span> countKind<span class="op">(</span>entries<span class="op">,</span> catalog<span class="op">.</span>KindModel<span class="op">)</span> <span class="co">// helper</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> redMode <span class="op">{</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">// RED asserts the DEFECT is present: zero verified models today.</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>Zero<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="st">&quot;RED: expected honest-empty with nil source&quot;</span><span class="op">)</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>GreaterOrEqual<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> <span class="st">&quot;GREEN: verified model must appear&quot;</span><span class="op">)</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> names<span class="op">(</span>entries<span class="op">),</span> <span class="st">&quot;openai/gpt-4o&quot;</span><span class="op">)</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul>
+<li><code>RED_MODE=1</code> (default): passes today, capturing the
+defect baseline (catalog is empty of models with the current
+<code>nil</code> wiring) — the proof the guard is real.</li>
+<li><code>RED_MODE=0</code>: fails today (no fake wired in production),
+passes after the §4 wiring lands. This is the polarity-switch guard
+(§11.4.115); register it as a standing regression guard per
+§11.4.135.</li>
+</ul>
+<h3 id="http-level-red-handler">5.2 HTTP-level RED (handler)</h3>
+<p>Spin the catalog handler (<code>catalog.NewHandler</code>,
+handler.go) on an httptest server, <code>GET /catalog</code>, assert the
+JSON body’s model-kind count under the same <code>RED_MODE</code>
+polarity. Catches the wiring at the route layer (router.go:782).</p>
+<h3 id="adapter-red-for-option-b">5.3 Adapter RED for Option B</h3>
+<p>A focused test for <code>NewStartupVerifierSource</code>: feed a
+<code>*StartupVerifier</code> whose <code>GetVerifiedProviders()</code>
+returns a provider with one fresh <code>Verified</code> model and one
+stale (<code>VerifiedAt</code> &gt; 24h) model; assert only the fresh
+one surfaces (CONST-037 gate) and a non-verified model is excluded.
+Paired §1.1 mutation: drop the <code>time.Since(...) &gt; 24h</code>
+guard → the stale model leaks → test FAILs.</p>
+<hr />
+<h2 id="honest-boundary-unit-vs-integration-task-6">6. Honest boundary:
+unit vs integration (Task 6)</h2>
+<ul>
+<li><p><strong>The wiring CAN and SHOULD be unit-tested with a fake
+<code>VerifiedModelSource</code>.</strong>
+<code>catalog.VerifiedModelSource</code> is a single-method interface
+(catalog.go:104-106). A test fake satisfies it with zero infra. The
+RED→GREEN flip in §5.1/§5.2 needs <strong>no</strong> running
+LLMsVerifier, no provider keys, no DB — it proves the <em>catalog-side
+contract</em> (nil → empty; non-nil populated → models appear).
+Mocks/fakes are permitted here because these are unit tests
+(CONST-050(A)).</p></li>
+<li><p><strong>An end-to-end “real verified models actually flow” claim
+REQUIRES integration infra</strong> (CONST-050(B), Rule 5): the
+StartupVerifier pipeline only populates
+<code>GetVerifiedProviders()</code> after
+<code>VerifyAllProviders</code> runs against <strong>real provider
+endpoints with real API keys</strong> (startup.go:218,
+getDiscoveryEndpoint reaches live
+<code>https://api.openai.com/v1/models</code> etc.). So:</p>
+<ul>
+<li>Unit layer (fake source) — proves the wiring contract. No infra.
+Primary RED guard.</li>
+<li>Integration layer — boot helix_agent with at least one real provider
+key (e.g. an Ollama at <code>localhost:11434</code>, the one
+no-cloud-key option in <code>getDiscoveryEndpoint</code>,
+discovery.go:253), let startup verification run, then
+<code>GET /v1/catalog</code> and assert ≥1 <code>verified</code> model
+entry whose <code>Provider/Model</code> matches a really-verified Ollama
+model — captured runtime evidence per §11.4.5/§11.4.69
+(<code>network_connectivity</code> / real HTTP body), NOT
+metadata-only.</li>
+<li><strong>Ollama is the cheapest real-infra path</strong> (local, no
+secret); cloud providers need keys from <code>.env</code> (CONST-042 —
+never committed).</li>
+</ul></li>
+</ul>
+<hr />
+<h2 id="summary">7. Summary</h2>
+<ul>
+<li><strong>Why nil today:</strong>
+<code>catalog.NewDiscoveryVerifiedSource</code> is typed to
+<code>*verifier.ModelDiscoveryService</code>, which is
+<strong>constructed only in tests, never in production</strong>
+(grep-confirmed). SP2 passed <code>nil</code> and chose honest-empty
+(registry_adapter.go:54) rather than fabricate (anti-bluff). Compounding
+it, the real, populated verified data lives in a
+<strong>different</strong> object — <code>StartupVerifier</code>
+(<code>providerRegistry.GetStartupVerifier()</code>, startup.go:1638) —
+not in <code>ModelDiscoveryService</code>.</li>
+<li><strong>The wiring point:</strong>
+<code>submodules/helix_agent/internal/router/router.go:779</code> (the
+<code>Verified:</code> field of <code>catalog.Options</code>).
+<code>providerRegistry</code> is already in scope there.
+<strong>Recommended (Option B):</strong> add a
+<code>StartupVerifier</code>-backed <code>VerifiedModelSource</code>
+adapter in <code>internal/catalog/registry_adapter.go</code> and pass
+<code>catalog.NewStartupVerifierSource(providerRegistry.GetStartupVerifier())</code>
+— reuses the live pipeline, no duplicate poller, applies the CONST-037
+24h staleness gate in the adapter and CONST-038 ≤60s cadence via the
+existing re-verify loop (verify the loop period before claiming
+compliance). Mirror the same source into <code>/v1/providers</code> as a
+<code>verified_models</code> field.</li>
+<li><strong>Test boundary:</strong> the wiring contract (nil→empty vs
+populated→models) is fully <strong>unit-testable with a fake
+<code>VerifiedModelSource</code></strong> (single-method interface, no
+infra) — this is the primary RED guard with a <code>RED_MODE</code>
+polarity switch. The “real models really flow” claim is
+<strong>integration-only</strong> (StartupVerifier needs real provider
+endpoints + keys; Ollama on <code>localhost:11434</code> is the cheapest
+no-secret real path) with captured runtime evidence.</li>
+</ul>
+</body>
+</html>

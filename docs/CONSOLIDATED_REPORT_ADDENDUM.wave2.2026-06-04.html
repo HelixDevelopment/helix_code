@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CONSOLIDATED_REPORT_ADDENDUM.wave2.2026-06-04</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">CONSOLIDATED_REPORT_ADDENDUM.wave2.2026-06-04</h1>
+</header>
+<!-- AUTHORITATIVE ADDENDUM — generated 2026-06-04 from read-only discovery Wave 2 (wf_e0bd1a2a-792, 12 modules). Pairs with CONSOLIDATED_UNFINISHED_WORK_AND_PLAN.2026-06-04.md. -->
+<h1 id="consolidated-report-addendum-previously-un-assessed-modules-2026-06-04-wave-2">Consolidated
+Report — Addendum: previously-un-assessed modules (2026-06-04, Wave
+2)</h1>
+<p>This addendum synthesizes the 12 Wave-2 module assessments that were
+rate-limited in the prior discovery round. All findings are sourced from
+the assessments above. “unverified” is preserved verbatim wherever the
+assessor flagged it. No runtime claims are asserted beyond what an
+assessor explicitly captured.</p>
+<h2 id="a.-newly-assessed-module-status">A. Newly-assessed module
+status</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>Module</th>
+<th>Builds</th>
+<th>Broken/disabled?</th>
+<th>Dead code</th>
+<th>Top unfinished</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>challenges</td>
+<td><strong>Partial</strong> — <code>go build ./...</code> FAILS</td>
+<td><code>pkg/userflow/</code> (118 .go) unbuildable: missing
+<code>digital.vasic.containers</code> dep, 0 <code>replace</code>
+directives</td>
+<td>Whole <code>pkg/userflow/</code> effectively dead in this
+checkout</td>
+<td><code>pkg/userflow/container_infra.go:8-13</code> unresolved
+containers import; <code>cmd/userflow-runner</code> blocked
+transitively</td>
+<td><code>cd submodules/challenges &amp;&amp; go build ./...</code> →
+missing-module error; 14 non-userflow pkgs build+test PASS
+(<code>assertion 5.184s</code>, <code>runner 3.599s</code>)</td>
+</tr>
+<tr>
+<td>security</td>
+<td><strong>Yes</strong></td>
+<td>None</td>
+<td>None</td>
+<td>No blocking items; no committed vuln-scan config</td>
+<td><code>go build ./...</code> BUILD_EXIT=0; <code>go vet ./...</code>
+exit 0; 343 test funcs compile
+(<code>ok ... [no tests to run]</code>)</td>
+</tr>
+<tr>
+<td>llms_verifier</td>
+<td><strong>App module: yes / outer+meta: no</strong></td>
+<td>Outer module won’t build offline (missing go.sum entries)</td>
+<td><code>*.go.backup</code>, <code>backup/scoring_example.go</code>
+orphan main, committed <code>*.db.backup_*</code>,
+<code>server.pid</code></td>
+<td>Dead
+<code>replace digital.vasic.llmprovider =&gt; ../../LLMProvider</code>
+(target MISSING, no importer); empty metadata “for now”</td>
+<td>inner <code>go build ./...</code> exit 0, <code>go vet</code> exit
+0; outer <code>go build ./...</code> → missing go.sum entries</td>
+</tr>
+<tr>
+<td>helix_agent</td>
+<td><strong>Yes</strong></td>
+<td>None (0 bare skips of 1172)</td>
+<td>No <code>.disabled</code>/<code>.bak</code> in internal/cmd/pkg</td>
+<td><code>internal/tools/tool_executors.go:292,792</code> stubs;
+<code>internal/optimization/guidance</code> (22 markers)</td>
+<td><code>go build -o /tmp/... ./cmd/helixagent/</code> → 96 MB binary;
+<code>go vet</code> exit 0</td>
+</tr>
+<tr>
+<td>doc_processor</td>
+<td><strong>No</strong> — committed merge-conflict markers</td>
+<td><code>pkg/i18n/translator.go</code> +
+<code>translator_test.go</code> have unresolved
+<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>/<code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>
+markers (committed at HEAD <code>7750140</code>)</td>
+<td>None observed in buildable pkgs</td>
+<td><code>pkg/i18n/translator.go</code> (lines
+4,14,32,37,58,75,80,89,98); binary blocked (imports i18n)</td>
+<td><code>go build ./...</code> →
+<code>translator.go:4:1: expected &#39;package&#39;, found &#39;&lt;&lt;&#39;</code>; 7
+non-i18n pkgs test PASS</td>
+</tr>
+<tr>
+<td>llm_orchestrator</td>
+<td><strong>Yes</strong></td>
+<td>None</td>
+<td>None</td>
+<td><code>pkg/agent/gemini_agent.go:126</code> stdin-pipe mode
+follow-up; <code>go.mod:18</code> case-mismatch replace</td>
+<td><code>go build ./...</code> EXIT=0; <code>go vet</code> exit 0;
+<code>go test -race ./pkg/agent/</code> PASS (14.3s)</td>
+</tr>
+<tr>
+<td>llm_provider</td>
+<td><strong>Yes</strong></td>
+<td>None</td>
+<td><code>pkg/discovery/discovery.go:162-190</code> deprecated Tier-3
+hardcoded-fallback still consulted at runtime</td>
+<td>CONST-036 fallback sweep (~40 providers); zen provider needs
+external OpenCode CLI</td>
+<td><code>go build ./...</code> exit 0; <code>go vet</code> exit 0; core
+pkgs PASS under <code>-race -short</code></td>
+</tr>
+<tr>
+<td>vision_engine</td>
+<td><strong>Yes (default) / partial (vision tag)</strong></td>
+<td><code>-tags vision</code> build fails ONLY for missing host OpenCV
+(expected, isolated behind <code>//go:build vision</code>)</td>
+<td>None — build-tag split intentional</td>
+<td>OpenCV vision path untested on this host (toolchain-gated, not
+code-gated)</td>
+<td><code>go build ./...</code> EXIT=0;
+<code>go test -race ./pkg/remote/</code> ok 1.507s; 8 vision providers
+confirmed real HTTP</td>
+</tr>
+<tr>
+<td>assets</td>
+<td><strong>n/a</strong> (brand dir)</td>
+<td>None</td>
+<td>None</td>
+<td><code>.gitignore</code> derivative patterns reference a non-existent
+generator; tautological mutation self-test</td>
+<td>Challenge ran: PASS both PNGs + governance files;
+<code>MUTATION_TEST=1</code> rejected sentinel</td>
+</tr>
+<tr>
+<td>github_pages_website</td>
+<td><strong>Partial</strong> (static site = serve; not run at
+runtime)</td>
+<td>HTML validation soft-skips when html5validator absent (effectively
+unvalidated)</td>
+<td><code>courses/player.js:264</code> quality-switch stub;
+<code>certificate.html:241</code> PDF stub</td>
+<td><code>package.json:16-18</code> docker-compose scripts with no
+compose file; provider claims substantiated</td>
+<td><code>node --check</code> all JS OK;
+<code>bash test-website.sh html</code> → “html5validator not installed,
+skipping”</td>
+</tr>
+<tr>
+<td>root meta-repo (<code>dev.helix.code</code> go 1.25.2)</td>
+<td><strong>Yes</strong></td>
+<td>None (errors only from non-module <code>cli_agents*/</code>
+reference trees)</td>
+<td><code>.gitmodules.bak.https-to-ssh</code>; tracked
+<code>coverage.out</code>/README.html/README.pdf</td>
+<td>~150+ aspirational
+<code>*_IMPLEMENTATION*.md</code>/<code>PHASE_*</code> doc sprawl</td>
+<td><code>go build ./...</code> EXIT 0 (cli_agents errors outside module
+graph)</td>
+</tr>
+<tr>
+<td>helix_code (inner, go 1.26)</td>
+<td><strong>Yes (Asmt 5/11) / unverified (Asmt 12 timed
+out)</strong></td>
+<td>None disabled; cold compile hit 90-180s timeout in Asmt 12</td>
+<td><code>internal/tools/lsp_fakeserver</code> (test fixture)</td>
+<td><code>internal/memory/providers/faiss_provider.go</code>
+self-described “simulation”;
+<code>internal/worker/consensus.go:222</code></td>
+<td>Asmt 11: <code>go build ./...</code> clean (benign
+<code>-lobjc</code> linker warnings); Asmt 12: builds
+<strong>unverified</strong> within time cap</td>
+</tr>
+<tr>
+<td>helix_qa</td>
+<td><strong>Yes</strong></td>
+<td>None</td>
+<td>None</td>
+<td>(not deep-assessed this wave)</td>
+<td><code>go build ./...</code> EXIT 0 (Asmt 11)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="b.-new-brokenfailingdisabled-items-fix-first-candidates-with-evidence">B.
+New broken/failing/disabled items (fix-first candidates) — with
+evidence</h2>
+<ol type="1">
+<li><p><strong>doc_processor — committed broken build
+(CONFIRMED).</strong> <code>pkg/i18n/translator.go</code> and
+<code>pkg/i18n/translator_test.go</code> contain unresolved git
+merge-conflict markers at HEAD <code>7750140</code> (clean working tree
+→ in version control, not local). <code>go build ./...</code> →
+<code>pkg/i18n/translator.go:4:1: expected &#39;package&#39;, found &#39;&lt;&lt;&#39;</code>.
+The binary <code>cmd/docprocessor</code> imports i18n so it cannot
+build; root
+<code>automation_test.go</code>/<code>e2e_test.go</code>/<code>security_test.go</code>
+cascade-fail. README claims §11.4 anti-bluff “every claim exercised”
+while the repo does not build — a direct contradiction.
+<strong>Highest-severity fix-first.</strong></p></li>
+<li><p><strong>challenges — <code>go build ./...</code> broken
+out-of-the-box (CONFIRMED).</strong>
+<code>pkg/userflow/container_infra.go:8-13</code> imports
+<code>digital.vasic.containers/pkg/{compose,event,health,logging,runtime,serviceregistry}</code>
+with 0 <code>replace</code> directives and 0 containers entries in
+<code>go.sum</code>. Breaks <code>pkg/userflow/</code> (118 files) and
+the only binary <code>cmd/userflow-runner</code>.
+<code>helix-deps.yaml</code> does not declare the containers dep
+(CONST-054 manifest drift). The other 14 <code>pkg/</code> packages
+build + test clean.</p></li>
+<li><p><strong>llms_verifier — outer/meta module not buildable offline
+(CONFIRMED).</strong> From repo root <code>go build ./...</code> →
+<code>missing go.sum entry</code> for go-sqlite3, bcrypt, brotli, gin,
+quic-go, uuid, logrus, kafka-go, amqp091; Asmt 11 notes
+<code>go.sum</code> is <strong>ABSENT</strong> at that layer. The real
+product is the inner <code>llm-verifier/</code> module which builds +
+vets clean. Outer module needs
+<code>go mod download</code>/<code>go get</code> from a clean
+checkout.</p></li>
+<li><p><strong>github_pages_website — HTML test silently validates
+nothing (CONFIRMED).</strong> <code>test-website.sh:45-53</code> prints
+<code>WARNING: html5validator not installed, skipping HTML validation</code>
+and exits without failure — a “passing” HTML test that asserts nothing
+(anti-bluff concern). <code>package.json:16-18</code>
+<code>build</code>/<code>logs</code>/<code>status</code> scripts invoke
+<code>docker-compose</code> but no <code>docker-compose.yml</code>
+exists (only <code>Containerfile</code>; <code>start-website.sh</code>
+uses podman) — script/manifest mismatch.</p></li>
+<li><p><strong>helix_code —
+<code>internal/memory/providers/faiss_provider.go</code> self-described
+simulation (CONFIRMED static read, gating unverified).</strong> Struct
+comments say “not used in simulation”, “GPU not available in
+simulation”, “always true in simulation”; grep for
+<code>os/exec|http.Post|http.Get|net.Dial</code> → <strong>0</strong>
+matches (no real FAISS/IPC). Candidate CONST-050(A)/Rule-2
+production-mock violation — <strong>unverified</strong> whether gated to
+unit-tests-only.</p></li>
+<li><p><strong>helix_code —
+<code>internal/worker/consensus.go:222</code> multi-peer election
+transport not implemented.</strong> Self-flagged §11.4/CONST-035 gap:
+vote-request transport “is not implemented (peers=%d). Node remains
+Candidate” — election can hang (also a concurrency risk, §E).</p></li>
+</ol>
+<h2 id="c.-new-dead-code-suspects">C. New dead-code suspects</h2>
+<ul>
+<li><strong>challenges:</strong> <code>pkg/userflow/</code> (118
+<code>.go</code> files) — effectively dead/unbuildable pending the
+containers dependency.</li>
+<li><strong>llms_verifier:</strong>
+<code>llm-verifier/api/handlers.go.backup</code>,
+<code>llm-verifier/cmd/main.go.backup</code> (wrong suffix, not
+compiled); <code>backup/scoring_example.go</code>
+(<code>package main</code> outside any module — orphaned); committed
+<code>*.db.backup_*</code> artifacts under <code>cmd/</code>.</li>
+<li><strong>llms_verifier:</strong> <code>llm-verifier/go.mod:172</code>
+<code>replace digital.vasic.llmprovider =&gt; ../../LLMProvider</code> —
+target submodule MISSING and no Go file imports
+<code>digital.vasic.llmprovider</code> → dead replace directive.</li>
+<li><strong>llm_orchestrator:</strong> <code>go.mod:18</code>
+<code>replace digital.vasic.llmprovider =&gt; ../LLMProvider</code> —
+actual sibling is <code>../llm_provider</code> (case mismatch,
+CONST-052); unused by source so build unaffected — latent
+dependency-wiring bug. Plus stray <code>submodule-analysis.txt</code>
+(317 B).</li>
+<li><strong>root meta-repo:</strong>
+<code>.gitmodules.bak.https-to-ssh</code>.</li>
+<li><strong>doc_processor / llm_orchestrator:</strong> stale
+<code>submodule-analysis.txt</code> referencing older commit
+(<code>8b83447</code> vs HEAD <code>7750140</code> in
+doc_processor).</li>
+<li>Note (not dead code): <code>helix_agent/cmd/cognee-mock/</code> and
+<code>helix_code/internal/tools/lsp_fakeserver/</code> are named
+mocks/fixtures — flagged to confirm they are NOT in a production path
+(assessors treat them as test surface; production-path status
+<strong>unverified</strong>).</li>
+</ul>
+<h2 id="d.-new-tooling-gaps-snyk-sonarqube-govulncheck-race-profiling-per-module">D.
+New tooling gaps (Snyk / SonarQube / govulncheck / race / profiling) per
+module</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>Module</th>
+<th>Snyk</th>
+<th>Sonar</th>
+<th>govulncheck</th>
+<th>gosec</th>
+<th>-race wired</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>challenges</td>
+<td>absent</td>
+<td>absent</td>
+<td>absent</td>
+<td>absent</td>
+<td>yes (<code>-race -p 1</code>)</td>
+<td><code>.go-mutesting.yml</code> present; <code>make lint</code> needs
+golangci-lint but <strong>no <code>.golangci.yml</code></strong></td>
+</tr>
+<tr>
+<td>security</td>
+<td>absent</td>
+<td>absent</td>
+<td><strong>absent</strong> (course-exercise only)</td>
+<td>absent</td>
+<td>yes (<code>-race -p 1</code>)</td>
+<td>No committed <code>.golangci.yml</code> → <code>make lint</code>
+env-dependent. Gap notable for a <em>security</em> module</td>
+</tr>
+<tr>
+<td>llms_verifier</td>
+<td>absent</td>
+<td>absent</td>
+<td><strong>wired</strong> (<code>Makefile:90,97</code>)</td>
+<td><strong>wired</strong> (<code>Makefile:95</code>)</td>
+<td>yes (<code>Makefile:53</code>)</td>
+<td>golangci-lint wired; richest scan config of this wave (not
+executed)</td>
+</tr>
+<tr>
+<td>helix_agent</td>
+<td><strong>present</strong> (<code>.snyk</code> v1.25.0)</td>
+<td><strong>present</strong>
+(<code>sonar-project.properties</code>)</td>
+<td>wired (security-scan)</td>
+<td><code>.gosec.yml</code>+baseline</td>
+<td>yes (<code>test-race</code>)</td>
+<td><code>.snyk</code> ignore <code>SNYK-GOLANG-...logr</code>
+<strong>expired 2026-06-01</strong> → stale/active as of 2026-06-04.
+Also
+<code>.semgrep.yml</code>/<code>.trivy.yaml</code>/<code>.hadolint.yaml</code>/<code>.golangci.yml</code></td>
+</tr>
+<tr>
+<td>doc_processor</td>
+<td>absent</td>
+<td>absent</td>
+<td>absent</td>
+<td>absent</td>
+<td>yes (<code>make test-race</code>)</td>
+<td>governance gate scripts present</td>
+</tr>
+<tr>
+<td>llm_orchestrator</td>
+<td>absent</td>
+<td>absent</td>
+<td>absent</td>
+<td>absent</td>
+<td>yes (<code>make test</code>/<code>race</code>)</td>
+<td><code>lint</code> = <code>go vet</code> only; fuzz target
+present</td>
+</tr>
+<tr>
+<td>llm_provider</td>
+<td>absent</td>
+<td>absent</td>
+<td>absent</td>
+<td>absent</td>
+<td>yes (every test target)</td>
+<td>governance gates present</td>
+</tr>
+<tr>
+<td>vision_engine</td>
+<td>absent</td>
+<td>absent</td>
+<td><strong>absent</strong></td>
+<td>absent</td>
+<td>yes (<code>test-race</code>)</td>
+<td><code>lint</code> golangci with <code>go vet</code> fallback</td>
+</tr>
+<tr>
+<td>github_pages_website</td>
+<td>absent</td>
+<td>absent</td>
+<td>absent</td>
+<td>n/a</td>
+<td>n/a</td>
+<td>only html5validator <em>referenced</em>, not installed;
+<code>.gitignore</code> ignores only <code>.idea</code></td>
+</tr>
+<tr>
+<td>helix_code</td>
+<td><strong>present</strong> (<code>.snyk</code>+sonar)</td>
+<td><strong>present</strong></td>
+<td>wired (<code>run-all-tests.sh</code>)</td>
+<td>—</td>
+<td>yes (17 <code>-race</code> mentions)</td>
+<td>tools not installed on host</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Host tooling (Asmt 11):</strong> snyk, sonar-scanner,
+govulncheck, pprof binary all <strong>NOT on PATH</strong>; podman ON
+PATH, docker NOT FOUND (Rule-4/§11.4.76 consistent).
+<code>SONARQUBE_SNYK_IMPLEMENTATION.md</code> is an aspirational PLAN
+(status “STARTING”, Phase 2-4 unchecked) — scanning is
+<strong>configured-but-not-runnable</strong> here. Root
+<code>coverage.out</code> (5 KB) tracked — likely stale build derivative
+(§11.4.30 candidate).</p>
+<h2 id="e.-new-concurrency-risks-filefunc">E. New concurrency risks
+(file:func)</h2>
+<ul>
+<li><strong>helix_code — <code>internal/worker/consensus.go</code>
+(Raft-style election):</strong> when vote-request transport is absent
+(<code>:222</code>), node “remains Candidate” — election can hang.
+Highest-attention new risk. (Manager-pattern mutexes documented but
+<strong>not runtime <code>-race</code>-verified</strong>.)</li>
+<li><strong>helix_agent —
+<code>internal/background/worker_pool.go</code></strong> (worker pool +
+progress channels) and <strong><code>internal/streaming</code></strong>:
+Makefile has dedicated
+<code>test-race</code>/<code>audit-concurrency</code> targets implying
+known sensitivity; <code>-race</code> <strong>not run</strong> this
+session — none independently confirmed.</li>
+<li><strong>challenges — <code>pkg/runner/parallel.go</code></strong>
+(parallel challenge execution) and
+<strong><code>pkg/monitor/websocket.go</code></strong> (concurrent WS
+clients): highest-attention spots; 14 building pkgs passed
+<code>-short</code> (run <strong>without</strong> <code>-race</code> to
+stay under timeout → race-cleanliness <strong>unverified</strong> this
+session; Makefile intends <code>-race</code>).</li>
+<li><strong>No NEW defects observed</strong> in security, llm_provider,
+llm_orchestrator, vision_engine — all use explicit
+<code>sync.Mutex</code>/<code>RWMutex</code>/<code>atomic</code>;
+llm_orchestrator (<code>pkg/agent</code>), vision_engine
+(<code>pkg/remote</code>), llm_provider (core pkgs) passed
+<code>-race</code> clean where run. Provider/discovery/network-gated
+paths <strong>unverified</strong> under <code>-race</code>.</li>
+</ul>
+<h2 id="f.-new-docscourseswebsitediagramsql-gaps">F. New
+docs/courses/website/diagram/SQL gaps</h2>
+<ul>
+<li><strong>Missing root <code>docs/ARCHITECTURE.md</code></strong> —
+CLAUDE.md §11 cites it as the architecture reference but
+<code>find -iname ARCHITECTURE*.md</code> is empty; content lives in
+<code>implementation_guide/002_Architecture_Diagrams.md</code>. STALE
+doc pointer.</li>
+<li><strong>No source diagram files</strong>
+(<code>.mmd</code>/<code>.puml</code>/<code>.drawio</code>) anywhere —
+only rendered <code>.png</code> exports under
+<code>docs/bluff_proofing/</code> and <code>docs/improvements/</code> →
+no regen source per §11.4.77.</li>
+<li><strong><code>VIDEO_COURSE_CURRICULUM.md</code></strong> is
+STUB/plan only (<code>Status: Planned</code>, 71 lines, no root
+material). Real course assets exist only inside the
+<code>github_pages_website/</code> submodule (<code>docs/courses</code>,
+~46 entries in <code>course-data.js</code>).</li>
+<li><strong><code>website/</code></strong> is PLAN-ONLY
+(<code>WEBSITE_CONTENT_PLAN.md</code>, <code>Status: Draft</code>, “Hugo
+or Docusaurus (TBD)”). Real site is the
+<code>github_pages_website/</code> submodule.</li>
+<li><strong>SQL secret-in-source:</strong>
+<code>postgres-init.sql</code> hardcodes DB password
+<code>helixpass</code> (CONST-042 concern). <code>init.sql</code> only
+creates extensions/grants — no application table DDL at root (tables
+presumably via Go migrations, <strong>unverified</strong>).</li>
+<li><strong>§11.4.83 evidence tree sparse:</strong>
+<code>docs/qa/</code> has only 6 feature run dirs
+(HXC-014/016/029/030/035/036) vs 767 test files — far from fully
+populated; README confirms the gate is “release-gate ONLY”, not wired
+pre-commit/pre-push.</li>
+<li><strong>llms_verifier doc sprawl / self-cert smell:</strong> 159
+root <code>.md</code> files (AGENTS.md 152 KB, CLAUDE.md 137 KB)
+incl. <code>FINAL_*</code>/<code>ULTIMATE_*</code>/<code>COMPLETE_*</code>/<code>*_SUCCESS.md</code>/<code>COMPLETION_CELEBRATION.md</code>
+— exactly the “complete/passing” wording Rule 9 / §11.4 forbids without
+pasted runtime evidence; vastly over-states verified state.</li>
+<li><strong>root meta-repo doc sprawl:</strong> ~80-150
+<code>PHASE_*</code>/<code>COMPREHENSIVE_*</code>/<code>*_REPORT.md</code>/<code>FINAL_COMPLETION</code>
+files, largely stale/aspirational and unreconciled.</li>
+<li><strong>github_pages_website staleness:</strong>
+<code>WEBSITE_VERSION.md</code> v1.1.0 / 2025-11-25 — ~6 months stale vs
+2026-06-04 (§11.4.99 territory). Tracked runtime logs
+<code>docs/nginx-logs/access.log</code> + <code>error.log</code>
+(CONST-053 candidate). Provider claims (15+ providers) ARE substantiated
+by real <code>helix_code/internal/llm/*_provider.go</code> impls — not
+bluffed.</li>
+<li><strong>assets:</strong> §3.2 of root CLAUDE.md lists
+<code>assets/</code> as a SUBMODULE but it is NOT in
+<code>.gitmodules</code> (plain tracked subdir);
+<code>assets/CLAUDE.md:12</code> is a garbled §11.9-anchor fragment;
+<code>.gitignore</code> references a non-existent derivative
+generator.</li>
+<li><strong>helix_code manual drift:</strong> CLAUDE.md §3.2.1 claims
+~45 internal packages; actual ~60 (approval, clarification, planner,
+secrets, telemetry, etc. not listed).</li>
+</ul>
+<h2 id="g.-modules-that-returned-no-data-rate-limited-again-do-not-assume-clean">G.
+Modules that returned no data (rate-limited again) — do NOT assume
+clean</h2>
+<ul>
+<li><strong>None of the 12 Wave-2 modules returned empty</strong> — all
+produced assessments. However, the following surfaces remain
+<strong>explicitly unverified</strong> (not “clean”):
+<ul>
+<li><strong>helix_code full build/test (Asmt 12):</strong> cold compile
+hit the 90-180s timeout; <code>go build ./cmd/cli/</code>,
+<code>go vet ./cmd/cli/</code>, even
+<code>go build ./internal/version ./internal/logo</code> did NOT
+complete. Compile success <strong>unverified within time cap</strong>
+(Asmt 5/11 reported it builds clean — treat as conflicting evidence,
+re-verify with warm cache).</li>
+<li><strong>helix_qa:</strong> built clean (Asmt 11) but <strong>not
+deep-assessed</strong> this wave (no skip/placeholder/concurrency/docs
+pass).</li>
+<li><strong>containers submodule:</strong> never directly assessed —
+referenced only as the missing dependency breaking
+<code>challenges</code>. Its own build/test state is
+<strong>unverified</strong>.</li>
+<li>All infra-bound suites (Postgres/Redis/Ollama/Kafka/RabbitMQ, live
+provider keys) across every module were <strong>NOT run</strong> per
+read-only/no-infra constraints — runtime behavior
+<strong>unverified</strong>.</li>
+<li>Static-scan execution (Snyk/Sonar/govulncheck/gosec) <strong>NOT
+run</strong> anywhere (tools absent from PATH).</li>
+</ul></li>
+</ul>
+<h2 id="h.-updated-prioritized-actions-to-fold-into-the-next-implementation-wave-top-8">H.
+Updated prioritized actions to fold into the next implementation wave
+(top 8)</h2>
+<ol type="1">
+<li><strong>Resolve doc_processor committed merge conflict</strong> —
+fix <code>pkg/i18n/translator.go</code> (lines
+4,14,32,37,58,75,80,89,98) + <code>translator_test.go</code> (4,38,169).
+Restores <code>go build ./...</code> and the binary. A committed
+non-compiling repo that claims §11.4 anti-bluff green is the most urgent
+contradiction. (§11.4.108 SOURCE-layer failure; §11.4.121 commit-hygiene
+relevance.)</li>
+<li><strong>Wire challenges → containers dependency</strong> — add
+<code>digital.vasic.containers</code> <code>replace</code>/require +
+<code>go.sum</code> entries (flat-root per CONST-051(C)) and declare it
+in <code>helix-deps.yaml</code> (CONST-054). Unblocks
+<code>pkg/userflow/</code> + <code>cmd/userflow-runner</code>.</li>
+<li><strong>Restore llms_verifier outer-module buildability</strong> —
+regenerate/commit the absent root <code>go.sum</code> (or document the
+<code>go mod download</code> bootstrap as a §11.4.77 regeneration
+mechanism). Remove dead
+<code>replace digital.vasic.llmprovider =&gt; ../../LLMProvider</code>
+(target MISSING).</li>
+<li><strong>Investigate + classify
+<code>helix_code/internal/memory/providers/faiss_provider.go</code></strong>
+— confirm whether the self-described “simulation” is gated to
+unit-tests-only; if reachable from production, it is a
+CONST-050(A)/Rule-2 violation requiring a real FAISS/IPC impl or
+fail-loud sentinel.</li>
+<li><strong>Fix the github_pages_website HTML soft-skip + docker-compose
+phantom</strong> — make <code>test-website.sh</code> FAIL (not skip)
+when html5validator is absent (anti-bluff §11.4.98), and reconcile
+<code>package.json</code> docker-compose scripts with the actual
+podman/<code>Containerfile</code> workflow. Untrack
+<code>nginx-logs/*.log</code> (CONST-053).</li>
+<li><strong>Refresh helix_agent stale <code>.snyk</code> ignore</strong>
+— the <code>SNYK-GOLANG-...logr</code> ignore expired 2026-06-01 (now
+active as of 2026-06-04); re-triage or re-justify. Reconcile inner
+CLAUDE.md <code>make container-*</code> claims vs root §11.4.99
+note.</li>
+<li><strong>Address structural doc/hygiene debt</strong> —
+create/retarget root <code>docs/ARCHITECTURE.md</code> (or fix the §11
+pointer); add <code>.mmd</code>/<code>.puml</code> source diagrams
+(§11.4.77); rotate the hardcoded <code>helixpass</code> in
+<code>postgres-init.sql</code> (CONST-042); prune the llms_verifier +
+root “FINAL/COMPLETE/SUCCESS” self-cert doc sprawl (Rule 9). Untrack
+root <code>coverage.out</code>.</li>
+<li><strong>Schedule a warm-cache <code>-race</code> + build
+pass</strong> for the three timed-out/unverified surfaces — helix_code
+full build (resolve Asmt 5/11 vs Asmt 12 conflict),
+<code>internal/worker/consensus.go</code> election hang, helix_agent
+<code>internal/background</code>/<code>internal/streaming</code>, and
+challenges
+<code>pkg/runner/parallel.go</code>/<code>pkg/monitor/websocket.go</code>
+(Makefiles intend <code>-race</code> but it was not run this session).
+## Sources verified Sources verified 2026-06-09: internal HelixCode
+consolidation/planning document — no third-party-service instructions;
+cross-referenced against project state (docs/Issues.md, docs/Fixed.md,
+.gitmodules, docs/CONTINUATION.md) as of 2026-06-09.</li>
+</ol>
+</body>
+</html>
