@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-impl-D17-debluff-review</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-impl-D17-debluff-review</h1>
+</header>
+<h1 id="independent-code-review-d-16-d-17-de-bluff-of-the-per-agent-cli-layer">Independent
+Code-Review — D-16 + D-17 De-Bluff of the per-agent CLI layer</h1>
+<p><strong>Reviewer:</strong> Independent code-review subagent
+(§11.4.125 / §11.4.142) <strong>Date:</strong> 2026-06-10
+<strong>Repo:</strong> HelixCode root
+<code>/Volumes/T7/Projects/HelixCode</code> <strong>Target:</strong>
+UNCOMMITTED working-tree changes in
+<code>submodules/helix_agent/internal/clis/agents/</code>
+<strong>Verdict:</strong> <strong>GO</strong></p>
+<hr />
+<h2 id="scope-verification-step-6-pass">1. Scope verification (step 6) —
+PASS</h2>
+<ul>
+<li>122 changed entries total. <strong>Every</strong> path is under
+<code>internal/clis/agents/*</code>.</li>
+<li><code>git status --porcelain</code> confirms: 92 modified
+<code>.go</code> files (61 source + 31 <code>_test.go</code>) + 30
+untracked test files (<code>*_pin_test.go</code> /
+<code>*_debluff_pin_test.go</code> / <code>*_stub_pin_test.go</code> +
+one <code>copilotworkspace_test.go</code>). 29 of the untracked files
+are pin/debluff/stub guard tests.</li>
+<li><strong>NOT touched (correct):</strong>
+<code>instance_manager.go</code>, <code>go.mod</code>,
+<code>go.sum</code>, anything in <code>helix_code/</code>. Confirmed via
+full porcelain listing.</li>
+<li><strong>Secret scan:</strong> <code>git diff</code> over the batch —
+no <code>sk-…</code>, AWS keys, inline
+<code>api_key=</code>/<code>password=</code>. CLEAN.</li>
+<li><strong>Mutation-residue scan (§11.4.84):</strong> no
+<code>MUTATED for paired</code> / <code>// always pass</code> /
+<code>_mutated_</code> markers in non-test source. CLEAN. (One
+false-positive grep hit, <code>&quot;Task completed successfully&quot;</code> in
+<code>smolagents.go:199</code>, is a doc-comment <em>quoting</em> the
+removed bluff — benign.)</li>
+<li>Working tree restored exactly after all mutation cycles: still 122
+files, build green.</li>
+</ul>
+<h2 id="whole-layer-build-vet-step-1-pass-the-gate">2. Whole-layer build
++ vet (step 1) — <strong>PASS (the gate)</strong></h2>
+<pre><code>cd submodules/helix_agent
+go build ./internal/clis/...   → BUILD_EXIT=0   (no output)
+go vet   ./internal/clis/...   → VET_EXIT=0     (no output)</code></pre>
+<p>No cross-package breakage from the ~60 parallel edits. The layer
+compiles and vets together.</p>
+<h2 id="whole-layer-test-step-2-pass-the-gate">3. Whole-layer test (step
+2) — <strong>PASS (the gate)</strong></h2>
+<pre><code>go test ./internal/clis/... -count=1</code></pre>
+<p><strong>Result: ALL <code>ok</code>, 0 FAIL.</strong> 78 packages
+reported <code>ok</code> (incl. every touched agent package: amazonq,
+claude_code, cline, codai, codeiumwindsurf, codenamegoose, cody,
+conduit, continueagent, copilotcli, copilotworkspace, crush, cursor,
+deepseek(+cli), fauxpilot, forge, gemini, getshitdone, githubspark,
+gitmcp, gptengineer, gptme, gptr, honeycomb, hunyuan, jetbrainsai,
+junie, kilocode, kimi, kodu, lovable, mistralcode, mobileagent,
+multiagentcoding, nanocoder, noi, octogen, ollamacode, opencodecli,
+perplexity, plandex, postgresmcp, promptfoo, shai, smolagents, snowcli,
+speckit, supermaven, superset, tabnine, taskweaver, uiuxpromax, vtcode,
+warp, windsurf). 4 packages report <code>[no test files]</code>
+(claude/api, claude/features, claude/strategy) — pre-existing,
+untouched.</p>
+<h2 id="anti-bluff-invariant-step-3-pass">4. Anti-bluff invariant (step
+3) — PASS</h2>
+<ul>
+<li><strong>CLAUDE.md §9 smoke (scoped to
+<code>internal/clis/agents</code>):</strong> 2 matches, both benign:
+<ul>
+<li><code>claude_code.go:247</code> — a
+<code>// simulated/templated response (BLUFF-001).</code> doc-comment
+describing what the code MUST NOT do.</li>
+<li><code>claude_code/mcp_integration.go:26</code> —
+<code>ErrMCPClientNotWired</code> error string quoting the historical
+bluff. (This file is committed/out-of-scope, not part of this
+batch.)</li>
+<li>No <strong>live</strong> fabrication literal in non-test
+source.</li>
+</ul></li>
+<li><strong>Targeted response-fabrication scan</strong>
+(<code>fmt.Sprintf(&quot;…received|Generated by|Reviewed|Applied edit|completed successfully…&quot;)</code>
+as a RESPONSE): CLEAN across agents source.</li>
+<li><strong>Broad fabricated-status-map scan</strong>
+(<code>&quot;status&quot;:&quot;generated|sent|executed|composed|…&quot;</code>): the only
+hits in agents source are in <code>agentdeck.go</code> and
+<code>bridle.go</code> — <strong>both out of scope</strong> (not in this
+batch’s diff; pre-existing).</li>
+<li><strong>Spot-check of 8 packages confirms genuine
+conversion:</strong>
+<ul>
+<li><strong>Real-exec class</strong> — <code>claude_code</code>
+(<code>resolveClaudeBinary</code>→<code>exec.LookPath</code>,
+<code>runClaude</code>→<code>exec.CommandContext</code>+<code>CombinedOutput</code>,
+<code>CLAUDE_BIN</code> test override; removed
+<code>&quot;Claude Code received: %s&quot;</code>/<code>&quot;Applied edit to…&quot;</code>/<code>&quot;Reviewed…&quot;</code>),
+<code>gemini</code> (<code>geminiBinary</code>/<code>GEMINI_BIN</code>,
+<code>exec.LookPath</code>+<code>CommandContext</code>+<code>CombinedOutput</code>;
+removed <code>&quot;// Generated by Gemini&quot;</code> template). Remaining
+<code>fmt.Sprintf(&quot;Review %s …&quot;)</code> /
+<code>&quot;Edit file %s: %s&quot;</code> are <strong>prompts passed INTO the
+binary</strong>, not fabricated responses — correct.</li>
+<li><strong>Honest-error class</strong> — <code>cursor</code>
+(<code>errNoHeadlessCLI</code>; preserves genuine session CRUD, removes
+only the fabricated assistant turn), <code>cline</code>
+(<code>errNoHeadlessCLI</code>; <code>exec.LookPath</code> retained only
+for IsAvailable detection), <code>copilotworkspace</code>
+(<code>errNoHeadlessCLI</code>), <code>gptengineer</code>
+(<code>ErrCLINotWired</code>),
+<code>smolagents</code>/<code>superset</code>/<code>promptfoo</code>
+(inline <code>fmt.Errorf(&quot;… refusing to fabricate … (BLUFF-001)&quot;)</code>
+— removed fabricated transcripts / scorecards / dashboard URLs).</li>
+</ul></li>
+<li><strong>Per-package completeness check:</strong> every modified
+source file carries either a real <code>exec.*</code> call or an
+honest-error return citing the missing real path. No file was touched
+cosmetically while leaving a live bluff. (3 packages —
+promptfoo/smolagents/superset — used inline <code>fmt.Errorf</code>
+rather than a named sentinel; manually confirmed genuine.)</li>
+</ul>
+<h2 id="mutation-genuineness-step-4-pass-55-guards-are-non-tautologies">5.
+Mutation genuineness (step 4) — PASS (5/5, guards are
+non-tautologies)</h2>
+<p>Each: apply §1.1 mutation → standing guard FAILs → restore → guard
+PASSes.</p>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 30%" />
+<col style="width: 33%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Package</th>
+<th>Mutation</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>gptengineer (honest-error)</td>
+<td><code>generate</code> → fabricated
+<code>{files,status:generated}</code></td>
+<td><code>TestD17_GPTEngineer_NoFabricatedFileList</code>
+<strong>FAIL</strong> → restore <strong>ok</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td>claude_code (real-exec)</td>
+<td><code>handleChat</code> → <code>&quot;Claude Code received: %s&quot;</code>
+echo</td>
+<td><code>TestPin_HandleChat_NotFabricatedEcho</code>
+<strong>FAIL</strong> (sentinel marker absent) → restore
+<strong>ok</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td>cursor (honest-error)</td>
+<td><code>chat</code> → fabricated <code>{response}</code></td>
+<td><code>TestCursor_Execute/chat…</code> <strong>FAIL</strong>
+(expected error got nil) → restore <strong>ok</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td>cline (honest-error)</td>
+<td><code>chat</code> → fabricated <code>{status:sent}</code></td>
+<td><code>TestD17_Cline_NoFabrication</code> <strong>FAIL</strong> →
+restore <strong>ok</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td>smolagents (inline honest-error)</td>
+<td><code>run</code> → fabricated
+<code>{result:Task completed successfully}</code></td>
+<td><code>TestD17_Smolagents_RunIsHonestError</code>
+<strong>FAIL</strong> → restore <strong>ok</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Guards use unforgeable evidence: real-exec guards inject a fake
+binary via <code>CLAUDE_BIN</code>/<code>GEMINI_BIN</code> and assert
+its JSON-envelope sentinel flows through (impossible without genuine
+<code>os/exec</code>); honest-error guards assert
+<code>require.Error</code> + <code>errors.Is(ErrCLINotWired)</code> /
+“no headless CLI” substring. Not tautologies.</p>
+<h2 id="reconciliations-step-5-pass">6. §11.4.120 reconciliations (step
+5) — PASS</h2>
+<p>Spot-checked reconciled <code>_test.go</code> files assert the NEW
+mechanism, are not weakened to tautologies, and are not deleted-to-pass:
+- <strong>cursor_test.go</strong> — 6 cases flipped from
+<code>wantErr:false</code> +
+<code>assert.NotEmpty(m[&quot;response&quot;/&quot;code&quot;/&quot;status&quot;])</code> to
+<code>wantErr:true, errMsg:&quot;no headless CLI&quot;</code>, with an explicit
+§11.4.120 comment. Harness enforces <code>require.Error</code> +
+<code>assert.Contains(err, errMsg)</code>. Session-CRUD cases stay
+genuine. - <strong>gemini_test.go</strong> — old
+<code>&quot;Generated by Gemini&quot;</code> assertions replaced by a
+sentinel-via-fake-binary real-exec proof + an absent-binary honest-error
+guard. - <strong>promptfoo_test.go</strong> — <code>eval</code> case
+reconciled to “honest error (no real run)” + dedicated
+<code>TestPromptfooEvalNoFabricatedScorecard</code> guard. -
+<strong>claude_code_pin_test.go / cline_debluff_pin_test.go /
+gptengineer_stub_pin_test.go</strong> — RED_MODE polarity-switch guards
+(§11.4.115): RED reproduces the pre-fix bluff, default GREEN asserts it
+is absent. - Full guard run
+(<code>-run &#39;TestD17|TestPin|NoFabricat|StubBluff|NotFabricated|NoFabricatedAIWork&#39;</code>)
+across <code>agents/...</code>: <strong>NO FAILURES.</strong></p>
+<hr />
+<h2 id="findings">Findings</h2>
+<h3 id="must-fix-blocking-this-batch">Must-fix (blocking this
+batch)</h3>
+<p><strong>NONE.</strong></p>
+<h3 id="non-blocking-pre-existing-out-of-this-batchs-scope-recommend-follow-up-tickets-do-not-block-the-d-16d-17-commit">Non-blocking
+/ pre-existing (out of this batch’s scope — recommend follow-up tickets,
+do NOT block the D-16/D-17 commit)</h3>
+<ol type="1">
+<li><code>internal/clis/agents/claude_code/claude_code.go:477</code> —
+<code>handleMCP</code> action <code>&quot;list&quot;</code> returns a
+<strong>hardcoded</strong> server list
+<code>&quot;filesystem, github, memory, fetch, puppeteer&quot;</code> (BLUFF-002
+class). Pre-existing; not in this diff.</li>
+<li><code>internal/clis/agents/claude_code/claude_code.go:489</code> —
+<code>handleMCP</code> action <code>&quot;call&quot;</code> returns
+<code>fmt.Sprintf(&quot;Called %s/%s via MCP&quot;, …)</code> with no transport
+invoked (fabricated success). The sibling
+<code>mcp_integration.go</code> already defines
+<code>ErrMCPClientNotWired</code> for exactly this;
+<code>handleMCP</code> does not use it. Pre-existing; not in this
+diff.</li>
+<li><code>internal/clis/agents/agentdeck/agentdeck.go:197</code> and
+<code>internal/clis/agents/bridle/bridle.go:223,237</code> —
+<code>&quot;status&quot;:&quot;completed&quot;</code> returned without a real run.
+Pre-existing; not in this diff.</li>
+</ol>
+<p>These are genuine residual bluffs but lie outside the per-agent
+prompt→response handler scope this batch targeted; flagging them for a
+future de-bluff round.</p>
+<hr />
+<h2 id="verdict-go">VERDICT: <strong>GO</strong></h2>
+<p>The D-16+D-17 de-bluff across the per-agent CLI layer is genuine,
+builds and tests cleanly as a whole layer, removes all live
+response-fabrication literals from the touched packages, and is backed
+by non-tautological standing regression guards (verified by 5/5
+mutations) plus correct §11.4.120 test reconciliations. Scope is clean
+(agents/* only; no secrets; no mutation residue). The three non-blocking
+pre-existing findings are outside this batch.</p>
+<h3 id="whole-internalclis-gate-steps-12">Whole-<code>internal/clis</code>
+gate (steps 1–2)</h3>
+<ul>
+<li><code>go build ./internal/clis/...</code> → <strong>PASS</strong>
+(exit 0)</li>
+<li><code>go vet ./internal/clis/...</code> → <strong>PASS</strong>
+(exit 0)</li>
+<li><code>go test ./internal/clis/... -count=1</code> →
+<strong>PASS</strong> — 78 packages <code>ok</code>, <strong>0
+FAIL</strong>, 4 <code>[no test files]</code> (pre-existing,
+untouched).</li>
+</ul>
+<h3 id="finding-counts">Finding counts</h3>
+<ul>
+<li>Must-fix (blocking): <strong>0</strong></li>
+<li>Non-blocking / pre-existing out-of-scope: <strong>3</strong></li>
+</ul>
+</body>
+</html>

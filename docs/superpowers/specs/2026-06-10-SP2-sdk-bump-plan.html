@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-SP2-sdk-bump-plan</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-SP2-sdk-bump-plan</h1>
+</header>
+<h1 id="sp2-sdk-bump-plan-providerinfra-sdk-currency">SP2 — SDK Bump
+Plan (provider/infra SDK currency)</h1>
+<p><strong>Revision:</strong> 1 <strong>Created:</strong> 2026-06-10
+<strong>Last modified:</strong> 2026-06-10 <strong>Maintainer:</strong>
+CLI-Agent Fusion programme (SP2 P2.3 SDK-currency)
+<strong>Status:</strong> active <strong>Status summary:</strong>
+Read-only planning artefact — ordered, risk-classified go.mod bump
+sequence for HelixCode’s provider/infra SDKs.</p>
+<blockquote>
+<p>READ-ONLY PLAN. This document changes nothing. It cites the currency
+research at <code>docs/research/2026-06-10-sdk-cli-currency.md</code>
+(PART A) and the exact import-site evidence gathered from the two go.mod
+files + the <code>*.go</code> import statements. Every bump step below
+is to be executed one SDK at a time per §11.4.42 iteration discipline,
+§11.4.92 multi-pass, §11.4.40 full-suite-retest, and §11.4.108
+four-layer verification.</p>
+</blockquote>
+<hr />
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#1-inventory--current-pins-vs-latest">1. Inventory —
+current pins vs latest</a></li>
+<li><a href="#2-classification">2. Classification</a></li>
+<li><a href="#3-per-bump-detail-edit--importers--verification--rollback">3.
+Per-bump detail (edit + importers + verification + rollback)</a></li>
+<li><a href="#4-ordered-execution-plan">4. Ordered execution
+plan</a></li>
+<li><a href="#5-helix_code-vs-helix_agent-coordination">5. helix_code vs
+helix_agent coordination</a></li>
+<li><a href="#6-final-ordered-bump-list--code-change-verdict">6. Final
+ordered bump list + code-change verdict</a></li>
+</ul>
+<hr />
+<h2 id="inventory-current-pins-vs-latest">1. Inventory — current pins vs
+latest</h2>
+<p>Module IDs are both <code>dev.helix.code</code> (inner) /
+<code>dev.helix.agent</code> (helix_agent submodule). Inner app go.mod =
+<code>helix_code/go.mod</code>; submodule =
+<code>submodules/helix_agent/go.mod</code>.</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>SDK module</th>
+<th>helix_code pin</th>
+<th>helix_agent pin</th>
+<th>LATEST (research §A)</th>
+<th>Skew</th>
+<th>Same-major?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>github.com/aws/aws-sdk-go-v2</code> (core)</td>
+<td>v1.32.7 (<code>helix_code/go.mod:16</code>)</td>
+<td>— (not used)</td>
+<td>v1.42.0</td>
+<td>10 minor</td>
+<td>yes (v1)</td>
+</tr>
+<tr>
+<td><code>github.com/aws/aws-sdk-go-v2/config</code></td>
+<td>v1.28.7 (<code>helix_code/go.mod:17</code>)</td>
+<td>—</td>
+<td>siblings of core</td>
+<td>—</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>github.com/aws/aws-sdk-go-v2/credentials</code></td>
+<td>v1.17.48 (<code>helix_code/go.mod:18</code>)</td>
+<td>—</td>
+<td>siblings of core</td>
+<td>—</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>github.com/aws/aws-sdk-go-v2/service/bedrockruntime</code></td>
+<td>v1.23.1 (<code>helix_code/go.mod:19</code>)</td>
+<td>—</td>
+<td><strong>v1.53.5</strong></td>
+<td><strong>~30 minor</strong></td>
+<td>yes (v1)</td>
+</tr>
+<tr>
+<td><code>github.com/aws/smithy-go</code></td>
+<td>v1.22.1 (<code>helix_code/go.mod:20</code>)</td>
+<td>—</td>
+<td>(transitive of AWS core)</td>
+<td>—</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>github.com/Azure/azure-sdk-for-go/sdk/azcore</code></td>
+<td>v1.16.0 (<code>helix_code/go.mod:13</code>)</td>
+<td>—</td>
+<td>v1.22.0</td>
+<td>6 minor</td>
+<td>yes (v1)</td>
+</tr>
+<tr>
+<td><code>github.com/Azure/azure-sdk-for-go/sdk/azidentity</code></td>
+<td>v1.8.0 (<code>helix_code/go.mod:14</code>)</td>
+<td>—</td>
+<td><strong>v1.13.1</strong></td>
+<td>5 minor</td>
+<td>yes (v1) — <strong>SECURITY GO-2024-2918</strong></td>
+</tr>
+<tr>
+<td><code>github.com/getzep/zep-go/v3</code></td>
+<td>v3.10.0 (<code>helix_code/go.mod:27</code>)</td>
+<td>—</td>
+<td>v3.23.0</td>
+<td>13 minor</td>
+<td>yes (v3)</td>
+</tr>
+<tr>
+<td><code>github.com/gin-gonic/gin</code></td>
+<td><strong>v1.12.0</strong> (<code>helix_code/go.mod:28</code>)</td>
+<td>v1.12.0 (<code>submodules/helix_agent/go.mod:5</code>)</td>
+<td>v1.12.0</td>
+<td><strong>none — already aligned</strong></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>github.com/smacker/go-tree-sitter</code></td>
+<td><code>v0.0.0-20240827094217-dd81d9e9be82</code>
+(<code>helix_code/go.mod:41</code>)</td>
+<td>same commit (<code>submodules/helix_agent/go.mod:73</code>)</td>
+<td>smacker at HEAD (dormant); maintained alt =
+<code>tree-sitter/go-tree-sitter v0.25.0</code></td>
+<td>at HEAD</td>
+<td>n/a — migration, not bump</td>
+</tr>
+</tbody>
+</table>
+<h3 id="important-fact-correction-vs-the-researchs-pin-snapshot">Important
+fact-correction vs the research’s pin snapshot</h3>
+<p>The research
+(<code>docs/research/2026-06-10-sdk-cli-currency.md:13-16</code>)
+recorded <code>helix_code</code> gin as <strong>v1.11.0</strong>. The
+CURRENT <code>helix_code/go.mod:28</code> already reads
+<strong><code>gin v1.12.0</code></strong> — the gin skew described in
+the research summary item 6 <strong>is already resolved</strong> (per
+the gitStatus this session: “gin already fixed to 1.12”). Both modules
+are on gin v1.12.0. <strong>No gin bump remains.</strong> This is
+captured here so the executor does not re-do already-landed work
+(§11.4.37 fetch-before-edit / §11.4.114 known-good).</p>
+<hr />
+<h2 id="classification">2. Classification</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Bump</th>
+<th>Class</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>service/bedrockruntime</code> v1.23.1 → v1.53.5</td>
+<td><strong>BREAKING-RISK</strong> (large jump, needs its own careful
+sub-task)</td>
+<td>Same v1 major, but ~30 minor jump. Generated AWS service clients add
+model/operation/types churn across 30 minors; the import surface in
+<code>bedrock_provider.go</code> includes
+<code>.../bedrockruntime/types</code> +
+<code>ResponseStreamReader</code> +
+<code>InvokeModelWithResponseStream</code> — event-stream + types are
+the historically churny areas. Treat as code-change-possible, isolate.
+Core+config+credentials+smithy MUST move together (shared internal
+versions).</td>
+</tr>
+<tr>
+<td><code>aws-sdk-go-v2</code> core + <code>config</code> +
+<code>credentials</code> + <code>smithy-go</code></td>
+<td><strong>SAFE-COORDINATED</strong> (must move as a set, before/with
+bedrockruntime)</td>
+<td>Same v1 line. v1.42.0’s new standard-retry is opt-in behind
+<code>AWS_NEW_RETRIES_2026</code> env (non-breaking per research §A row
+1). These four + the ~10 AWS indirect modules
+(<code>internal/configsources</code>,
+<code>internal/endpoints/v2</code>,
+<code>service/internal/presigned-url</code>, <code>sso</code>,
+<code>ssooidc</code>, <code>sts</code>,
+<code>protocol/eventstream</code>, etc. at
+<code>helix_code/go.mod:82-91</code>) share lock-step internal versions;
+<code>go mod tidy</code> resolves the set.</td>
+</tr>
+<tr>
+<td><code>azidentity</code> v1.8.0 → v1.13.1</td>
+<td><strong>SECURITY</strong> (prioritise — GO-2024-2918 EoP)</td>
+<td>Same v1 line. Carries the Azure Identity elevation-of-privilege
+advisory on old releases (research §A row 4). Stay on <strong>stable
+v1.13.1</strong>; v1.14.0 is beta-only — do NOT adopt beta.</td>
+</tr>
+<tr>
+<td><code>azcore</code> v1.16.0 → v1.22.0</td>
+<td><strong>SAFE</strong></td>
+<td>Same v1 line, additive (research §A row 5). azidentity v1.13.1
+likely pulls a newer azcore as a minimum anyway, so doing azcore
+alongside/just-before azidentity avoids a double tidy.</td>
+</tr>
+<tr>
+<td><code>getzep/zep-go/v3</code> v3.10.0 → v3.23.0</td>
+<td><strong>SAFE</strong></td>
+<td>Same v3 line, additive (research §A row 2). Single importer
+file.</td>
+</tr>
+<tr>
+<td>gin</td>
+<td><strong>DONE / no-op</strong></td>
+<td>Already v1.12.0 in both modules. No action.</td>
+</tr>
+<tr>
+<td><code>smacker/go-tree-sitter</code> →
+<code>tree-sitter/go-tree-sitter v0.25.0</code></td>
+<td><strong>DEFER</strong> (separate migration epic, NOT in this bump
+batch)</td>
+<td>Different import path + different API (Close-on-allocation), 30+
+language sub-package imports across
+<code>internal/repomap/tree_sitter.go</code>,
+<code>internal/repomap/tag_extractor.go</code>,
+<code>internal/tools/mapping/treesitter_parsers.go</code> (helix_code) +
+<code>submodules/helix_agent/internal/clis/aider/repo_map.go</code>
+(helix_agent). No vendor supersession statement (research §A migration
+note). Real migration work — do NOT fold into a currency bump.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="per-bump-detail-edit-importers-verification-rollback">3.
+Per-bump detail (edit + importers + verification + rollback)</h2>
+<p>For every step: pre-flight <code>git fetch --all --prune</code>
+(§11.4.37), branch off <code>main</code> (never edit go.mod on
+<code>main</code> directly), run the bump, then the listed verification.
+Rollback for ALL =
+<code>git checkout -- go.mod go.sum &amp;&amp; go mod tidy</code> (or
+<code>git stash</code>/<code>git restore</code> to the pre-bump SHA).
+All commands run from <code>helix_code/</code> unless noted.</p>
+<h3 id="getzepzep-gov3-safe-do-first-smallest-blast-radius">3.1 —
+getzep/zep-go/v3 (SAFE, do first — smallest blast radius)</h3>
+<ul>
+<li><p><strong>Edit:</strong> <code>helix_code/go.mod:27</code>
+<code>v3.10.0</code> → <code>v3.23.0</code>.</p></li>
+<li><p><strong>Importer (only one prod file):</strong>
+<code>internal/memory/providers/zep_provider.go</code> — imports
+<code>getzep/zep-go/v3</code> (<code>zep</code>),
+<code>.../v3/client</code> (<code>zepclient</code>),
+<code>.../v3/option</code> (<code>zep_provider.go:14-16</code>). 1342
+lines; the API surface to re-verify is the zep client constructor +
+memory get/add option chains.</p></li>
+<li><p><strong>Command:</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> get github.com/getzep/zep-go/v3@v3.23.0 <span class="kw">&amp;&amp;</span> <span class="ex">go</span> mod tidy <span class="kw">&amp;&amp;</span> <span class="ex">go</span> build ./... <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&amp;&amp;</span> <span class="ex">go</span> test ./internal/memory/...</span></code></pre></div></li>
+<li><p><strong>§11.4.40 verification:</strong>
+<code>go build ./...</code> clean +
+<code>go vet ./internal/memory/...</code> +
+<code>go test -count=1 ./internal/memory/...</code> GREEN. If a real-Zep
+integration test exists (<code>-tags=integration</code>), run it against
+the live endpoint per CONST-050(A) (no mocks beyond unit).</p></li>
+<li><p><strong>Rollback:</strong>
+<code>git checkout -- go.mod go.sum &amp;&amp; go mod tidy</code>.</p></li>
+</ul>
+<h3 id="azcore-safe-then-azidentity-security-do-as-a-pair">3.2 — azcore
+(SAFE) then azidentity (SECURITY) — do as a pair</h3>
+<ul>
+<li><p><strong>Edit:</strong> <code>helix_code/go.mod:13</code> azcore
+<code>v1.16.0</code> → <code>v1.22.0</code>;
+<code>helix_code/go.mod:14</code> azidentity <code>v1.8.0</code> →
+<code>v1.13.1</code>. Also the indirect
+<code>sdk/internal v1.10.0</code> (<code>helix_code/go.mod:78</code>)
+will likely bump via tidy.</p></li>
+<li><p><strong>Importers:</strong>
+<code>internal/llm/azure_provider.go</code> — imports
+<code>sdk/azcore</code>, <code>sdk/azcore/policy</code>,
+<code>sdk/azidentity</code> (<code>azure_provider.go:18-20</code>); uses
+<code>azcore.TokenCredential</code>,
+<code>azidentity.NewManagedIdentityCredential</code>,
+<code>azidentity.ClientID</code>,
+<code>azidentity.NewDefaultAzureCredential</code>
+(<code>azure_provider.go:39,150,252,261-270</code>). Test:
+<code>internal/llm/azure_provider_test.go</code>.</p></li>
+<li><p><strong>Command:</strong></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> get github.com/Azure/azure-sdk-for-go/sdk/azcore@v1.22.0</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> get github.com/Azure/azure-sdk-for-go/sdk/azidentity@v1.13.1</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod tidy <span class="kw">&amp;&amp;</span> <span class="ex">go</span> build ./... <span class="kw">&amp;&amp;</span> <span class="ex">go</span> test ./internal/llm/...</span></code></pre></div></li>
+<li><p><strong>§11.4.40 verification:</strong> build clean +
+<code>go test -count=1 ./internal/llm/...</code> GREEN. The credential
+constructors above are the contract to re-verify (managed-identity +
+default-cred signatures are the most likely churn points). SECURITY
+note: confirm <code>go.sum</code> now records azidentity ≥ v1.13.1 (the
+GO-2024-2918-patched line) — capture
+<code>go list -m github.com/Azure/azure-sdk-for-go/sdk/azidentity</code>
+output as the §11.4.5 evidence the advisory is cleared. Optionally run
+<code>govulncheck ./internal/llm/...</code> to prove GO-2024-2918 no
+longer reports.</p></li>
+<li><p><strong>Rollback:</strong>
+<code>git checkout -- go.mod go.sum &amp;&amp; go mod tidy</code>.</p></li>
+</ul>
+<h3 id="aws-sdk-go-v2-core-set-safe-coordinated-gate-for-bedrockruntime">3.3
+— aws-sdk-go-v2 core set (SAFE-COORDINATED) — gate for
+bedrockruntime</h3>
+<ul>
+<li><p><strong>Edit:</strong> <code>helix_code/go.mod:16</code> core
+<code>v1.32.7</code> → <code>v1.42.0</code>; <code>:17</code> config;
+<code>:18</code> credentials; <code>:20</code> smithy-go — bump
+together; let <code>go mod tidy</code> settle the ~10 AWS indirect
+modules at <code>helix_code/go.mod:82-91</code>.</p></li>
+<li><p><strong>Importers:</strong>
+<code>internal/llm/bedrock_provider.go</code> —
+<code>aws-sdk-go-v2/aws</code>, <code>.../config</code>
+(<code>awsconfig</code>), <code>.../credentials</code>,
+<code>.../smithy-go</code> (<code>bedrock_provider.go:13-15,18</code>);
+uses <code>smithy.APIError</code>
+(<code>bedrock_provider.go:1038</code>),
+<code>config.LoadDefaultConfig</code>-style <code>NewFromConfig</code>
+plumbing.</p></li>
+<li><p><strong>Command:</strong></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> get github.com/aws/aws-sdk-go-v2@v1.42.0 <span class="dt">\</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>       github.com/aws/aws-sdk-go-v2/config@latest <span class="dt">\</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>       github.com/aws/aws-sdk-go-v2/credentials@latest <span class="dt">\</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>       github.com/aws/smithy-go@latest</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod tidy <span class="kw">&amp;&amp;</span> <span class="ex">go</span> build ./... <span class="kw">&amp;&amp;</span> <span class="ex">go</span> test ./internal/llm/...</span></code></pre></div>
+<p>(Resolve config/credentials to the versions tidy picks as compatible
+with core v1.42.0 rather than pinning a literal — they track
+core.)</p></li>
+<li><p><strong>§11.4.40 verification:</strong> build clean +
+<code>go test -count=1 ./internal/llm/...</code> GREEN. Do NOT set
+<code>AWS_NEW_RETRIES_2026</code> (leave retry behaviour unchanged —
+research §A row 1). Capture
+<code>go list -m github.com/aws/aws-sdk-go-v2</code> as
+evidence.</p></li>
+<li><p><strong>Rollback:</strong>
+<code>git checkout -- go.mod go.sum &amp;&amp; go mod tidy</code>.</p></li>
+</ul>
+<h3 id="servicebedrockruntime-breaking-risk-own-careful-sub-task">3.4 —
+service/bedrockruntime (BREAKING-RISK — own careful sub-task)</h3>
+<blockquote>
+<p>Do this ONLY after 3.3 lands GREEN (the core set is the dependency
+floor for the service client).</p>
+</blockquote>
+<ul>
+<li><p><strong>Edit:</strong> <code>helix_code/go.mod:19</code>
+<code>v1.23.1</code> → <code>v1.53.5</code>.</p></li>
+<li><p><strong>Importers:</strong>
+<code>internal/llm/bedrock_provider.go</code> —
+<code>service/bedrockruntime</code> +
+<code>service/bedrockruntime/types</code>
+(<code>bedrock_provider.go:16-17</code>). Concrete API surface to
+re-verify (the churn-risk points across 30 minors):</p>
+<ul>
+<li><code>InvokeModel(ctx, *bedrockruntime.InvokeModelInput, ...func(*bedrockruntime.Options))</code>
+<ul>
+<li><code>InvokeModelWithResponseStream(...)</code> interface methods
+(<code>bedrock_provider.go:24-25</code>);</li>
+</ul></li>
+<li><code>bedrockruntime.NewFromConfig(awsCfg)</code>
+(<code>bedrock_provider.go:238</code>);</li>
+<li><code>InvokeModelInput</code> /
+<code>InvokeModelWithResponseStreamInput</code> struct fields
+(<code>bedrock_provider.go:456,493</code>);</li>
+<li><code>bedrockruntime.ResponseStreamReader</code> event-stream iface
+in <code>processEventStream</code>
+(<code>bedrock_provider.go:880</code>) — <strong>highest churn
+risk</strong> (event-stream types move most).</li>
+<li>Tests: <code>internal/llm/bedrock_provider_test.go</code>,
+<code>internal/llm/response_err_round54_test.go</code>.</li>
+</ul></li>
+<li><p><strong>Command:</strong></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> get github.com/aws/aws-sdk-go-v2/service/bedrockruntime@v1.53.5</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod tidy <span class="kw">&amp;&amp;</span> <span class="ex">go</span> build ./... <span class="kw">&amp;&amp;</span> <span class="ex">go</span> test ./internal/llm/...</span></code></pre></div></li>
+<li><p><strong>If <code>go build ./...</code> FAILS</strong> (the
+breaking-risk case): the failure is the §11.4.108 ARTIFACT/SOURCE
+signal. Per §11.4.102 systematic-debugging FIRST — read the compile
+error, diff the changed
+<code>types</code>/<code>ResponseStreamReader</code>/<code>*Input</code>
+symbol against v1.53.5’s GoDoc (verify against
+<code>pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/bedrockruntime</code>
+per §11.4.99 latest-source), update the call sites in
+<code>bedrock_provider.go</code> minimally, re-build. This is the one
+bump where code edits are expected, so it is split into its own sub-task
+and its own commit.</p></li>
+<li><p><strong>§11.4.40 verification:</strong> build clean +
+<code>go test -count=1 ./internal/llm/...</code> GREEN +, if a
+real-Bedrock integration test gate exists, a live
+<code>InvokeModel</code> round-trip producing a real response
+(anti-bluff per §11.9 — NEVER a simulated response per BLUFF-001).
+Capture the real AWS response as §11.4.69
+<code>network_connectivity</code> / LLM-output evidence.</p></li>
+<li><p><strong>Rollback:</strong>
+<code>git checkout -- go.mod go.sum internal/llm/bedrock_provider.go &amp;&amp; go mod tidy</code>.</p></li>
+</ul>
+<h3 id="smacker-tree-sitter-migration-defer-not-part-of-this-batch">3.5
+— smacker → tree-sitter migration (DEFER — not part of this batch)</h3>
+<ul>
+<li><strong>Why deferred:</strong> different import path
+(<code>github.com/tree-sitter/go-tree-sitter</code>) + different API
+(mandatory <code>Close()</code> on allocations). Importers to migrate
+(count = real work):
+<ul>
+<li>helix_code: <code>internal/repomap/tree_sitter.go</code> (sitter + 9
+language subpkgs, <code>tree_sitter.go:9-18</code>),
+<code>internal/repomap/tag_extractor.go</code> (<code>:8</code>),
+<code>internal/tools/mapping/treesitter_parsers.go</code> (sitter +
+<strong>30 language subpkgs</strong>,
+<code>treesitter_parsers.go:6-33</code>),
+<code>internal/tools/mapping/doc.go</code>, plus test
+<code>internal/repomap/incremental_p2t06_test.go</code>;</li>
+<li>helix_agent:
+<code>submodules/helix_agent/internal/clis/aider/repo_map.go</code>.</li>
+</ul></li>
+<li><strong>Blocker:</strong> the 30+ smacker language sub-packages
+(<code>/bash</code>, <code>/c</code>, <code>/cpp</code>,
+<code>/golang</code>, …) do NOT have a 1:1 mapping in
+<code>tree-sitter/go-tree-sitter</code> — each language is a separate
+<code>tree-sitter-&lt;lang&gt;/bindings/go</code> module. This is a
+multi-file, multi-module migration epic that MUST be its own plan with
+its own §11.4.43 RED tests per language. <strong>Track as a separate
+workable item; do not bump in the currency batch.</strong> smacker is at
+HEAD, so currency is not regressing by leaving it.</li>
+</ul>
+<hr />
+<h2 id="ordered-execution-plan">4. Ordered execution plan</h2>
+<p>One SDK (or coordinated set) per branch/commit, each fully verified
+before the next. All in <code>helix_code</code> (helix_agent has none of
+these except the deferred tree-sitter — see §5).</p>
+<ol type="1">
+<li><strong>zep-go/v3</strong> (SAFE, smallest) — §3.1. Commit on
+GREEN.</li>
+<li><strong>azcore + azidentity</strong> (SAFE + SECURITY pair) — §3.2.
+<strong>Prioritised within the safe tier because of
+GO-2024-2918.</strong> Capture the patched-version evidence. Commit on
+GREEN.</li>
+<li><strong>aws core set</strong> (core+config+credentials+smithy,
+SAFE-COORDINATED) — §3.3. Commit on GREEN. This is the dependency floor
+for step 4.</li>
+<li><strong>service/bedrockruntime</strong> (BREAKING-RISK, own
+sub-task) — §3.4. Expect possible code edits in
+<code>bedrock_provider.go</code>; systematic-debugging on any compile
+break; own commit.</li>
+<li><strong>(DEFER)</strong> smacker → tree-sitter migration — §3.5. NOT
+in this batch; spin a separate plan.</li>
+</ol>
+<p>After EACH step: <code>go build ./...</code> + the affected-package
+<code>go test -count=1</code> GREEN before proceeding (§11.4.42). After
+the WHOLE batch: full <code>go test -count=1 ./...</code> +
+<code>go vet ./...</code> + anti-bluff smoke (§9 of root CLAUDE.md) +
+§11.4.125 code-review gate before any tag.</p>
+<p>Ordering rationale: safe→security→breaking, BUT the AWS core set
+(3.3) must precede bedrockruntime (3.4) because the service client
+depends on the core/internal modules’ versions; within the “safe” tier
+azidentity is pulled forward to clear the security advisory early.</p>
+<h2 id="helix_code-vs-helix_agent-coordination">5. helix_code vs
+helix_agent coordination</h2>
+<ul>
+<li><strong>bedrockruntime, aws core set, azcore, azidentity,
+zep-go/v3</strong> — <strong>helix_code ONLY.</strong>
+<code>submodules/helix_agent/go.mod</code> does NOT require any of these
+(confirmed: it has no <code>aws-sdk-go-v2</code>, no
+<code>Azure/azure-sdk-for-go</code>, no <code>getzep/zep-go</code>). No
+cross-module coordination needed for steps 1-4.</li>
+<li><strong>gin</strong> — both modules <strong>already on
+v1.12.0</strong> (<code>helix_code/go.mod:28</code>,
+<code>submodules/helix_agent/go.mod:5</code>). The “gin-skew” the
+research warned of is already closed; no action. (Keep them aligned in
+future bumps — gin-skew style coordination still applies if either
+moves.)</li>
+<li><strong>smacker/go-tree-sitter</strong> — pinned at the SAME commit
+in BOTH modules (<code>helix_code/go.mod:41</code>,
+<code>submodules/helix_agent/go.mod:73</code>). The deferred migration
+is the ONE item needing gin-skew-style cross-module coordination: when
+it runs, helix_code’s 5 files
+<ul>
+<li>helix_agent’s <code>repo_map.go</code> must migrate together so the
+pinned commit / new module stays consistent across both go.mod files.
+Plan that as a coordinated two-module epic, not a bump.</li>
+</ul></li>
+</ul>
+<h2 id="final-ordered-bump-list-code-change-verdict">6. Final ordered
+bump list + code-change verdict</h2>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>SDK</th>
+<th>go.mod line(s)</th>
+<th>Class</th>
+<th>Code changes?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>getzep/zep-go/v3</code> v3.10.0→v3.23.0</td>
+<td><code>helix_code/go.mod:27</code></td>
+<td>SAFE</td>
+<td><strong>No</strong> (pure go.mod; verify
+<code>zep_provider.go</code> compiles)</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>azcore</code> v1.16.0→v1.22.0 + <code>azidentity</code>
+v1.8.0→v1.13.1</td>
+<td><code>helix_code/go.mod:13,14</code></td>
+<td>SAFE + <strong>SECURITY</strong></td>
+<td><strong>No</strong> expected (pure go.mod; verify
+<code>azure_provider.go</code> cred ctors)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>aws core: <code>aws-sdk-go-v2</code> v1.32.7→v1.42.0 +
+<code>config</code> + <code>credentials</code> +
+<code>smithy-go</code></td>
+<td><code>helix_code/go.mod:16,17,18,20</code></td>
+<td>SAFE-COORDINATED</td>
+<td><strong>No</strong> expected (pure go.mod; tidy settles ~10
+indirects)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>service/bedrockruntime</code> v1.23.1→v1.53.5</td>
+<td><code>helix_code/go.mod:19</code></td>
+<td><strong>BREAKING-RISK</strong></td>
+<td><strong>Possibly YES</strong> — <code>bedrock_provider.go</code>
+<code>types</code>/<code>ResponseStreamReader</code>/<code>*Input</code>
+may need edits; own sub-task + own commit</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>smacker</code>→<code>tree-sitter/go-tree-sitter v0.25.0</code></td>
+<td><code>helix_code/go.mod:41</code> +
+<code>submodules/helix_agent/go.mod:73</code></td>
+<td><strong>DEFER</strong></td>
+<td><strong>YES (heavy)</strong> — import-path + API migration across 5
+helix_code files + 1 helix_agent file + 30+ language subpkgs; separate
+epic, NOT this batch</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Pure-go.mod (no code expected):</strong> steps 1, 2, 3.
+<strong>Code-change candidate (its own careful sub-task):</strong> step
+4 (bedrockruntime 30-minor jump). <strong>Out of scope / separate epic
+(definite code migration, two-module coordination):</strong> step 5
+(tree-sitter import-path migration).</p>
+</body>
+</html>

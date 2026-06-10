@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-blocked-cli-agents</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-blocked-cli-agents</h1>
+</header>
+<h1 id="research-blocked-cli-agents-headless-non-interactive-invocation">Research
+— Blocked CLI Agents: Headless / Non-Interactive Invocation</h1>
+<p><strong>Date:</strong> 2026-06-10 <strong>Author:</strong>
+DEEP-WEB-RESEARCH subagent (§11.4.99 latest-source cross-reference)
+<strong>Scope:</strong> HelixCode
+<code>helix_code/cmd/cli/main.go</code> CLI-dispatch agents left
+research-blocked after the SP4-cont de-bluff pass (43 dispatch methods:
+3 converted to real exec, 40 to honest-error). This doc determines, per
+agent, whether a CURRENT official non-interactive single-prompt
+invocation + machine-readable model listing exists, so honest-error
+stubs can be promoted to real exec. <strong>Method:</strong> WebSearch +
+WebFetch against official docs / repos as of 2026-06-10. Every finding
+cited. Honest negatives stated explicitly. No code edited.</p>
+<hr />
+<h2 id="tldr-verdict-table">TL;DR verdict table</h2>
+<table>
+<colgroup>
+<col style="width: 3%" />
+<col style="width: 8%" />
+<col style="width: 43%" />
+<col style="width: 11%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Agent</th>
+<th>Headless single-prompt invocation?</th>
+<th>Verdict</th>
+<th>Convertible to real exec?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Amazon Q Developer CLI → <strong>Kiro CLI</strong></td>
+<td>YES —
+<code>kiro-cli chat --no-interactive &quot;&lt;prompt&gt;&quot;</code></td>
+<td><strong>CONFIRMED HEADLESS</strong></td>
+<td>YES</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Cody (Sourcegraph)</td>
+<td>YES — <code>cody chat -m &#39;&lt;prompt&gt;&#39;</code> (officially
+“human-interactive only”, caveat)</td>
+<td><strong>CONFIRMED HEADLESS (with caveat)</strong></td>
+<td>YES (best-effort)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Sourcegraph <code>src</code> CLI</td>
+<td>N/A — search/admin tool, no LLM chat</td>
+<td><strong>NO LLM CLI</strong> (out of scope)</td>
+<td>NO — not an LLM agent</td>
+</tr>
+<tr>
+<td>4</td>
+<td>SWE-agent</td>
+<td>YES — <code>sweagent run --problem_statement.text=&quot;...&quot;</code></td>
+<td><strong>CONFIRMED HEADLESS</strong></td>
+<td>YES</td>
+</tr>
+<tr>
+<td>5</td>
+<td>GPT-Pilot / Pythagora</td>
+<td>NO — interactive-by-design, no headless flag</td>
+<td><strong>NO HEADLESS CLI</strong></td>
+<td>NO — stays honest-error</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Devika</td>
+<td>NO — web-UI + socket-driven; no documented single-prompt headless
+path</td>
+<td><strong>NO HEADLESS CLI</strong></td>
+<td>NO — stays honest-error</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Model group
+(LlamaCode/StarCoder/CodeGemma/DeepSeekCoder/MistralCode/Codey/WizardCoder)</td>
+<td>These are MODELS, not CLIs</td>
+<td><strong>MODELS, not agents</strong></td>
+<td>Via Ollama / provider API — see §7</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="amazon-q-developer-cli-kiro-cli">1. Amazon Q Developer CLI →
+Kiro CLI</h2>
+<p><strong>Major finding (currency):</strong> The open-source
+<code>aws/amazon-q-developer-cli</code> repo is <strong>no longer
+actively maintained</strong> (“will only receive critical security
+fixes”). Amazon Q Developer CLI is now shipped as <strong>Kiro
+CLI</strong>, a closed-source product, since 2025-11-17. The binary name
+changed from <code>q</code> to <code>kiro-cli</code>. Functionally the
+chat experience is the same. HelixCode should target the Kiro CLI name
+(and keep <code>q</code> as a legacy fallback).</p>
+<p><strong>Confirmed non-interactive invocation (Kiro CLI):</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Auth: export KIRO_API_KEY=&lt;key&gt;   (headless mode requires the env var)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">kiro-cli</span> chat <span class="at">--no-interactive</span> <span class="st">&quot;your prompt here&quot;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">kiro-cli</span> chat <span class="at">--no-interactive</span> <span class="at">--trust-all-tools</span> <span class="st">&quot;Show me the current directory&quot;</span></span></code></pre></div>
+<ul>
+<li><code>--no-interactive</code> — “Print first response to STDOUT
+without interactive mode” (prints response and exits; an initial prompt
+arg is mandatory).</li>
+<li><code>--trust-all-tools</code> — auto-approve all tool calls (needed
+for unattended runs).</li>
+<li><code>--trust-tools=&lt;read,grep,write&gt;</code> — auto-approve
+specific tool categories.</li>
+<li><code>--require-mcp-startup</code> — exit code 3 if any MCP server
+fails to start.</li>
+</ul>
+<p><strong>Model listing (machine-readable):</strong></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kiro-cli</span> chat <span class="at">--list-models</span> <span class="at">--format</span> json</span></code></pre></div>
+<ul>
+<li><code>--list-models</code> — “Display available models”; supports
+<code>--format json</code>. This satisfies the LLMsVerifier-style real
+model-listing need (CONST-036/037) for a per-agent query — though note
+Kiro’s model set is its own, not arbitrary.</li>
+</ul>
+<p><strong>Note on legacy <code>q</code>:</strong> The older
+<code>q chat --no-interactive &quot;&lt;prompt&gt;&quot;</code> form was
+documented for the AWS-branded CLI and a community request for
+non-interactive mode (Issue #808) drove it. If an operator still has the
+<code>q</code> binary installed, the same <code>--no-interactive</code>
+flag applies.</p>
+<p><strong>Verdict: CONFIRMED HEADLESS — convertible to real
+exec.</strong> Dispatch should prefer <code>kiro-cli</code>, fall back
+to <code>q</code>, require <code>KIRO_API_KEY</code> (or existing Q
+auth), pass <code>--no-interactive --trust-all-tools</code>, and use
+<code>--list-models --format json</code> for model enumeration.</p>
+<hr />
+<h2 id="cody-sourcegraph-headless-cli-exists-with-an-official-caveat">2.
+Cody (Sourcegraph) — headless CLI exists, with an official caveat</h2>
+<p><strong>Confirmed non-interactive invocation:</strong></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">cody</span> chat <span class="at">-m</span> <span class="st">&#39;Explain React hooks&#39;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">cody</span> chat <span class="at">--message</span> <span class="st">&#39;Explain React hooks&#39;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">cody</span> chat Explain React hooks          <span class="co"># space-separated bare args</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> error.log <span class="kw">|</span> <span class="ex">cody</span> chat <span class="st">&#39;What went wrong?&#39;</span>   <span class="co"># piped stdin</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">cody</span> chat <span class="at">--model</span> <span class="st">&#39;claude-3.5-sonnet&#39;</span> <span class="at">-m</span> <span class="st">&#39;Hi Cody!&#39;</span></span></code></pre></div>
+<p><strong>Documented flags</strong> (from the official Install Cody CLI
+page): - <code>-m</code> / <code>--message</code> — the prompt text. -
+<code>--stdin</code> — read message from standard input. -
+<code>--context-file</code> — local-file context. -
+<code>--context-repo</code> — remote-repo context. -
+<code>--model</code> — select model (shown in Sourcegraph blog/docs
+examples, e.g. <code>--model &#39;claude-3.5-sonnet&#39;</code>).</p>
+<p><strong>Caveats (honest):</strong> - Sourcegraph docs state the Cody
+CLI is <strong>“only intended for human interactive usage”</strong> and
+is <strong>“Experimental”</strong> for Enterprise accounts. It runs
+single prompts fine in scripts, but Sourcegraph does not formally
+support automation, and behaviour may change. - <strong>No documented
+JSON output flag</strong> and <strong>no documented model-listing
+subcommand</strong> were found in the official CLI docs. Model selection
+is by passing a known model id to <code>--model</code>; there is no
+confirmed <code>cody models</code> discovery command. (Negative
+finding.) - Package: <code>@sourcegraph/cody</code> on npm (the npm page
+returned 403 to the fetcher; flags above are from the official docs
+page).</p>
+<p><strong>Verdict: CONFIRMED HEADLESS (with caveat) — convertible to
+real exec (best-effort).</strong> Wire <code>cody chat --stdin</code>
+(or <code>-m</code>) for the prompt; treat model-listing as unavailable
+(cannot satisfy a real <code>GetModels()</code> from the CLI — would
+have to hardcode/omit, so list-models for Cody should remain
+honest-error or defer to Sourcegraph config). Flag the “experimental /
+human-interactive only” status in the integration doc.</p>
+<hr />
+<h2 id="sourcegraph-src-cli-not-an-llm-agent">3. Sourcegraph
+<code>src</code> CLI — not an LLM agent</h2>
+<p><strong>Finding:</strong> The <code>src</code> CLI
+(<code>sourcegraph/src-cli</code>, npm <code>@sourcegraph/src</code>) is
+a <strong>code-search / batch-changes / GraphQL-admin</strong> tool. It
+has <strong>no built-in LLM chat or completion</strong>. It does produce
+JSON for programmatic consumption (<code>src search -json</code>, raw
+GraphQL via <code>src api</code>), but that is code search, not AI
+generation. Sourcegraph’s AI surface is <strong>Cody</strong> (§2), a
+separate binary.</p>
+<p><strong>Verdict: NO LLM CLI — out of scope as an “AI agent”.</strong>
+If HelixCode lists <code>src</code> as an AI agent that is a
+categorization error: it should either be removed from the AI-agent
+dispatch table or kept as honest-error with the note “src is a
+code-search CLI, not an LLM agent; use Cody (§2) for AI.” No conversion
+to AI real-exec is possible.</p>
+<hr />
+<h2 id="swe-agent-headless-run-once-confirmed">4. SWE-agent — headless
+run-once confirmed</h2>
+<p><strong>Confirmed single-task invocation:</strong></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Single task from inline text:</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">sweagent</span> run <span class="dt">\</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--agent.model.name</span><span class="op">=</span>claude-3-7-sonnet-latest <span class="dt">\</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--problem_statement.text</span><span class="op">=</span><span class="st">&quot;Fix the bug in foo.py&quot;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># From a GitHub issue / file:</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="ex">sweagent</span> run <span class="at">--problem_statement.type</span><span class="op">=</span>github_issue <span class="at">--problem_statement.github_url</span><span class="op">=&lt;</span>url<span class="op">&gt;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="ex">sweagent</span> run <span class="at">--config</span> agent.yaml <span class="at">--config</span> env.yaml <span class="at">--problem_statement.text</span><span class="op">=</span><span class="st">&quot;...&quot;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Batch:</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="ex">sweagent</span> run-batch ...</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="ex">sweagent</span> run-replay <span class="op">&lt;</span>trajectory.json<span class="op">&gt;</span></span></code></pre></div>
+<ul>
+<li><code>sweagent run</code> is the headless single-issue entrypoint.
+It builds a config object; the problem statement may be
+<code>TextProblemStatement</code> (inline), <code>GithubIssue</code>, or
+<code>FileProblemStatement</code>. Model is set via
+<code>--agent.model.name=...</code> (LiteLLM-style model ids).</li>
+<li>Output is a trajectory file (machine-readable JSON), not a single
+text blob — so HelixCode would parse the resulting patch/trajectory
+rather than read a chat response off stdout.</li>
+<li>A lighter sibling exists: <strong>mini-swe-agent</strong>
+(<code>mini</code> / <code>mini-swe-agent</code>), a ~100-line headless
+agent scoring &gt;74% on SWE-bench verified, also runnable
+head­lessly.</li>
+</ul>
+<p><strong>Model listing:</strong> SWE-agent has no “list models”
+command of its own; it delegates to LiteLLM/provider model ids. Model
+enumeration would come from the underlying provider, not SWE-agent.
+(Negative for a native list-models.)</p>
+<p><strong>Verdict: CONFIRMED HEADLESS — convertible to real
+exec.</strong> Wire
+<code>sweagent run --problem_statement.text=&quot;&lt;prompt&gt;&quot; --agent.model.name=&lt;model&gt;</code>;
+consume the emitted trajectory/patch as the result. It is a task-solving
+harness (issue→patch), not a chat-completion endpoint — the HelixCode
+integration should treat its “response” as the produced
+patch/trajectory, not free-form text.</p>
+<hr />
+<h2 id="gpt-pilot-pythagora-interactive-by-design-no-headless">5.
+GPT-Pilot / Pythagora — interactive by design, NO headless</h2>
+<p><strong>Finding:</strong> GPT-Pilot is invoked as
+<code>python main.py</code> (no <code>console_scripts</code> entrypoint
+on PyPI). Args exist (<code>app_id=</code>, <code>workspace=</code>,
+<code>advanced=True</code>) but the tool is <strong>fundamentally
+interactive</strong>: the ProductOwner agent prompts for app type/name
+if not given, asks the developer to review each finished task, and
+requests approval before running commands. There is <strong>no
+documented non-interactive / headless flag</strong>. Automating it fully
+would require source modification or expect-style wrapper scripting
+around prompts — not a supported invocation.</p>
+<p><strong>Verdict: NO HEADLESS CLI — stays honest-error.</strong>
+Honest-error message should say: “GPT-Pilot has no non-interactive mode;
+it requires developer review/approval at each step (run via
+<code>python main.py</code>). Not invocable headlessly.” No clean
+conversion.</p>
+<hr />
+<h2 id="devika-web-ui-socket-driven-no-documented-headless-single-prompt-path">6.
+Devika — web-UI + socket-driven, NO documented headless single-prompt
+path</h2>
+<p><strong>Finding:</strong> Devika runs as a Flask backend
+(<code>python devika.py</code> → “Devika is up and running!”) plus a
+separate SvelteKit/Node UI (<code>bun run start</code> at
+<code>http://127.0.0.1:3001</code>). The backend <code>devika.py</code>
+imports Flask (<code>Flask, request, jsonify, send_file</code>) and
+registers blueprints, and there ARE <code>/api/*</code> routes
+(e.g. <code>/api/get-agent-state</code>,
+<code>/api/get-browser-snapshot</code>, and a project blueprint).
+<strong>However:</strong> the README/architecture docs document
+<strong>only the browser workflow</strong> (create project in UI, set
+model, type objective in chat). There is <strong>no documented
+CLI</strong> and <strong>no documented single-prompt “execute task” HTTP
+endpoint</strong> suitable for clean scriptable invocation; execution is
+orchestrated through the UI + socket events, and the project is
+effectively unmaintained. Reverse-engineering an undocumented
+<code>/api/execute</code>-style route would be guessing (forbidden under
+§11.4.6) and brittle.</p>
+<p><strong>Verdict: NO HEADLESS CLI — stays honest-error.</strong>
+Honest-error message: “Devika is a web-UI + socket-driven agent
+(<code>python devika.py</code> + browser UI); no documented
+non-interactive CLI or single-prompt API. Not invocable headlessly.” If
+a future operator wants it, the path would be an undocumented Flask-API
+integration (research-blocked, not CLI).</p>
+<hr />
+<h2 id="model-not-cli-group-llamacode-starcoder-codegemma-deepseekcoder-mistralcode-codey-wizardcoder">7.
+Model-not-CLI group — LlamaCode, StarCoder, CodeGemma, DeepSeekCoder,
+MistralCode, Codey, WizardCoder</h2>
+<p><strong>Finding (confirmation):</strong> These are <strong>LLM models
+/ model families, not standalone CLI agents</strong>. None ships an
+official per-agent headless CLI binary. They are served, not invoked: -
+<strong>StarCoder, CodeGemma, DeepSeek-Coder, WizardCoder,
+“LlamaCode”-class</strong> → open-weight code models distributed via
+Hugging Face, runnable locally through <strong>Ollama</strong> (or
+llama.cpp / vLLM / HF Transformers). - <strong>Codey</strong> → Google’s
+code model, served via the <strong>Vertex AI / Gemini provider
+API</strong> (no local CLI; superseded by Gemini code models). -
+<strong>MistralCode</strong> → Mistral’s code offering, served via the
+<strong>Mistral provider API</strong> (and some weights via
+Ollama/HF).</p>
+<p><strong>Recommended HelixCode path — via Ollama (confirmed) or
+provider API, NOT a per-agent CLI:</strong></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Single non-interactive prompt → stdout (confirmed official syntax):</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">ollama</span> run <span class="op">&lt;</span>model<span class="op">&gt;</span> <span class="st">&quot;&lt;prompt&gt;&quot;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">ollama</span> run deepseek-coder <span class="st">&quot;Write a quicksort in Go&quot;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="ex">ollama</span> run starcoder2 <span class="st">&quot;Explain this regex&quot;</span> <span class="op">&gt;</span> out.txt   <span class="co"># redirect/pipe OK</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Machine-readable model listing (confirmed):</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="ex">ollama</span> ls            <span class="co"># (alias: ollama list) — lists installed models</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Programmatic REST alternative: POST http://localhost:11434/api/generate (JSON)</span></span></code></pre></div>
+<ul>
+<li><code>ollama run &lt;model&gt; &quot;&lt;prompt&gt;&quot;</code> executes one
+prompt and prints to stdout (auto-pulls the model if absent). Output can
+be piped/redirected.</li>
+<li><code>ollama ls</code> / <code>ollama list</code> enumerates
+installed models (machine-readable) — satisfies real model-listing for
+the Ollama-served subset.</li>
+<li>For richer JSON, the Ollama REST <code>/api/generate</code> endpoint
+returns JSON; HelixCode already integrates Ollama as a first-class
+provider (CONST-039), so these models should flow through the
+<strong>existing Ollama provider path</strong>, not a new per-agent CLI
+dispatch.</li>
+</ul>
+<p><strong>Operator decision (recommendation):</strong> 1.
+<strong>Preferred:</strong> Route the open-weight code models
+(StarCoder, CodeGemma, DeepSeek-Coder, WizardCoder, local Llama/Mistral
+code variants) through the <strong>existing HelixCode Ollama
+provider</strong> (<code>ollama run</code> / Ollama REST +
+<code>ollama ls</code> for discovery). This aligns with
+CONST-036/037/039 (LLMsVerifier as source of truth; Ollama already a
+supported provider) and avoids inventing fake per-agent CLIs. 2.
+<strong>Provider-API path:</strong> Route <strong>Codey → Vertex/Gemini
+API</strong> and <strong>MistralCode → Mistral API</strong> through
+HelixCode’s existing provider abstraction (CONST-039 lists Gemini +
+Mistral as required providers). 3. <strong>Leave honest-error</strong>
+for any of these ONLY as a per-agent <em>CLI dispatch</em> entry —
+i.e. the per-agent “CLI” stub stays honest-error stating “X is a model,
+not a CLI; use it via the Ollama provider / provider API,” and the real
+capability is exposed through the provider layer, not the CLI-agent
+dispatch table.</p>
+<p><strong>Verdict: MODELS, not agents.</strong> No per-agent CLI. Real
+integration = Ollama provider (<code>ollama run</code> +
+<code>ollama ls</code>) for open-weight models; provider API for
+Codey/MistralCode. The CLI-dispatch stubs for these names should remain
+honest-error pointing at the provider path.</p>
+<hr />
+<h2 id="final-summary">Final summary</h2>
+<p><strong>Now have a CONFIRMED headless invocation (promote
+honest-error → real exec):</strong> 1. <strong>Amazon Q → Kiro
+CLI</strong> —
+<code>kiro-cli chat --no-interactive &quot;&lt;prompt&gt;&quot;</code> (+
+<code>KIRO_API_KEY</code>, <code>--trust-all-tools</code>); models via
+<code>kiro-cli chat --list-models --format json</code>. (Prefer
+<code>kiro-cli</code>, fallback <code>q</code>.) 2.
+<strong>Cody</strong> — <code>cody chat --stdin</code> /
+<code>-m &#39;&lt;prompt&gt;&#39;</code> (+ <code>--model</code>);
+<strong>caveat</strong>: officially “human-interactive only /
+experimental,” and <strong>no CLI model-listing</strong> (list-models
+stays honest-error for Cody). 3. <strong>SWE-agent</strong> —
+<code>sweagent run --problem_statement.text=&quot;&lt;prompt&gt;&quot; --agent.model.name=&lt;model&gt;</code>;
+result is a trajectory/patch (issue→patch harness), not chat text; no
+native list-models.</p>
+<p><strong>Confirmed NO headless CLI (stay honest-error):</strong> -
+<strong>GPT-Pilot / Pythagora</strong> — interactive by design, no
+headless flag. - <strong>Devika</strong> — web-UI + socket-driven; no
+documented single-prompt CLI/API (undocumented Flask routes =
+research-blocked, not CLI). - <strong>Sourcegraph
+<code>src</code></strong> — not an LLM agent at all (code-search/admin
+CLI); miscategorized if listed as AI — remove or honest-error pointing
+to Cody.</p>
+<p><strong>Model group
+(LlamaCode/StarCoder/CodeGemma/DeepSeekCoder/MistralCode/Codey/WizardCoder):</strong>
+- These are <strong>models, not CLIs</strong>.
+<strong>Recommendation:</strong> wire the open-weight ones via the
+<strong>existing Ollama provider</strong>
+(<code>ollama run &lt;model&gt; &quot;&lt;prompt&gt;&quot;</code>, discover with
+<code>ollama ls</code>), and Codey/MistralCode via the <strong>provider
+API</strong> (Gemini/Mistral). Keep their per-agent CLI-dispatch entries
+as honest-error that redirect to the provider path. This respects
+CONST-036/037/039 and the no-fake-CLI posture.</p>
+<hr />
+<h2 id="sources-verified-2026-06-10">Sources verified 2026-06-10</h2>
+<ul>
+<li>Amazon Q Developer CLI — chat on the command line:
+https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line-chat.html</li>
+<li>Amazon Q Developer CLI — command reference:
+https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line-reference.html</li>
+<li>aws/amazon-q-developer-cli (repo — maintenance/Kiro migration
+notice): https://github.com/aws/amazon-q-developer-cli</li>
+<li>aws/amazon-q-developer-cli Issue #808 (Add Non-Interactive Mode):
+https://github.com/aws/amazon-q-developer-cli/issues/808</li>
+<li>Kiro CLI — Headless mode: https://kiro.dev/docs/cli/headless/</li>
+<li>Kiro CLI — CLI commands reference:
+https://kiro.dev/docs/cli/reference/cli-commands/</li>
+<li>Kiro CLI — Chat: https://kiro.dev/docs/cli/chat/</li>
+<li>Kiro — introducing headless mode (blog):
+https://kiro.dev/blog/introducing-headless-mode/</li>
+<li>Kiro Issue #5423 (machine-readable output for headless usage):
+https://github.com/kirodotdev/Kiro/issues/5423</li>
+<li>Cody — Install Cody CLI:
+https://sourcegraph.com/docs/cody/clients/install-cli</li>
+<li>Cody — docs root: https://sourcegraph.com/docs/cody</li>
+<li>Cody VS Code 1.16 / models (blog):
+https://sourcegraph.com/blog/cody-vscode-1-16-0-release</li>
+<li><span class="citation" data-cites="sourcegraph/cody">@sourcegraph/cody</span> (npm):
+https://www.npmjs.com/package/<span class="citation" data-cites="sourcegraph/cody">@sourcegraph/cody</span></li>
+<li>Sourcegraph src-cli (repo):
+https://github.com/sourcegraph/src-cli</li>
+<li>Sourcegraph CLI docs: https://sourcegraph.com/docs/cli</li>
+<li>SWE-agent — CLI usage: https://swe-agent.com/latest/usage/cli/</li>
+<li>SWE-agent — command line basics:
+https://swe-agent.com/latest/usage/cl_tutorial/</li>
+<li>mini-swe-agent (repo):
+https://github.com/SWE-agent/mini-swe-agent</li>
+<li>GPT-Pilot (repo): https://github.com/Pythagora-io/gpt-pilot</li>
+<li>GPT-Pilot (PyPI): https://pypi.org/project/gpt-pilot/</li>
+<li>GPT-Pilot Wiki (FAQ / usage):
+https://github.com/Pythagora-io/gpt-pilot/wiki</li>
+<li>Devika (repo): https://github.com/stitionai/devika</li>
+<li>Devika README:
+https://github.com/stitionai/devika/blob/main/README.md</li>
+<li>Devika ARCHITECTURE:
+https://github.com/stitionai/devika/blob/main/ARCHITECTURE.md</li>
+<li>Devika devika.py (Flask backend):
+https://github.com/stitionai/devika/blob/main/devika.py</li>
+<li>Ollama — CLI reference: https://docs.ollama.com/cli</li>
+<li>Ollama — CLI (DeepWiki):
+https://deepwiki.com/ollama/ollama/1.3-command-line-interface</li>
+<li>Ollama README:
+https://github.com/ollama/ollama/blob/main/README.md</li>
+</ul>
+<p><strong>Negative findings (explicit):</strong> No JSON-output flag or
+model-listing subcommand found for Cody CLI; no native list-models for
+SWE-agent (delegates to LiteLLM); no documented headless flag for
+GPT-Pilot; no documented single-prompt CLI/HTTP endpoint for Devika;
+<code>src</code> CLI has no LLM/AI capability. Kiro CLI is closed-source
+(the open-source Amazon Q CLI is in security-only maintenance).</p>
+</body>
+</html>
