@@ -8,13 +8,18 @@ import (
 
 // redMode mirrors the §11.4.115 polarity switch for the secrets package.
 //
-//	RED_MODE=1 (default): assert the DEFECT — the loader OVERRIDES an
-//	            already-exported shell var (current os.Setenv-unconditional).
-//	RED_MODE=0: the GREEN guard — DECISION-1 gap-fill: an already-exported
-//	            shell var WINS; the file value only fills gaps.
+//	default (RED_MODE unset/0): the standing GREEN guard — DECISION-1 gap-fill:
+//	            an already-exported shell var WINS; the file value only fills gaps.
+//	            This is the committed standing-suite role, so `go test ./...` is GREEN.
+//	RED_MODE=1: opt-in defect reproduction — assert the DEFECT (loader OVERRIDES an
+//	            already-exported shell var); PASSes only on the pre-fix broken artifact.
+//
+// NOTE (D-15 fix): the default was previously RED, which left `go test ./...`
+// permanently FAILing for this package (a §11.4.40 green-suite violation). The
+// §11.4.115 RED evidence was captured during development; the committed test's
+// standing role is the GREEN guard.
 func redMode() bool {
-	v := os.Getenv("RED_MODE")
-	return v == "" || v == "1"
+	return os.Getenv("RED_MODE") == "1"
 }
 
 // TestLoadAPIKeys_GapFillPrecedence (DECISION-1): a value already present in
